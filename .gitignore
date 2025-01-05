@@ -1,0 +1,51 @@
+# Ignore build artifacts
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/Makefile
+/*.cmake
+/*.vcxproj*
+/*.sln
+/*.user
+/*.ninja
+/*.obj
+/*.o
+/*.lo
+/*.la
+/*.a
+/*.so
+/*.so.*
+/*.dylib
+/*.dll
+/*.exe
+/*.pdb
+/*.tmp
+/*.log
+
+# Ignore coverage files (if using code coverage tools)
+*.gcda
+*.gcno
+*.info
+
+# Ignore editor/IDE specific files
+.vscode/
+*.swp
+*.swo
+*.DS_Store
+*.directory
+.idea/
+*.iml
+
+# Ignore generated documentation
+docs/doxygen/html/
+docs/doxygen/latex/
+
+# Ignore other generated files (if any)
+.tags
+*.tar.gz
+*.zip
+*.7z
+
+.vs/
+bin/
+out/

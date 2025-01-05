@@ -1,0 +1,59 @@
+# tests/CMakeLists.txt
+
+# Enable testing if not already done at top-level
+enable_testing()
+
+# If Google Test is not installed system-wide, fetch it using FetchContent:
+include(FetchContent)
+# Fetch GoogleTest
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
+  # Avoid the timestamp warning:
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+# Make the content available
+FetchContent_MakeAvailable(googletest)
+
+# If GoogleTest is installed system-wide
+# find_package(GTest REQUIRED)
+# target_link_libraries(your_test_target PRIVATE GTest::gtest GTest::gtest_main)
+
+# Define test sources
+set(TEST_SOURCES
+    test_main.cpp
+    test_string_utils.cpp
+    ../src/StringUtils.cpp
+)
+
+# Create a test executable
+add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
+
+# Include directories for tests
+target_include_directories(${PROJECT_NAME}_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)
+
+# Link the test executable with the main library (if there is one) and GTest
+if(TARGET ${PROJECT_NAME}Lib)
+    target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${LIB_NAME})
+endif()
+
+# If using FetchContent and GoogleTest:
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE gtest gtest_main)
+# If using find_package(GTest):
+# target_link_libraries(${PROJECT_NAME}_tests PRIVATE GTest::gtest GTest::gtest_main)
+
+# Set the compile features or options
+target_compile_features(${PROJECT_NAME}_tests PRIVATE cxx_std_17)
+if (MSVC)
+    # For Visual Studio, use /W4 to have high warnings
+    target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4)
+else()
+    # For GCC/Clang, use -Wall -Wextra -pedantic
+    target_compile_options(${PROJECT_NAME}_tests PRIVATE -Wall -Wextra -pedantic)
+endif()
+
+# Add the test, so it runs with 'ctest'
+add_test(NAME ${PROJECT_NAME}_unit_tests
+         COMMAND ${PROJECT_NAME}_tests)
