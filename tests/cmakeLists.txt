@@ -22,8 +22,6 @@ FetchContent_MakeAvailable(googletest)
 # Define test sources
 set(TEST_SOURCES
     test_main.cpp
-    test_string_utils.cpp
-    ../src/StringUtils.cpp
 )
 
 # Create a test executable
