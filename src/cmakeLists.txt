@@ -12,10 +12,12 @@ option(BUILD_LIBRARY "Enable building of the library target" OFF)
 set(SRC_FILES
     main.cpp
     mainWindow.cpp
+    view/OpenGl/OpenGl3DWidget.cpp
 )
 
 set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/include/mainWindow.hpp
+    view/OpenGl/OpenGl3DWidget.hpp
 )
 
 # Enable AUTOMOC (and optionally AUTOUIC, AUTORCC) 
@@ -31,17 +33,17 @@ if (${BUILD_LIBRARY})
     add_library(${LIB_NAME} STATIC ${SRC_FILES} ${HEADER_FILES})
 
     # Ensure the library has access to the public headers
-    target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+    target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include $ENV{VCPKG_INCLUDE})
 endif()
 
 # Generate executable file
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 
 # Link external dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::OpenGLWidgets opengl32.lib)
 
 # Add include directory
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include $ENV{VCPKG_INCLUDE})
 
 # Deploy Qt for the executable
 deploy_qt_for(${PROJECT_NAME})
@@ -70,3 +72,4 @@ if (${BUILD_LIBRARY})
         target_compile_options(LIB_NAME PRIVATE -Wall -Wextra -pedantic)
     endif()
 endif()
+

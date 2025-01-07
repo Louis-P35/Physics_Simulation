@@ -35,8 +35,11 @@ option(BUILD_DOCS "Build documentation" OFF)
 # Include QT6
 # Qt path need to be set in CMAKE_PREFIX_PATH
 # This will set the Qt6_DIR variable
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets OpenGLWidgets REQUIRED)
 message(STATUS "Qt6_DIR is: ${Qt6_DIR}")
+
+# Include GLM
+find_package(GLM CONFIG REQUIRED)
 
 
 # Add the main library or executable sources from src/

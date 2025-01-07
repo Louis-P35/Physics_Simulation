@@ -1,5 +1,6 @@
 // Includes from project
 #include "mainWindow.hpp"
+#include "view/OpenGl/OpenGl3DWidget.hpp"
 
 // Includes from 3rd party
 #include <QMenuBar>
@@ -69,7 +70,7 @@ QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidge
     // Right widget: for Vulkan rendering area
     QWidget* pRightWidget = new QWidget(pSplitter);
     QVBoxLayout* pRightLayout = new QVBoxLayout(pRightWidget);
-    pRightLayout->addWidget(new QLabel("Vulkan 3D Rendering Area"));
+    pRightLayout->addWidget(new OpenGl3DWidget(pRightWidget));
 
     // Add left and right widgets to the splitter
     pSplitter->addWidget(pLeftWidget);

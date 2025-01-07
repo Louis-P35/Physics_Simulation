@@ -7,6 +7,26 @@ This is a physics simulator project (C++, Qt, Vulcan)
 ## On linux, make the scripts executable:
 chmod +x scripts/build_release.sh scripts/run.sh scripts/test.sh
 
+## If not already, install vcpkg
+### Clone repository
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+### Build it
+#### On windows
+.\bootstrap-vcpkg.bat
+#### On linux
+./bootstrap-vcpkg.sh
+### Set up the environment variable
+CMAKE_TOOLCHAIN_FILE C:\Users\louis\Documents\vcpkg\scripts\buildsystems\vcpkg.cmake
+GLM_DIR C:\Users\louis\Documents\vcpkg\installed\x64-windows\share\glm
+VCPKG_INCLUDE C:\Users\louis\Documents\vcpkg\installed\x64-windows\include
+Restart your IDE
+## Install GLM using vcpkg
+### On windows
+.\vcpkg.exe install glm
+### On linux
+./vcpkg install glm
+
 
 ## QT setup
 Setup Qt environment variables: 
