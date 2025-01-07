@@ -1,5 +1,5 @@
 # Physics_Simulation
-This is a physics simulator project (C++, Qt, Vulcan)
+This is a physics simulator project (C++, Qt, OpenGl)
 
 
 # Project setup
@@ -16,16 +16,16 @@ cd vcpkg
 .\bootstrap-vcpkg.bat
 #### On linux
 ./bootstrap-vcpkg.sh
-### Set up the environment variable
-CMAKE_TOOLCHAIN_FILE C:\Users\louis\Documents\vcpkg\scripts\buildsystems\vcpkg.cmake
-GLM_DIR C:\Users\louis\Documents\vcpkg\installed\x64-windows\share\glm
-VCPKG_INCLUDE C:\Users\louis\Documents\vcpkg\installed\x64-windows\include
-Restart your IDE
 ## Install GLM using vcpkg
 ### On windows
 .\vcpkg.exe install glm
 ### On linux
 ./vcpkg install glm
+## Set up the environment variables
+CMAKE_TOOLCHAIN_FILE C:\Users\louis\Documents\vcpkg\scripts\buildsystems\vcpkg.cmake
+GLM_DIR C:\Users\louis\Documents\vcpkg\installed\x64-windows\share\glm
+VCPKG_INCLUDE C:\Users\louis\Documents\vcpkg\installed\x64-windows\include
+Restart your IDE
 
 
 ## QT setup
@@ -34,5 +34,5 @@ CMAKE_PREFIX_PATH to (for exemple): C:/Qt/6.8.1/msvc2022_64
 QT_QPA_PLATFORM_PLUGIN_PATH to (for example): C:\Qt\6.8.1\msvc2022_64\plugins\platforms
 Restart IDE
 
-## cmake
+# cmake
 DeployQt.cmake is used to deploy the Qt libraries.
