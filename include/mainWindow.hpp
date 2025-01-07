@@ -2,6 +2,7 @@
 
 // Includes from 3rd party
 #include <QMainWindow>
+#include <QWidget>
 
 
 class MainWindow : public QMainWindow
@@ -10,4 +11,7 @@ class MainWindow : public QMainWindow
 
 public:
 	explicit MainWindow(QWidget* pParent = nullptr);
+
+private:
+	QWidget* createTab(const std::string& tabName, QTabWidget* pTabWidget);
 };

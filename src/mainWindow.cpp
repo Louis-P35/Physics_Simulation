@@ -5,13 +5,14 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QMenu>
-#include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QTabWidget>
+#include <QSplitter>
 
 MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
 {
@@ -28,7 +29,64 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
     // Statusbar
     statusBar()->showMessage("Ready");
 
-	// Central widget
-    QWidget* pCentralWidget = new QWidget(this);
-    setCentralWidget(pCentralWidget);
+    // Create a QTabWidget
+    QTabWidget* pTabWidget = new QTabWidget(this);
+
+	// Create a tab for Cloth simulation
+	this->createTab("Cloth simulation", pTabWidget);
+    
+
+    // Create second tab
+    this->createTab("Fluid simulation", pTabWidget);
+
+
+    // Set the QTabWidget as the central widget of the main window
+    setCentralWidget(pTabWidget);
+}
+
+
+/*
+* Create a tab with a given name and add it to the QTabWidget
+* A vertical splitter is dividing the area into two panes (control & rendering)
+* 
+* @param tabName Name of the tab
+* @param pTabWidget QTabWidget to add the tab to
+* @return QWidget* Pointer to the created tab
+*/
+QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidget)
+{
+	// Create a tab
+	QWidget* pTab = new QWidget();
+
+    // Create a vertical splitter to divide the area horizontally
+    QSplitter* pSplitter = new QSplitter(Qt::Horizontal, pTab);
+
+    // Left widget: placeholder for future controls or content
+    QWidget* pLeftWidget = new QWidget(pSplitter);
+    QVBoxLayout* pLeftLayout = new QVBoxLayout(pLeftWidget);
+    pLeftLayout->addWidget(new QLabel("Left Pane Content"));
+
+    // Right widget: for Vulkan rendering area
+    QWidget* pRightWidget = new QWidget(pSplitter);
+    QVBoxLayout* pRightLayout = new QVBoxLayout(pRightWidget);
+    pRightLayout->addWidget(new QLabel("Vulkan 3D Rendering Area"));
+
+    // Add left and right widgets to the splitter
+    pSplitter->addWidget(pLeftWidget);
+    pSplitter->addWidget(pRightWidget);
+
+    // Set initial stretch factors for the splitter to approximate 1/3 left, 2/3 right
+    pSplitter->setStretchFactor(0, 1); // left widget
+    pSplitter->setStretchFactor(1, 2); // right widget
+
+    // Set the splitter as the layout for the tab
+    QVBoxLayout* pTabLayout = new QVBoxLayout(pTab);
+    pTabLayout->addWidget(pSplitter);
+    pTabLayout->setContentsMargins(0, 0, 0, 0);
+    pTabLayout->setSpacing(0);
+
+	// Add tabs to the QTabWidget
+    pTabWidget->addTab(pTab, tabName.c_str());
+
+	return pTab;
 }
