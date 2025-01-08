@@ -23,5 +23,5 @@ public:
 	explicit MainWindow(QWidget* pParent = nullptr);
 
 private:
-	QWidget* createTab(const std::string& tabName, QTabWidget* pTabWidget);
+	QWidget* createTab(const std::string& tabName, OpenGl3DWidget* pGlWidget, QTabWidget* pTabWidget);
 };

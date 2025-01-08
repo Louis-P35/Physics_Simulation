@@ -110,54 +110,22 @@ void OpenGl3DWidget::paintGL()
         renderer->m_vao.release();
 	}
 
-    /*// Draw a colored cube using immediate mode
-    glBegin(GL_QUADS);
-    // Front face (z = 1.0f)
-    glColor3f(1.0f, 0.0f, 0.0f);  // Red
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    // Back face (z = -1.0f)
-    glColor3f(0.0f, 1.0f, 0.0f);  // Green
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    // Top face (y = 1.0f)
-    glColor3f(0.0f, 0.0f, 1.0f);  // Blue
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    // Bottom face (y = -1.0f)
-    glColor3f(1.0f, 1.0f, 0.0f);  // Yellow
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    // Right face (x = 1.0f)
-    glColor3f(0.0f, 1.0f, 1.0f);  // Cyan
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    // Left face (x = -1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);  // Magenta
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glEnd();*/
-
     // Trigger a repaint for continuous rotation (use timer for production code)
     update();
 }
 
 
+
+/*
+* Initialize a 3D object renderer (VAo & VBO) from an Object3D
+* and move it to the list of objects to render
+* 
+* @param object3D Object3D to initialize
+* @return void
+*/
 void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
 {
-    std::cout << "Initialize VBO" << std::endl;
+    std::cout << "Initialize VAO & VBO" << std::endl;
 
 	std::unique_ptr<ObjectRenderingInstance> objInst = std::make_unique<ObjectRenderingInstance>();
 	objInst->m_verticesData = object3D.computeVBOVerticesData();
@@ -193,5 +161,6 @@ void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
     objInst->m_vbo.release();
 
 	// Add it to the list of objects to render
+    // VAO are not copyable, so we move it
     m_objectsToRenderList.push_back(std::move(objInst));
 }

@@ -13,6 +13,11 @@
 #include <vector>
 
 
+/*
+* Struct for OpenGl rendering
+* 
+* m_verticesData is a list of VBOVertex that represent the vertices of the object
+*/
 struct ObjectRenderingInstance
 {
     QOpenGLBuffer m_vbo;

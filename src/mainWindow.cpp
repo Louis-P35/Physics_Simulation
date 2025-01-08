@@ -33,11 +33,12 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
     QTabWidget* pTabWidget = new QTabWidget(this);
 
 	// Create a tab for Cloth simulation
-	this->createTab("Cloth simulation", pTabWidget);
+    m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(this);
+	this->createTab("Cloth simulation", m_pOpenGl3DWidgetClothSimulation, pTabWidget);
     
 
     // Create second tab
-	//this->createTab("Fluid simulation", pTabWidget); // TODO virer d'abort le code de la simulation de tissu en dur
+	this->createTab("Fluid simulation", nullptr, pTabWidget);
 
 
     // Set the QTabWidget as the central widget of the main window
@@ -50,10 +51,11 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
 * A vertical splitter is dividing the area into two panes (control & rendering)
 * 
 * @param tabName Name of the tab
+* @param pGlWidget OpenGl3DWidget to add to the tab
 * @param pTabWidget QTabWidget to add the tab to
 * @return QWidget* Pointer to the created tab
 */
-QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidget)
+QWidget* MainWindow::createTab(const std::string& tabName, OpenGl3DWidget* pGlWidget, QTabWidget* pTabWidget)
 {
 	// Create a tab
 	QWidget* pTab = new QWidget();
@@ -69,10 +71,12 @@ QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidge
     // Right widget: for OpenGl rendering area
     QWidget* pRightWidget = new QWidget(pSplitter);
     QVBoxLayout* pRightLayout = new QVBoxLayout(pRightWidget);
-    m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(pRightWidget); // TODO pas ici
-    OpenGl3DWidget* pGlWidget = m_pOpenGl3DWidgetClothSimulation;
-    pGlWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    pRightLayout->addWidget(pGlWidget);
+    
+    if (pGlWidget)
+    {
+        pGlWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        pRightLayout->addWidget(pGlWidget);
+    }
 
     // Add left and right widgets to the splitter
     pSplitter->addWidget(pLeftWidget);
