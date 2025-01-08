@@ -1,9 +1,15 @@
+// Includes from project
 #include "OpenGl3DWidget.hpp"
+
+// Includes from 3rd party
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QSurfaceFormat>
+
+// Includes from STL
 #include <cmath>
+#include <iostream>
 
 /*
 * OpenGl3DWidget constructor
@@ -44,6 +50,8 @@ void OpenGl3DWidget::initializeGL()
     glEnable(GL_LIGHT0);
     GLfloat lightPos[] = { 0.0f, 0.0f, 10.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+	std::cout << "OpenGL initialized" << std::endl;
 }
 
 
@@ -95,7 +103,14 @@ void OpenGl3DWidget::paintGL()
     glRotatef(angle, 1.0f, 1.0f, 0.0f);
     angle += 1.0f;  // update rotation
 
-    // Draw a colored cube using immediate mode
+	for (auto& renderer : m_objectsToRenderList)
+	{
+        renderer->m_vao.bind();
+		glDrawArrays(GL_TRIANGLES, 0, GLsizei(renderer->m_verticesData.size()));
+        renderer->m_vao.release();
+	}
+
+    /*// Draw a colored cube using immediate mode
     glBegin(GL_QUADS);
     // Front face (z = 1.0f)
     glColor3f(1.0f, 0.0f, 0.0f);  // Red
@@ -133,8 +148,50 @@ void OpenGl3DWidget::paintGL()
     glVertex3f(-1.0f, -1.0f, 1.0f);
     glVertex3f(-1.0f, 1.0f, 1.0f);
     glVertex3f(-1.0f, 1.0f, -1.0f);
-    glEnd();
+    glEnd();*/
 
     // Trigger a repaint for continuous rotation (use timer for production code)
     update();
+}
+
+
+void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
+{
+    std::cout << "Initialize VBO" << std::endl;
+
+	std::unique_ptr<ObjectRenderingInstance> objInst = std::make_unique<ObjectRenderingInstance>();
+	objInst->m_verticesData = object3D.computeVBOVerticesData();
+
+    // Initialize VAO
+    objInst->m_vao.create();
+    objInst->m_vao.bind();
+
+    // Initialize VBO
+    objInst->m_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    objInst->m_vbo.create();
+    objInst->m_vbo.bind();
+    objInst->m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    objInst->m_vbo.allocate(objInst->m_verticesData.data(), int(objInst->m_verticesData.size() * sizeof(VBOVertex)));
+
+    // Supposons que votre shader utilise :
+    // - location 0 pour position
+    // - location 1 pour normale
+    // - location 2 pour uv
+    GLint posLoc = 0;  // à adapter selon votre shader
+    GLint normLoc = 1;
+    GLint uvLoc = 2;
+    glEnableVertexAttribArray(posLoc);
+    glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, position)));
+
+    glEnableVertexAttribArray(normLoc);
+    glVertexAttribPointer(normLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, normal)));
+
+    glEnableVertexAttribArray(uvLoc);
+    glVertexAttribPointer(uvLoc, 2, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, uv)));
+
+    objInst->m_vao.release();
+    objInst->m_vbo.release();
+
+	// Add it to the list of objects to render
+    m_objectsToRenderList.push_back(std::move(objInst));
 }

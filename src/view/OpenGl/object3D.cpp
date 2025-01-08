@@ -1,12 +1,17 @@
 // Include from project
 #include "object3D.hpp"
 
+// Includes from 3rd party
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+
 // Include from STL
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <filesystem>
+#include <cstddef>
 
 
 /*
@@ -46,18 +51,20 @@ bool Object3D::loadFromObjFile(const std::string& path)
 		// Check if the line is a vertex
         if (prefix == "v")
         {
-			Vec3 vertex(0, 0, 0);
-			iss >> vertex.x >> vertex.y >> vertex.z;
+            std::array<float, 3> vertex{ 0, 0, 0 };
+            iss >> vertex[0] >> vertex[1] >> vertex[2];
 			m_vertices.push_back(vertex);
         }
 
         // Check if the line is a normal
         if (prefix == "vn")
         {
-            Vec3 normal(0, 0, 0);
-            iss >> normal.x >> normal.y >> normal.z;
+            std::array<float, 3> normal{ 0, 0, 0 };
+            iss >> normal[0] >> normal[1] >> normal[2];
             m_normals.push_back(normal);
         }
+
+        // TODO vt
 
         // Check if the line is a face
         if (prefix == "f")
@@ -74,6 +81,8 @@ bool Object3D::loadFromObjFile(const std::string& path)
 
     // Closing the file
     file.close();
+
+    computeVBOVerticesData();
 
     std::cout << "File: " << path << " loaded successfully." << std::endl;
 
@@ -171,4 +180,39 @@ bool Object3D::parseFaceLine(const std::string& line)
 	m_faces.push_back(faceData);
 
 	return true;
+}
+
+
+/*
+* Compute VBO vertices data
+* 
+* @return std::vector<VBOVertex> List of VBO vertices data
+*/
+std::vector<VBOVertex> Object3D::computeVBOVerticesData()
+{
+	// Clear the list
+    std::vector<VBOVertex> verticesData;
+
+	for (const auto& face : m_faces)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			VBOVertex vertex;
+
+			vertex.position = m_vertices[face[i * 3]];
+            if (face[i * 3 + 1] != -1)
+            {
+                vertex.uv = m_uvs[face[i * 3 + 1]];
+            }
+            else
+			{
+				vertex.uv = { 0, 0 };
+			}
+            vertex.normal = m_normals[face[i * 3 + 2]];
+
+            verticesData.push_back(vertex);
+		}
+	}
+
+    return verticesData;
 }

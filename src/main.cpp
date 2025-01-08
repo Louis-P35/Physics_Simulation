@@ -1,9 +1,7 @@
 // Includes from project
 #include "main.hpp"
 #include "mainWindow.hpp"
-// Includes from project
-#include "main.hpp"
-#include "view/OpenGl/object3D.hpp" 
+#include "applicationData.hpp"
 
 // Includes from 3rd party
 #include <QApplication>
@@ -19,20 +17,24 @@
 int main(int argc, char** argv)
 {
     // Init. TODO: Do the 3d object loading in a thread
-    init();
+	ApplicationData appData;
+    init(appData.m_monkey3D);
 
     QApplication app(argc, argv);
     MainWindow window;
+	
     window.show();
+
+	std::cout << "Application started" << std::endl;
+	window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_monkey3D);
+
     return app.exec();
 }
 
 
-bool init()
+bool init(Object3D& obj)
 {
-	Object3D monkey3D(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(1, 1, 1));
-
-	monkey3D.loadFromObjFile("../models/monkey.obj");
+    obj.loadFromObjFile("../models/monkey.obj");
 
     return true;
 }

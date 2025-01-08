@@ -20,6 +20,8 @@ set(SRC_FILES
 set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/include/mainWindow.hpp
     ${CMAKE_SOURCE_DIR}/include/vec3.hpp
+    ${CMAKE_SOURCE_DIR}/include/main.hpp
+    ${CMAKE_SOURCE_DIR}/include/applicationData.hpp
     view/OpenGl/OpenGl3DWidget.hpp
     view/OpenGl/object3D.hpp
 )

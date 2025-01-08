@@ -1,6 +1,5 @@
 // Includes from project
 #include "mainWindow.hpp"
-#include "view/OpenGl/OpenGl3DWidget.hpp"
 
 // Includes from 3rd party
 #include <QMenuBar>
@@ -38,7 +37,7 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
     
 
     // Create second tab
-    this->createTab("Fluid simulation", pTabWidget);
+	//this->createTab("Fluid simulation", pTabWidget); // TODO virer d'abort le code de la simulation de tissu en dur
 
 
     // Set the QTabWidget as the central widget of the main window
@@ -67,10 +66,11 @@ QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidge
     QVBoxLayout* pLeftLayout = new QVBoxLayout(pLeftWidget);
     pLeftLayout->addWidget(new QLabel("Left Pane Content"));
 
-    // Right widget: for Vulkan rendering area
+    // Right widget: for OpenGl rendering area
     QWidget* pRightWidget = new QWidget(pSplitter);
     QVBoxLayout* pRightLayout = new QVBoxLayout(pRightWidget);
-    OpenGl3DWidget* pGlWidget = new OpenGl3DWidget(pRightWidget);
+    m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(pRightWidget); // TODO pas ici
+    OpenGl3DWidget* pGlWidget = m_pOpenGl3DWidgetClothSimulation;
     pGlWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     pRightLayout->addWidget(pGlWidget);
 
