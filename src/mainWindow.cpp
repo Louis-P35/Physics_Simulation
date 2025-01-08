@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
 	setWindowTitle("Physics simulation");
 
     // Set a minimum size for the window
-    setMinimumSize(800, 600);
+    setMinimumSize(m_widowInitialSizeX, m_widowInitialSizeY);
 
     // Menubar
     QMenu* fileMenu = menuBar()->addMenu("File");
@@ -70,7 +70,9 @@ QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidge
     // Right widget: for Vulkan rendering area
     QWidget* pRightWidget = new QWidget(pSplitter);
     QVBoxLayout* pRightLayout = new QVBoxLayout(pRightWidget);
-    pRightLayout->addWidget(new OpenGl3DWidget(pRightWidget));
+    OpenGl3DWidget* pGlWidget = new OpenGl3DWidget(pRightWidget);
+    pGlWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    pRightLayout->addWidget(pGlWidget);
 
     // Add left and right widgets to the splitter
     pSplitter->addWidget(pLeftWidget);
@@ -79,6 +81,11 @@ QWidget* MainWindow::createTab(const std::string& tabName, QTabWidget* pTabWidge
     // Set initial stretch factors for the splitter to approximate 1/3 left, 2/3 right
     pSplitter->setStretchFactor(0, 1); // left widget
     pSplitter->setStretchFactor(1, 2); // right widget
+
+	// Set initial sizes for the splitter
+    QList<int> sizes;
+    sizes << (m_widowInitialSizeX / 2) << m_widowInitialSizeX;
+    pSplitter->setSizes(sizes);
 
     // Set the splitter as the layout for the tab
     QVBoxLayout* pTabLayout = new QVBoxLayout(pTab);

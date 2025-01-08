@@ -9,6 +9,10 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+private:
+	int m_widowInitialSizeX = 800;
+	int m_widowInitialSizeY = 600;
+
 public:
 	explicit MainWindow(QWidget* pParent = nullptr);
 
