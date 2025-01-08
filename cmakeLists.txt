@@ -71,3 +71,6 @@ message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Build Tests: ${BUILD_TESTS}")
 message(STATUS "Build Docs: ${BUILD_DOCS}")
+
+# Copy the models/ folder in the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/models DESTINATION ${CMAKE_BINARY_DIR})

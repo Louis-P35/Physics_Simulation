@@ -5,6 +5,9 @@
 #include <QSurfaceFormat>
 #include <cmath>
 
+/*
+* OpenGl3DWidget constructor
+*/
 OpenGl3DWidget::OpenGl3DWidget(QWidget* pParent) : QOpenGLWidget(pParent)
 {
     // Request a compatibility profile for fixed-function pipeline support
@@ -14,10 +17,20 @@ OpenGl3DWidget::OpenGl3DWidget(QWidget* pParent) : QOpenGLWidget(pParent)
     setFormat(format);
 }
 
+/*
+* OpenGl3DWidget destructor
+*/
 OpenGl3DWidget::~OpenGl3DWidget()
 {
 }
 
+/*
+* Initialize OpenGL
+* 
+* This function is called once when the OpenGL context is created
+* 
+* @return void
+*/
 void OpenGl3DWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -33,6 +46,16 @@ void OpenGl3DWidget::initializeGL()
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 }
 
+
+/*
+* Resize OpenGL
+* 
+* This function is called whenever the widget is resized
+* 
+* @param w New width
+* @param h New height
+* @return void
+*/
 void OpenGl3DWidget::resizeGL(int w, int h)
 {
     if (h == 0)
@@ -52,6 +75,14 @@ void OpenGl3DWidget::resizeGL(int w, int h)
     glLoadIdentity();
 }
 
+/*
+* Paint OpenGL
+* 
+* This function is called whenever the widget needs to be repainted
+* This is where the rendering code goes
+* 
+* @return void
+*/
 void OpenGl3DWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
