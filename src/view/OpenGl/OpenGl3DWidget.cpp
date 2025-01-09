@@ -138,12 +138,31 @@ void OpenGl3DWidget::paintGL()
         m_pShader.m_shaderProgram.setUniformValue("viewPos", cameraPosition);
 
         // Set textures
-        glActiveTexture(GL_TEXTURE0);  // Select texture 0 unit
-        if (renderer->m_pColorTexture)
+        // color
+        bool colorTextureAvailable = (renderer->m_pColorTexture != nullptr);
+        m_pShader.m_shaderProgram.setUniformValue("useColorTexture", colorTextureAvailable);
+        if (colorTextureAvailable)
         {
-            renderer->m_pColorTexture->bind();
+            glActiveTexture(GL_TEXTURE0);  // Select texture 0 unit
+            if (renderer->m_pColorTexture)
+            {
+                renderer->m_pColorTexture->bind();
+            }
+            m_pShader.m_shaderProgram.setUniformValue("colorTexture", 0);  // Link sampler to texture unit 0
         }
-		m_pShader.m_shaderProgram.setUniformValue("colorTexture", 0);  // Link sampler to texture unit 0
+
+        // normal
+        bool normalTextureAvailable = (renderer->m_pNormalTexture != nullptr);
+        m_pShader.m_shaderProgram.setUniformValue("useNormalTexture", normalTextureAvailable);
+        if (normalTextureAvailable)
+        {
+            glActiveTexture(GL_TEXTURE1);  // Select texture 1 unit
+            if (renderer->m_pNormalTexture)
+            {
+                renderer->m_pNormalTexture->bind();
+            }
+            m_pShader.m_shaderProgram.setUniformValue("normalTexture", 1);  // Link sampler to texture unit 1
+        }
 
         renderer->m_vao.bind();
 		glDrawArrays(GL_TRIANGLES, 0, GLsizei(renderer->m_verticesData.size()));

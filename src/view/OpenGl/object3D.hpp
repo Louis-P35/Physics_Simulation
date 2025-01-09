@@ -14,6 +14,7 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <tuple>
 
 
 /*
@@ -24,6 +25,10 @@ struct VBOVertex
 	std::array<float, 3> position;
 	std::array<float, 3> normal;
 	std::array<float, 2> uv; // If available
+
+	// Tangent and bitangent vectors for normal mapping
+	std::array<float, 3> tangent;
+	std::array<float, 3> bitangent;
 };
 
 
@@ -62,4 +67,13 @@ public:
 private:
 	bool parseFaceLine(const std::string& line);
 	std::unique_ptr<QOpenGLTexture> loadTexture(const std::string& path) const;
+	bool computeTangentAndBitangentvectors();
+	std::tuple<Vec3, Vec3> computeTangentAndBitangentVector(
+		const Vec3& p0, 
+		const Vec3& p1, 
+		const Vec3& p2, 
+		const std::array<float, 2>& uv0,
+		const std::array<float, 2>& uv1,
+		const std::array<float, 2>& uv2
+	);
 };

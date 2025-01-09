@@ -13,6 +13,18 @@
 #include <tuple>
 
 
+// Params :
+// Obj plus ou moins glisssant
+// Position, rotation, scale des objets
+// Loading de l'objet au choix
+
+// Taille tissus
+// Résolution tissus
+// Epaisseur tissus
+// Poid du tissus
+// Elasticité du tissus
+
+
 
 int main(int argc, char** argv)
 {

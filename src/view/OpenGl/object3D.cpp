@@ -101,6 +101,7 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
     std::cout << "File: " << fullPath << " loaded successfully." << std::endl;
 
 	// Load the textures
+    // Color
     const fs::path colorTexturePath = fs::path(path) / "textures" / "color.png";
     m_pColorTexture = loadTexture(colorTexturePath.string());
 	if (m_pColorTexture != nullptr)
@@ -111,6 +112,18 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
 	{
 		std::cerr << "Error: Failed to load color texture : " << colorTexturePath.string() << std::endl;
 	}
+
+    // Normal
+    const fs::path normalTexturePath = fs::path(path) / "textures" / "normal.png";
+    m_pNormalTexture = loadTexture(normalTexturePath.string());
+    if (m_pNormalTexture != nullptr)
+    {
+        std::cout << "Normal texture loaded successfully." << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error: Failed to load normal texture : " << normalTexturePath.string() << std::endl;
+    }
 
 	return true;
 }
@@ -263,7 +276,8 @@ std::unique_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) c
     QImage glImage = image.convertToFormat(QImage::Format_RGBA8888);
 
 	// Crate and configure the texture
-    std::unique_ptr<QOpenGLTexture> pTexture(new QOpenGLTexture(glImage.mirrored(false, false)));
+    // Need to mirror the image to get it in line with the UVs...
+    std::unique_ptr<QOpenGLTexture> pTexture(new QOpenGLTexture(glImage.mirrored(false, true)));
 
 	// Configure the parameters of the texture
     pTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
@@ -271,4 +285,51 @@ std::unique_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) c
     pTexture->setWrapMode(QOpenGLTexture::Repeat);
 
 	return std::move(pTexture); // std::move() not necessary ?
+}
+
+
+/*
+* Compute tangent and bitangent vectors for all the faces (needed for normal mapping)
+* 
+* @return bool True if the computation is successful, false otherwise
+*/
+bool Object3D::computeTangentAndBitangentvectors()
+{
+	for (auto face : m_faces)
+	{
+		Vec3 p0 = Vec3(m_vertices[face[0]]);
+		Vec3 p1 = Vec3(m_vertices[face[1]]);
+		Vec3 p2 = Vec3(m_vertices[face[2]]);
+        std::array<float, 2> uv0 = m_uvs[face[3]];
+        std::array<float, 2> uv1 = m_uvs[face[4]];
+        std::array<float, 2> uv2 = m_uvs[face[5]];
+		Vec3 tangent, bitangent;
+
+		std::tie(tangent, bitangent) = computeTangentAndBitangentVector(p0, p1, p2, uv0, uv1, uv2);
+	}
+	return true;
+}
+
+
+/*
+* Compute tangent and bitangent vectors for a face (needed for normal mapping)
+* 
+* @param p0 First vertex of the face
+* @param p1 Second vertex of the face
+* @param p2 Third vertex of the face
+* @param uv0 UV of the first vertex
+* @param uv1 UV of the second vertex
+* @param uv2 UV of the third vertex
+* @return std::tuple<Vec3, Vec3> Tuple containing the tangent and bitangent vectors
+*/
+std::tuple<Vec3, Vec3> Object3D::computeTangentAndBitangentVector(
+    const Vec3& p0, 
+    const Vec3& p1, 
+    const Vec3& p2, 
+    const std::array<float, 2>& uv0,
+    const std::array<float, 2>& uv1,
+    const std::array<float, 2>& uv2
+)
+{
+	return std::make_tuple(Vec3(), Vec3());
 }
