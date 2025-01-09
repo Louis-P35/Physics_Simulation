@@ -74,3 +74,6 @@ message(STATUS "Build Docs: ${BUILD_DOCS}")
 
 # Copy the models/ folder in the build directory
 file(COPY ${CMAKE_SOURCE_DIR}/models DESTINATION ${CMAKE_BINARY_DIR})
+
+# Copy the shaders/ folder in the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})

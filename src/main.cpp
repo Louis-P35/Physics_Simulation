@@ -26,6 +26,7 @@ int main(int argc, char** argv)
     window.show();
 
 	std::cout << "Application started" << std::endl;
+    initAfterOpenGl(appData);
 	window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_monkey3D);
 
     return app.exec();
@@ -36,5 +37,11 @@ bool init(Object3D& obj)
 {
     obj.loadFromObjFile("../models/monkey.obj");
 
+    return true;
+}
+
+
+bool initAfterOpenGl(ApplicationData& appData)
+{
     return true;
 }

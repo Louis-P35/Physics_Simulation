@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QSurfaceFormat>
+#include <QMatrix4x4>
 
 // Includes from STL
 #include <cmath>
@@ -52,6 +53,8 @@ void OpenGl3DWidget::initializeGL()
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
 	std::cout << "OpenGL initialized" << std::endl;
+
+    loadShaders();
 }
 
 
@@ -95,13 +98,26 @@ void OpenGl3DWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glLoadIdentity();
-    // Move back a bit to see the cube
-    glTranslatef(0.0f, 0.0f, -5.0f);
-    // Rotate cube for a better view
+    QMatrix4x4 model;
     static float angle = 0.0f;
-    glRotatef(angle, 1.0f, 1.0f, 0.0f);
-    angle += 1.0f;  // update rotation
+    model.setToIdentity();
+    model.translate(0.0f, 0.0f, -5.0f);
+    model.rotate(angle, 1.0f, 1.0f, 0.0f);
+    angle += 1.0f;
+
+    QMatrix4x4 view;
+    view.lookAt(QVector3D(0.0f, 0.0f, 5.0f),  // position de la caméra
+        QVector3D(0.0f, 0.0f, 0.0f),  // point regardé
+        QVector3D(0.0f, 1.0f, 0.0f)); // haut
+
+    QMatrix4x4 projection;
+    projection.perspective(45.0f, float(width()) / height(), 0.1f, 100.0f);
+
+    // Activer le shader et définir les uniformes
+    m_pShader.m_shaderProgram.bind();
+    m_pShader.m_shaderProgram.setUniformValue("model", model);
+    m_pShader.m_shaderProgram.setUniformValue("view", view);
+    m_pShader.m_shaderProgram.setUniformValue("projection", projection);
 
 	for (auto& renderer : m_objectsToRenderList)
 	{
@@ -109,6 +125,8 @@ void OpenGl3DWidget::paintGL()
 		glDrawArrays(GL_TRIANGLES, 0, GLsizei(renderer->m_verticesData.size()));
         renderer->m_vao.release();
 	}
+
+    m_pShader.m_shaderProgram.release();
 
     // Trigger a repaint for continuous rotation (use timer for production code)
     update();
@@ -163,4 +181,13 @@ void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
 	// Add it to the list of objects to render
     // VAO are not copyable, so we move it
     m_objectsToRenderList.push_back(std::move(objInst));
+}
+
+
+void OpenGl3DWidget::loadShaders()
+{
+    if (m_pShader.loadShader("../shaders/vertex.glsl", "../shaders/fragment.glsl"))
+    {
+        std::cout << "Shader loaded successfully" << std::endl;
+    }
 }

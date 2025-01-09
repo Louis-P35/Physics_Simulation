@@ -2,6 +2,7 @@
 
 // Include from project
 #include "object3D.hpp"
+#include "shader.hpp"
 
 // Includes from 3rd party
 #include <QOpenGLWidget>
@@ -39,12 +40,14 @@ class OpenGl3DWidget : public QOpenGLWidget, protected QOpenGLFunctions
 
 public:
 	std::vector<std::unique_ptr<ObjectRenderingInstance>> m_objectsToRenderList;
+    Shader m_pShader;
 
 public:
     explicit OpenGl3DWidget(QWidget* pParent = nullptr);
     ~OpenGl3DWidget();
 
-	void initialyzeObject3D(Object3D& object3D);
+    void loadShaders(); // TODO: remove that and create a scene class
+	void initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
 
 protected:
     void initializeGL() override;

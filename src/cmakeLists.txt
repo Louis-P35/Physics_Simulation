@@ -13,8 +13,10 @@ set(SRC_FILES
     main.cpp
     mainWindow.cpp
     vec3.cpp
+    applicationData.cpp
     view/OpenGl/OpenGl3DWidget.cpp
     view/OpenGl/object3D.cpp
+    view/OpenGl/shader.cpp
 )
 
 set(HEADER_FILES
@@ -24,6 +26,7 @@ set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/include/applicationData.hpp
     view/OpenGl/OpenGl3DWidget.hpp
     view/OpenGl/object3D.hpp
+    view/OpenGl/shader.hpp
 )
 
 # Enable AUTOMOC (and optionally AUTOUIC, AUTORCC) 
