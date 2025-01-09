@@ -12,6 +12,7 @@
 
 // Includes from STL
 #include <vector>
+#include <memory>
 
 
 /*
@@ -26,6 +27,13 @@ struct ObjectRenderingInstance
     GLuint m_shaderProgram;
 
     std::vector<VBOVertex> m_verticesData;
+
+    std::array<float, 3> m_position;
+    std::array<float, 3> m_rotation;
+    std::array<float, 3> m_scale;
+
+    std::unique_ptr<QOpenGLTexture> m_pColorTexture;
+    std::unique_ptr<QOpenGLTexture> m_pNormalTexture;
 };
 
 

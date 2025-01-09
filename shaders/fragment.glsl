@@ -1,10 +1,12 @@
 #version 330 core
+in vec2 fragUV;
 in vec3 fragNormal;
 in vec3 fragPosition;
 out vec4 FragColor;
 
-uniform vec3 lightPos;    // Position of the light source
-uniform vec3 viewPos;     // Position of the camera
+uniform vec3 lightPos;              // Position of the light source
+uniform vec3 viewPos;               // Position of the camera
+uniform sampler2D colorTexture;     // Color texture
 
 void main()
 {
@@ -16,9 +18,9 @@ void main()
     
     // Diffuse component of the lambertian reflection model
     float diff = max(dot(normal, lightDir), 0.0);
-    
-    // Base color of the object
-    vec3 baseColor = vec3(1.0, 0.5, 0.31);  // par exemple
+
+    // Base color of the object from the color texture
+    vec3 baseColor = texture(colorTexture, fragUV).rgb;
     vec3 diffuse = diff * baseColor;
     
     // Add some ambient lighting (optional)

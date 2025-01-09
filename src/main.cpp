@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     initAfterOpenGl(appData);
 	window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_monkey3D);
     window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_bench3D);
+    window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_ground3D);
 
     return app.exec();
 }
@@ -36,14 +37,21 @@ int main(int argc, char** argv)
 
 bool init(ApplicationData& appData)
 {
-    appData.m_monkey3D.loadFromObjFile("../models/Susanne/monkey.obj");
-    appData.m_bench3D.loadFromObjFile("../models/workBench_2/Table.obj");
-
     return true;
 }
 
 
 bool initAfterOpenGl(ApplicationData& appData)
 {
+    appData.m_monkey3D.loadFromObjFile("../models/Susanne/", "monkey.obj");
+    appData.m_monkey3D.setPosition({ 0.0f, 4.0f, 0.0f });
+
+    appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
+    appData.m_bench3D.setPosition({ 0.0f, 0.0f, 0.0f });
+    appData.m_bench3D.setScale({ 3.0f, 3.0f, 3.0f });
+
+    // Ground
+	appData.m_ground3D.loadFromObjFile("../models/ground/", "ground.obj");
+
     return true;
 }

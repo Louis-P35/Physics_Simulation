@@ -7,11 +7,13 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLTexture>
 
 // Include from STL
 #include <string>
 #include <vector>
 #include <array>
+#include <memory>
 
 
 /*
@@ -33,9 +35,12 @@ struct VBOVertex
 class Object3D
 {
 public:
-	std::array<float, 3> m_position;
-	std::array<float, 3> m_rotation;
-	std::array<float, 3> m_scale;
+	std::array<float, 3> m_position = { 0.0f, 0.0f, 0.0f };
+	std::array<float, 3> m_rotation = { 0.0f, 0.0f, 0.0f };
+	std::array<float, 3> m_scale = { 1.0f, 1.0f, 1.0f };
+
+	std::unique_ptr<QOpenGLTexture> m_pColorTexture;
+	std::unique_ptr<QOpenGLTexture> m_pNormalTexture;
 
 private:
 	std::vector<std::array<float, 3>> m_vertices;
@@ -43,13 +48,18 @@ private:
 	std::vector<std::array<float, 2>> m_uvs;
 	std::vector<std::array<int, 9>> m_faces;
 
+
 public:
 	Object3D() {};
 	Object3D(const std::array<float, 3>& position, const std::array<float, 3>& rotation, const std::array<float, 3>& scale) : m_position(position), m_rotation(rotation), m_scale(scale) {}
 
-	bool loadFromObjFile(const std::string& path);
+	bool loadFromObjFile(const std::string& path, const std::string& filename);
 	std::vector<VBOVertex> computeVBOVerticesData();
+	void setPosition(std::array<float, 3> pos) { m_position = pos; };
+	void setRotation(std::array<float, 3> rot) { m_rotation = rot; };
+	void setScale(std::array<float, 3> scale) { m_scale = scale; };
 
 private:
 	bool parseFaceLine(const std::string& line);
+	std::unique_ptr<QOpenGLTexture> loadTexture(const std::string& path) const;
 };

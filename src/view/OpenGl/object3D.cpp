@@ -4,6 +4,7 @@
 // Includes from 3rd party
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
+#include <QImage>
 
 // Include from STL
 #include <iostream>
@@ -14,14 +15,20 @@
 #include <cstddef>
 
 
+namespace fs = std::filesystem;
+
+
 /*
 * Load object from file
 * 
-* @param path Path to the file
+* @param path Path to the directory containing the file
+* @param filename Name of the file
 * @return bool True if the object is loaded successfully, false otherwise
 */
-bool Object3D::loadFromObjFile(const std::string& path)
+bool Object3D::loadFromObjFile(const std::string& path, const std::string& filename)
 {
+	const std::string fullPath = path + filename;
+
 	std::cout << "Loading object from file: " << path << std::endl;
     std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
 
@@ -31,13 +38,13 @@ bool Object3D::loadFromObjFile(const std::string& path)
 	m_uvs.clear();
 
     // Open file in read only mode
-    std::ifstream file(path);
+    std::ifstream file(fullPath);
     if (!file.is_open())
     {
-        std::cerr << "Error: Could not open the file " << path << std::endl;
+        std::cerr << "Error: Could not open the file " << fullPath << std::endl;
         return false;
     }
-    std::cout << "File: " << path << " opened successfully." << std::endl;
+    std::cout << "File: " << fullPath << " opened successfully." << std::endl;
 
 	// Read file line by line
     std::string line;
@@ -88,9 +95,22 @@ bool Object3D::loadFromObjFile(const std::string& path)
     // Closing the file
     file.close();
 
+	// Compute the VBO vertices data
     computeVBOVerticesData();
 
-    std::cout << "File: " << path << " loaded successfully." << std::endl;
+    std::cout << "File: " << fullPath << " loaded successfully." << std::endl;
+
+	// Load the textures
+    const fs::path colorTexturePath = fs::path(path) / "textures" / "color.png";
+    m_pColorTexture = loadTexture(colorTexturePath.string());
+	if (m_pColorTexture != nullptr)
+	{
+		std::cout << "Color texture loaded successfully." << std::endl;
+	}
+    else
+	{
+		std::cerr << "Error: Failed to load color texture : " << colorTexturePath.string() << std::endl;
+	}
 
 	return true;
 }
@@ -165,7 +185,7 @@ bool Object3D::parseFaceLine(const std::string& line)
         {
         }
 
-		std::array<int, 3> faceData = { vertexIndex, uvIndex, normalIndex };
+		std::array<int, 3> faceData = {vertexIndex, uvIndex, normalIndex};
 		face.push_back(faceData);
     }
 
@@ -220,4 +240,35 @@ std::vector<VBOVertex> Object3D::computeVBOVerticesData()
 	}
 
     return verticesData;
+}
+
+
+/*
+* Load texture from file
+* 
+* @param path Path to the file
+* @return std::unique_ptr<QOpenGLTexture> Pointer to the texture
+*/
+std::unique_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) const
+{
+	// Load the image from the disk
+    QImage image(path.c_str());
+    if (image.isNull())
+    {
+        std::cerr << "Failed to load texture image" << std::endl;
+        return nullptr;
+    }
+
+	// Convert the image to the format that OpenGL expects
+    QImage glImage = image.convertToFormat(QImage::Format_RGBA8888);
+
+	// Crate and configure the texture
+    std::unique_ptr<QOpenGLTexture> pTexture(new QOpenGLTexture(glImage.mirrored(false, false)));
+
+	// Configure the parameters of the texture
+    pTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    pTexture->setMagnificationFilter(QOpenGLTexture::Linear);
+    pTexture->setWrapMode(QOpenGLTexture::Repeat);
+
+	return std::move(pTexture); // std::move() not necessary ?
 }

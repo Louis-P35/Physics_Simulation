@@ -43,7 +43,7 @@ void OpenGl3DWidget::initializeGL()
     initializeOpenGLFunctions();
 
     // Set clear color and enable depth testing
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.229f, 0.508f, 0.622f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
     // Setup basic lighting (optional)
@@ -96,39 +96,63 @@ void OpenGl3DWidget::resizeGL(int w, int h)
 */
 void OpenGl3DWidget::paintGL()
 {
+    QVector3D lightPosition(0.0f, 8.0f, 8.0f);
+    QVector3D cameraPosition(0.0f, 8.0f, 8.0f);
+    QVector3D cameraLookAt(0.0f, 4.0f, 0.0f);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    QMatrix4x4 model;
-    static float angle = 0.0f;
-    model.setToIdentity();
-    model.translate(0.0f, 0.0f, -5.0f);
-    model.rotate(angle, 1.0f, 1.0f, 0.0f);
-    angle += 1.0f;
-
-    QMatrix4x4 view;
-    view.lookAt(QVector3D(0.0f, 0.0f, 5.0f),  // position de la caméra
-        QVector3D(0.0f, 0.0f, 0.0f),  // point regardé
-        QVector3D(0.0f, 1.0f, 0.0f)); // haut
-
-    QMatrix4x4 projection;
-    projection.perspective(45.0f, float(width()) / height(), 0.1f, 100.0f);
-
-    // Activer le shader et définir les uniformes
-    m_pShader.m_shaderProgram.bind();
-    m_pShader.m_shaderProgram.setUniformValue("model", model);
-    m_pShader.m_shaderProgram.setUniformValue("view", view);
-    m_pShader.m_shaderProgram.setUniformValue("projection", projection);
-
+	// draw all 3d objects
 	for (auto& renderer : m_objectsToRenderList)
 	{
+        QMatrix4x4 model;
+        //static float angle = 0.0f;
+        model.setToIdentity();
+		// Apply the translation
+        model.translate(renderer->m_position[0], renderer->m_position[1], renderer->m_position[2]);
+		// Apply the scale
+        model.scale(renderer->m_scale[0], renderer->m_scale[1], renderer->m_scale[2]);
+        //model.rotate(angle, 1.0f, 1.0f, 0.0f);
+        //angle += 1.0f;
+
+        QMatrix4x4 view;
+        view.lookAt(
+            cameraPosition,             // Camera position
+            cameraLookAt,               // Point looked by the camera
+            QVector3D(0.0f, 1.0f, 0.0f) // Up vector
+        );
+
+        QMatrix4x4 projection;
+        projection.perspective(45.0f, float(width()) / height(), 0.1f, 100.0f);
+
+        // Activate the shader and define the uniformes
+        m_pShader.m_shaderProgram.bind();
+
+		// Set the uniforms
+        // matrix
+        m_pShader.m_shaderProgram.setUniformValue("model", model);
+        m_pShader.m_shaderProgram.setUniformValue("view", view);
+        m_pShader.m_shaderProgram.setUniformValue("projection", projection);
+        // Light pos and camera pos
+        m_pShader.m_shaderProgram.setUniformValue("lightPos", lightPosition);
+        m_pShader.m_shaderProgram.setUniformValue("viewPos", cameraPosition);
+
+        // Set textures
+        glActiveTexture(GL_TEXTURE0);  // Select texture 0 unit
+        if (renderer->m_pColorTexture)
+        {
+            renderer->m_pColorTexture->bind();
+        }
+		m_pShader.m_shaderProgram.setUniformValue("colorTexture", 0);  // Link sampler to texture unit 0
+
         renderer->m_vao.bind();
 		glDrawArrays(GL_TRIANGLES, 0, GLsizei(renderer->m_verticesData.size()));
         renderer->m_vao.release();
+
+        m_pShader.m_shaderProgram.release();
 	}
 
-    m_pShader.m_shaderProgram.release();
-
-    // Trigger a repaint for continuous rotation (use timer for production code)
+    // Trigger a repaint for continuous rotation (TODO: use timer for fps handling)
     update();
 }
 
@@ -159,11 +183,11 @@ void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
     objInst->m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     objInst->m_vbo.allocate(objInst->m_verticesData.data(), int(objInst->m_verticesData.size() * sizeof(VBOVertex)));
 
-    // Supposons que votre shader utilise :
-    // - location 0 pour position
-    // - location 1 pour normale
-    // - location 2 pour uv
-    GLint posLoc = 0;  // à adapter selon votre shader
+    // The shader use:
+    // - location 0 for position
+    // - location 1 for normal
+    // - location 2 for uv
+    GLint posLoc = 0;
     GLint normLoc = 1;
     GLint uvLoc = 2;
     glEnableVertexAttribArray(posLoc);
@@ -178,12 +202,27 @@ void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
     objInst->m_vao.release();
     objInst->m_vbo.release();
 
+    // Copy the position, rotation and scale
+    objInst->m_position = object3D.m_position;
+    objInst->m_rotation = object3D.m_rotation;
+    objInst->m_scale = object3D.m_scale;
+
+	// Copy the textures
+	objInst->m_pColorTexture = std::move(object3D.m_pColorTexture);
+	objInst->m_pNormalTexture = std::move(object3D.m_pNormalTexture);
+
+
 	// Add it to the list of objects to render
     // VAO are not copyable, so we move it
     m_objectsToRenderList.push_back(std::move(objInst));
 }
 
 
+/*
+* Load all the shaders
+* 
+* @return void
+*/
 void OpenGl3DWidget::loadShaders()
 {
     if (m_pShader.loadShader("../shaders/vertex.glsl", "../shaders/fragment.glsl"))
