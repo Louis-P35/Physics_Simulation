@@ -51,7 +51,7 @@ bool Object3D::loadFromObjFile(const std::string& path)
 		// Check if the line is a vertex
         if (prefix == "v")
         {
-            std::array<float, 3> vertex{ 0, 0, 0 };
+            std::array<float, 3> vertex{0, 0, 0};
             iss >> vertex[0] >> vertex[1] >> vertex[2];
 			m_vertices.push_back(vertex);
         }
@@ -59,12 +59,18 @@ bool Object3D::loadFromObjFile(const std::string& path)
         // Check if the line is a normal
         if (prefix == "vn")
         {
-            std::array<float, 3> normal{ 0, 0, 0 };
+            std::array<float, 3> normal{0, 0, 0};
             iss >> normal[0] >> normal[1] >> normal[2];
             m_normals.push_back(normal);
         }
 
-        // TODO vt
+        // Check if the line is a texture coord
+        if (prefix == "vt")
+        {
+            std::array<float, 2> uv{0, 0};
+            iss >> uv[0] >> uv[1];
+            m_uvs.push_back(uv);
+        }
 
         // Check if the line is a face
         if (prefix == "f")
@@ -147,7 +153,6 @@ bool Object3D::parseFaceLine(const std::string& line)
         {
             uvIndex = std::stoi(edgeVect[1]) - 1;
         }
-
         catch (const std::invalid_argument& e)
         {
         }

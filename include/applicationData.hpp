@@ -12,6 +12,7 @@ class ApplicationData
 {
 public:
 	Object3D m_monkey3D;
+	Object3D m_bench3D;
 
 public:
 	ApplicationData();

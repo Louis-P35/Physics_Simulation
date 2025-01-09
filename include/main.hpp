@@ -5,5 +5,5 @@
 #include "applicationData.hpp"
 
 
-bool init(Object3D& obj);
+bool init(ApplicationData& appData);
 bool initAfterOpenGl(ApplicationData& appData);

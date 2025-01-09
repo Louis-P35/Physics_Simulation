@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 {
     // Init. TODO: Do the 3d object loading in a thread
 	ApplicationData appData;
-    init(appData.m_monkey3D);
+    init(appData);
 
     QApplication app(argc, argv);
     MainWindow window;
@@ -28,14 +28,16 @@ int main(int argc, char** argv)
 	std::cout << "Application started" << std::endl;
     initAfterOpenGl(appData);
 	window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_monkey3D);
+    window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_bench3D);
 
     return app.exec();
 }
 
 
-bool init(Object3D& obj)
+bool init(ApplicationData& appData)
 {
-    obj.loadFromObjFile("../models/monkey.obj");
+    appData.m_monkey3D.loadFromObjFile("../models/Susanne/monkey.obj");
+    appData.m_bench3D.loadFromObjFile("../models/workBench_2/Table.obj");
 
     return true;
 }
