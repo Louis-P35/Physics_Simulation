@@ -28,6 +28,8 @@ namespace fs = std::filesystem;
 bool Object3D::loadFromObjFile(const std::string& path, const std::string& filename)
 {
 	const std::string fullPath = path + filename;
+    bool hasNormal = false;
+	bool hasUV = false;
 
 	std::cout << "Loading object from file: " << path << std::endl;
     std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
@@ -66,6 +68,7 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
         // Check if the line is a normal
         if (prefix == "vn")
         {
+            hasNormal = true;
             std::array<float, 3> normal{0, 0, 0};
             iss >> normal[0] >> normal[1] >> normal[2];
             m_normals.push_back(normal);
@@ -74,6 +77,7 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
         // Check if the line is a texture coord
         if (prefix == "vt")
         {
+			hasUV = true;
             std::array<float, 2> uv{0, 0};
             iss >> uv[0] >> uv[1];
             m_uvs.push_back(uv);
@@ -94,9 +98,6 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
 
     // Closing the file
     file.close();
-
-	// Compute the VBO vertices data
-    computeVBOVerticesData();
 
     std::cout << "File: " << fullPath << " loaded successfully." << std::endl;
 
@@ -124,6 +125,12 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
     {
         std::cerr << "Error: Failed to load normal texture : " << normalTexturePath.string() << std::endl;
     }
+
+	// Compute tangent and bitangent vectors (needed for normal mapping)
+	if (hasNormal && hasUV)
+	{
+		computeTangentAndBitangentvectors();
+	}
 
 	return true;
 }
@@ -228,7 +235,6 @@ bool Object3D::parseFaceLine(const std::string& line)
 */
 std::vector<VBOVertex> Object3D::computeVBOVerticesData()
 {
-	// Clear the list
     std::vector<VBOVertex> verticesData;
 
 	for (const auto& face : m_faces)
@@ -247,6 +253,12 @@ std::vector<VBOVertex> Object3D::computeVBOVerticesData()
 				vertex.uv = { 0, 0 };
 			}
             vertex.normal = m_normals[face[i * 3 + 2]];
+
+			if (!m_tangent.empty() && !m_bitangent.empty())
+			{
+				vertex.tangent = m_tangent[face[i * 3]].toArray();
+				vertex.bitangent = m_bitangent[face[i * 3]].toArray();
+			}
 
             verticesData.push_back(vertex);
 		}
@@ -295,18 +307,40 @@ std::unique_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) c
 */
 bool Object3D::computeTangentAndBitangentvectors()
 {
+	// Init tangent and bitangent vectors
+	m_tangent.clear();
+	m_tangent.resize(m_vertices.size(), {0.0f, 0.0f, 0.0f});
+    m_bitangent.clear();
+    m_bitangent.resize(m_vertices.size(), {0.0f, 0.0f, 0.0f});
+
 	for (auto face : m_faces)
 	{
 		Vec3 p0 = Vec3(m_vertices[face[0]]);
-		Vec3 p1 = Vec3(m_vertices[face[1]]);
-		Vec3 p2 = Vec3(m_vertices[face[2]]);
-        std::array<float, 2> uv0 = m_uvs[face[3]];
+		Vec3 p1 = Vec3(m_vertices[face[3]]);
+		Vec3 p2 = Vec3(m_vertices[face[6]]);
+        std::array<float, 2> uv0 = m_uvs[face[1]];
         std::array<float, 2> uv1 = m_uvs[face[4]];
-        std::array<float, 2> uv2 = m_uvs[face[5]];
+        std::array<float, 2> uv2 = m_uvs[face[7]];
 		Vec3 tangent, bitangent;
 
 		std::tie(tangent, bitangent) = computeTangentAndBitangentVector(p0, p1, p2, uv0, uv1, uv2);
+        
+		// Sum the vectors per vertex
+        m_tangent[face[0]] += tangent;
+        m_tangent[face[3]] += tangent;
+        m_tangent[face[6]] += tangent;
+        m_bitangent[face[0]] += bitangent;
+        m_bitangent[face[3]] += bitangent;
+        m_bitangent[face[6]] += bitangent;
 	}
+
+	// Normalize the vectors
+	for (int i = 0; i < m_vertices.size(); ++i)
+	{
+		m_tangent[i] = m_tangent[i].normalize();
+		m_bitangent[i] = m_bitangent[i].normalize();
+	}
+
 	return true;
 }
 
@@ -331,5 +365,27 @@ std::tuple<Vec3, Vec3> Object3D::computeTangentAndBitangentVector(
     const std::array<float, 2>& uv2
 )
 {
-	return std::make_tuple(Vec3(), Vec3());
+    // Compute direction vectors of the triangle on p0
+    Vec3 deltaPos1 = p1 - p0;
+    Vec3 deltaPos2 = p2 - p0;
+
+    // UV coordinates delta
+    float deltaUV1u = uv1[0] - uv0[0];
+    float deltaUV1v = uv1[1] - uv0[1];
+    float deltaUV2u = uv2[0] - uv0[0];
+    float deltaUV2v = uv2[1] - uv0[1];
+
+    // Compute the factor to solve the system
+    float denom = (deltaUV1u * deltaUV2v - deltaUV2u * deltaUV1v);
+    float f = (denom != 0.0f) ? (1.0f / denom) : 0.0f;
+
+    // Compute tangent and bitangent vectors
+    Vec3 tangent = (deltaPos1 * deltaUV2v - deltaPos2 * deltaUV1v) * f;
+    Vec3 bitangent = (deltaPos2 * deltaUV1u - deltaPos1 * deltaUV2u) * f;
+
+    // Normalize
+    tangent = tangent.normalize();
+    bitangent = bitangent.normalize();
+
+    return std::make_tuple(tangent, bitangent);
 }

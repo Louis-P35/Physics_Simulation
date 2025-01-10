@@ -17,6 +17,7 @@
 // Obj plus ou moins glisssant
 // Position, rotation, scale des objets
 // Loading de l'objet au choix
+// Gravité ?
 
 // Taille tissus
 // Résolution tissus

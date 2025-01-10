@@ -53,6 +53,9 @@ private:
 	std::vector<std::array<float, 2>> m_uvs;
 	std::vector<std::array<int, 9>> m_faces;
 
+	std::vector<Vec3> m_tangent;
+	std::vector<Vec3> m_bitangent;
+
 
 public:
 	Object3D() {};
