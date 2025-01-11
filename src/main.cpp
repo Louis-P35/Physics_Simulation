@@ -56,15 +56,25 @@ bool init(ApplicationData& appData)
 
 bool initAfterOpenGl(ApplicationData& appData)
 {
-    appData.m_monkey3D.loadFromObjFile("../models/Susanne/", "monkey.obj");
+    //Object3D test;
+    //appData.m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
+
+	//exit(0);
+	
+    //appData.m_monkey3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
+    appData.m_monkey3D.loadFromObjFile("../models/cube/", "cube.obj");
+    //appData.m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
     appData.m_monkey3D.setPosition({ 0.0f, 4.0f, 0.0f });
 
-    appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
+    //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
+    //appData.m_bench3D.loadFromObjFile("../models/cube/", "cube.obj");
+    //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table_b.obj");
     appData.m_bench3D.setPosition({ 0.0f, 0.0f, 0.0f });
     appData.m_bench3D.setScale({ 3.0f, 3.0f, 3.0f });
 
     // Ground
-	appData.m_ground3D.loadFromObjFile("../models/ground/", "ground.obj");
+	//appData.m_ground3D.loadFromObjFile("../models/ground/", "ground.obj");
+    appData.m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
 
     return true;
 }

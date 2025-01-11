@@ -19,13 +19,24 @@ FetchContent_MakeAvailable(googletest)
 # find_package(GTest REQUIRED)
 # target_link_libraries(your_test_target PRIVATE GTest::gtest GTest::gtest_main)
 
+# Add stubs directory first to avoid conflicts with the real OpenGL functions
+include_directories(${CMAKE_SOURCE_DIR}/tests/stubs)
+
 # Define test sources
 set(TEST_SOURCES
-    test_main.cpp
+    ${CMAKE_SOURCE_DIR}/tests/test_main.cpp
+    ${CMAKE_SOURCE_DIR}/tests/tangent_bitangent_test.cpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.cpp
+    ${CMAKE_SOURCE_DIR}/src/vec3.cpp
+)
+
+set(HEADER_FILES
+    ${CMAKE_SOURCE_DIR}/include/vec3.hpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp
 )
 
 # Create a test executable
-add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
+add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES} ${HEADER_FILES})
 
 # Include directories for tests
 target_include_directories(${PROJECT_NAME}_tests PRIVATE

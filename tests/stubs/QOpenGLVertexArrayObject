@@ -1,0 +1,11 @@
+#pragma once
+
+class QOpenGLVertexArrayObject
+{
+public:
+    QOpenGLVertexArrayObject() {}
+    bool create() { return true; }
+    void bind() {}
+    void release() {}
+    void destroy() {}
+};

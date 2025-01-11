@@ -1,0 +1,15 @@
+#pragma once
+
+class QOpenGLBuffer
+{
+public:
+    enum Type { VertexBuffer, IndexBuffer };
+
+    QOpenGLBuffer(Type type = VertexBuffer) {}
+    bool create() { return true; }
+    void bind() {}
+    void release() {}
+    void setUsagePattern(int pattern) {}
+    void allocate(const void* data, int size) {}
+    void destroy() {}
+};

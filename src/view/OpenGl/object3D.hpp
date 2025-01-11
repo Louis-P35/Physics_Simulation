@@ -67,14 +67,14 @@ public:
 	void setRotation(std::array<float, 3> rot) { m_rotation = rot; };
 	void setScale(std::array<float, 3> scale) { m_scale = scale; };
 
-private:
+protected:
 	bool parseFaceLine(const std::string& line);
 	std::unique_ptr<QOpenGLTexture> loadTexture(const std::string& path) const;
 	bool computeTangentAndBitangentvectors();
 	std::tuple<Vec3, Vec3> computeTangentAndBitangentVector(
-		const Vec3& p0, 
-		const Vec3& p1, 
-		const Vec3& p2, 
+		const Vec3& p0,
+		const Vec3& p1,
+		const Vec3& p2,
 		const std::array<float, 2>& uv0,
 		const std::array<float, 2>& uv1,
 		const std::array<float, 2>& uv2

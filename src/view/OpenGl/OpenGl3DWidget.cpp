@@ -96,8 +96,10 @@ void OpenGl3DWidget::resizeGL(int w, int h)
 */
 void OpenGl3DWidget::paintGL()
 {
-    QVector3D lightPosition(0.0f, 8.0f, 8.0f);
-    QVector3D cameraPosition(0.0f, 8.0f, 8.0f);
+    //QVector3D lightPosition(0.0f, 8.0f, 8.0f);
+    QVector3D lightPosition(8.0f, 8.0f, 8.0f);
+    //QVector3D cameraPosition(0.0f, 8.0f, 8.0f);
+    QVector3D cameraPosition(3.0f, 6.0f, 3.0f);
     QVector3D cameraLookAt(0.0f, 4.0f, 0.0f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

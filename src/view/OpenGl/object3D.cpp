@@ -258,6 +258,9 @@ std::vector<VBOVertex> Object3D::computeVBOVerticesData()
 			{
 				vertex.tangent = m_tangent[face[i * 3]].toArray();
 				vertex.bitangent = m_bitangent[face[i * 3]].toArray();
+
+				//std::cout << "copy Tangent: " << vertex.tangent[0] << " " << vertex.tangent[1] << " " << vertex.tangent[2] << std::endl;
+				//std::cout << "copy Bitangent: " << vertex.bitangent[0] << " " << vertex.bitangent[1] << " " << vertex.bitangent[2] << std::endl;
 			}
 
             verticesData.push_back(vertex);
@@ -324,6 +327,9 @@ bool Object3D::computeTangentAndBitangentvectors()
 		Vec3 tangent, bitangent;
 
 		std::tie(tangent, bitangent) = computeTangentAndBitangentVector(p0, p1, p2, uv0, uv1, uv2);
+
+		//std::cout << "Tangent: " << tangent.x << " " << tangent.y << " " << tangent.z << std::endl;
+		//std::cout << "Bitangent: " << bitangent.x << " " << bitangent.y << " " << bitangent.z << std::endl;
         
 		// Sum the vectors per vertex
         m_tangent[face[0]] += tangent;
@@ -339,6 +345,9 @@ bool Object3D::computeTangentAndBitangentvectors()
 	{
 		m_tangent[i] = m_tangent[i].normalize();
 		m_bitangent[i] = m_bitangent[i].normalize();
+
+		std::cout << "Tangent: " << m_tangent[i].x << " " << m_tangent[i].y << " " << m_tangent[i].z << std::endl;
+		std::cout << "Bitangent: " << m_bitangent[i].x << " " << m_bitangent[i].y << " " << m_bitangent[i].z << std::endl;
 	}
 
 	return true;

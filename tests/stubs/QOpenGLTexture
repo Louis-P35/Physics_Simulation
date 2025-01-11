@@ -1,0 +1,19 @@
+#pragma once
+
+#include <QImage>
+
+class QOpenGLTexture
+{
+public:
+    enum Filter { LinearMipMapLinear, Linear };
+    enum WrapMode { Repeat };
+
+    QOpenGLTexture(const void* image) {}
+    QOpenGLTexture(QImage image) {}
+    bool create() { return true; }
+    void bind() {}
+    void setMinificationFilter(Filter filter) {}
+    void setMagnificationFilter(Filter filter) {}
+    void setWrapMode(WrapMode mode) {}
+    void destroy() {}
+};

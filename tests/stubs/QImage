@@ -1,0 +1,38 @@
+#pragma once
+#include <string>
+
+class QImage
+{
+public:
+    QImage() : valid(false) {}
+    QImage(const char* /*filename*/) : valid(true) {}
+    
+    bool isNull() const { return !valid; }
+    
+    enum Format
+    {
+        Format_RGBA8888
+    };
+    
+    QImage convertToFormat(Format /*format*/) const
+    {
+        return *this;
+    }
+    
+    QImage mirrored() const
+    {
+        return *this;
+    }
+
+    QImage mirrored(bool, bool) const
+    {
+        return *this;
+    }
+    
+    void fill(int /*color*/)
+    {
+    }
+    
+private:
+    bool valid;
+};

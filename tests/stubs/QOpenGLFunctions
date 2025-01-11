@@ -1,0 +1,12 @@
+#pragma once
+
+// Minimal definition of QOpenGLFunctions for the tests
+class QOpenGLFunctions
+{
+public:
+    QOpenGLFunctions() {}
+    void initializeOpenGLFunctions()
+    {
+        // Empty stub
+    }
+};

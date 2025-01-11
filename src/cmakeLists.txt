@@ -7,7 +7,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/DeployQt.cmake")
 option(BUILD_LIBRARY "Enable building of the library target" OFF)
 
 # Collect source files for the library
-# It's a good practice not to use file(GLOB ...) for production builds, 
+# It's a good practice not to use file(GLOB ...) for production builds,
 # but explicitly list files.
 set(SRC_FILES
     main.cpp
