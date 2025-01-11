@@ -2,6 +2,7 @@
 in vec2 fragUV;
 in vec3 fragNormal;
 in vec3 fragPosition;
+in mat3 TBN;
 out vec4 FragColor;
 
 uniform vec3 lightPos;              // Position of the light source
@@ -15,6 +16,18 @@ void main()
 {
     // Normalize the normal
     vec3 normal = normalize(fragNormal);
+
+    // Apply normal mapping if activated
+    if(useNormalTexture)
+    {
+        // Get the normal from the normal map
+        vec3 tangentNormal = texture(normalTexture, fragUV).rgb;
+        // Remap it's coordinates from [0,1] to [-1,1]
+        // Because texture store RGB data between [0, 1] but normal vectors are between the [-1, 1] range
+        tangentNormal = tangentNormal * 2.0 - 1.0;
+        // Transform the normale from tangent space to world/camera space with the TBN matrix
+        normal = normalize(TBN * tangentNormal);
+    }
     
     // Compute the direction of the light source
     vec3 lightDir = normalize(lightPos - fragPosition);
@@ -38,4 +51,5 @@ void main()
     vec3 ambient = 0.1 * baseColor;
     
     FragColor = vec4(ambient + diffuse, 1.0);
+    //FragColor = vec4(normalize(normal) * 0.5 + 0.5, 1.0);
 }

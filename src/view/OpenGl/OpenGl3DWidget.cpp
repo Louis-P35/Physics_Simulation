@@ -209,14 +209,28 @@ void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
     GLint posLoc = 0;
     GLint normLoc = 1;
     GLint uvLoc = 2;
+    GLint tangentLoc = 3;
+    GLint bitangentLoc = 4;
+
+    // Position offset
     glEnableVertexAttribArray(posLoc);
     glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, position)));
 
+    // Normal offset
     glEnableVertexAttribArray(normLoc);
     glVertexAttribPointer(normLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, normal)));
 
+    // UVs offset
     glEnableVertexAttribArray(uvLoc);
     glVertexAttribPointer(uvLoc, 2, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, uv)));
+
+    // Tangent offset
+    glEnableVertexAttribArray(tangentLoc);
+    glVertexAttribPointer(tangentLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, tangent)));
+
+    // Bitangent offset
+    glEnableVertexAttribArray(bitangentLoc);
+    glVertexAttribPointer(bitangentLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOVertex), reinterpret_cast<void*>(offsetof(VBOVertex, bitangent)));
 
     objInst->m_vao.release();
     objInst->m_vbo.release();

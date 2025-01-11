@@ -250,7 +250,7 @@ std::vector<VBOVertex> Object3D::computeVBOVerticesData()
             }
             else
 			{
-				vertex.uv = { 0, 0 };
+				vertex.uv = {0, 0};
 			}
             vertex.normal = m_normals[face[i * 3 + 2]];
 
