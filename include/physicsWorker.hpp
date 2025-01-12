@@ -9,6 +9,11 @@
 #include <atomic>
 #include <functional>
 
+/*
+* PhysicsWorker class
+* 
+* This class is used to run the physics simulation in a separate thread
+*/
 class PhysicsWorker
 {
 private:

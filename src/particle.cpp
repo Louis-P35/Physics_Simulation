@@ -14,6 +14,8 @@ Spring::~Spring()
 /*
 * Compute the force applied by the spring
 * 
+* @param position Position of the particle that instanciated the spring
+* @param velocity Velocity of the particle that instanciated the spring
 * @return Vec3 Force applied by the spring
 */
 Vec3 Spring::computeForce(const Vec3& position, const Vec3& velocity)

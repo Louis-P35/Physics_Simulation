@@ -8,6 +8,7 @@
 // Includes from STL
 #include <memory>
 #include <vector>
+#include <chrono>
 
 
 class ApplicationData
@@ -18,6 +19,9 @@ public:
 	Object3D m_debugSphere3D;
 
 	Particle m_testParticle;
+
+private:
+	std::chrono::steady_clock::time_point m_lastUpdateTime;
 
 public:
 	ApplicationData();

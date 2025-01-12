@@ -2,7 +2,14 @@
 #include "physicsWorker.hpp"
 
 
-
+/*
+* Start the physics simulation
+* 
+* This function starts the physics simulation in a separate thread
+* 
+* @param updateCallback Callback function that is called to update the physics simulation
+* @return void
+*/
 void PhysicsWorker::start(std::function<void()> updateCallback)
 {
     m_running = true;
@@ -19,6 +26,9 @@ void PhysicsWorker::start(std::function<void()> updateCallback)
         });
 }
 
+/*
+* Stop the physics simulation
+*/
 void PhysicsWorker::stop()
 {
     m_running = false;

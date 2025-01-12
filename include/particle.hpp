@@ -9,7 +9,13 @@
 
 class Particle;
 
-
+/*
+* Spring class
+* 
+* This class is used to represent a spring in a physics simulation
+* 
+* The spring is used to link two particles together
+*/
 class Spring
 {
 private:
@@ -26,6 +32,13 @@ public:
 };
 
 
+/*
+* Particle class
+* 
+* This class is used to represent a particle in a physics simulation
+* 
+* The particle can be linked to other particles with springs
+*/
 class Particle
 {
 public:

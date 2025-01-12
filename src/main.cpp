@@ -92,7 +92,7 @@ bool initAfterOpenGl(ApplicationData& appData)
 
     std::unique_ptr<Object3D> pCube = std::make_unique<Object3D>();
     pCube->loadFromObjFile("../models/cube/", "cube.obj");
-    pCube->setPosition({ 4.0f, 2.0f, 0.0f });
+    pCube->setPosition({ 0.0f, 2.0f, 0.0f });
     pCube->setScale({ 0.3f, 0.3f, 0.3f });
     appData.m_objects3D.push_back(std::move(pCube));
 
