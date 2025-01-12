@@ -10,7 +10,11 @@
 #include <vector>
 #include <chrono>
 
-
+/*
+* ApplicationData class
+* 
+* This class is used to store the data of the application (model)
+*/
 class ApplicationData
 {
 public:
@@ -19,6 +23,7 @@ public:
 	Object3D m_debugSphere3D;
 
 	Particle m_testParticle;
+	Particle m_testParticle2;
 
 private:
 	std::chrono::steady_clock::time_point m_lastUpdateTime;

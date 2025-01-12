@@ -8,7 +8,12 @@
 
 ApplicationData::ApplicationData()
 {
-	m_testParticle.m_position = Vec3(0.0, 5.0, 0.0);
+	m_testParticle.m_position = Vec3(0.0, 2.0, 0.0);
+	m_testParticle.m_previousPosition = m_testParticle.m_position;
+	m_testParticle2.m_position = Vec3(-1.0, 2.0, 0.0);
+	m_testParticle2.m_previousPosition = m_testParticle2.m_position;
+	double lenght = (m_testParticle2.m_position - m_testParticle.m_position).norm();
+	m_testParticle.m_springs.push_back(Spring(&m_testParticle2, lenght, 100.0, 0.0));
 
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
@@ -22,18 +27,24 @@ ApplicationData::ApplicationData()
 */
 bool ApplicationData::simulationUpdate()
 {
-	std::cout << "Simulation update: ";
+	static bool firstUpdate = true;
 
 	// Calculate the time elapsed since the last update
 	auto currentTime = std::chrono::steady_clock::now();
 	std::chrono::duration<float> deltaTime = currentTime - m_lastUpdateTime;
 	m_lastUpdateTime = currentTime;  // Update the last update time to the current time
 
+	if (firstUpdate)
+	{
+		firstUpdate = false;
+		return true;
+	}
+
 	// Convert deltaTime to seconds
 	float elapsedTimeInSeconds = deltaTime.count();
 
 	m_testParticle.update(static_cast<double>(elapsedTimeInSeconds));
-	std::cout << m_testParticle.m_position.x << " " << m_testParticle.m_position.y << " " << m_testParticle.m_position.z << std::endl;
+	//std::cout << m_testParticle.m_position.x << " " << m_testParticle.m_position.y << " " << m_testParticle.m_position.z << std::endl;
 
 	// Outch need mutex...
 	m_debugSphere3D.m_position = m_testParticle.m_position.toArray();

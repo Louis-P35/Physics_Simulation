@@ -28,7 +28,7 @@ public:
 	Spring(Particle* pParticle, const double restLength, const double stiffness, const double damping);
 	~Spring();
 
-	Vec3 computeForce(const Vec3& position, const Vec3& velocity);
+	Vec3 computeForce(const Vec3& position, const Vec3& velocity) const;
 };
 
 
@@ -49,10 +49,10 @@ public:
 	Vec3 m_acceleration;
 
 	double m_mass = 1.0;
-	double m_airFriction = 1.0;
+	double m_airFriction = 0.2;
 	double m_objectFriction = 1.0;
 
-	std::vector<std::unique_ptr<Spring>> m_springs;
+	std::vector<Spring> m_springs;
 
 public:
 	Particle();
