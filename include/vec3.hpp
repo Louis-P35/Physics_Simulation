@@ -29,13 +29,13 @@ public:
 		return Vec3(x + other.x, y + other.y, z + other.z);
 	}
 
-	Vec3 operator+=(const Vec3& other)
+	void operator+=(const Vec3& other)
 	{
 		x += other.x;
 		y += other.y;
 		z += other.z;
 
-		return Vec3(x, y, z);
+		// No return to avoid copy
 	}
 
 	Vec3 operator-(const Vec3& other) const
@@ -43,14 +43,41 @@ public:
 		return Vec3(x - other.x, y - other.y, z - other.z);
 	}
 
+	void operator-=(const Vec3& other)
+	{
+		x -= other.x;
+		y -= other.y;
+		z -= other.z;
+
+		// No return to avoid copy
+	}
+
 	Vec3 operator*(const double scalar) const
 	{
 		return Vec3(x * scalar, y * scalar, z * scalar);
 	}
 
+	void operator*=(const double scalar)
+	{
+		x *= scalar;
+		y *= scalar;
+		z *= scalar;
+
+		// No return to avoid copy
+	}
+
 	Vec3 operator/(const double scalar) const
 	{
 		return Vec3(x / scalar, y / scalar, z / scalar);
+	}
+
+	void operator/=(const double scalar)
+	{
+		x /= scalar;
+		y /= scalar;
+		z /= scalar;
+
+		// No return to avoid copy
 	}
 
 	Vec3 cross(const Vec3& other) const
@@ -72,10 +99,28 @@ public:
 		return sqrt(x * x + y * y + z * z);
 	}
 
-	Vec3 normalize() const
+	Vec3 getNormalized() const
 	{
 		double len = norm();
+		if (len == 0.0)
+		{
+			return Vec3(x, y, z);
+		}
+
 		return Vec3(x / len, y / len, z / len);
+	}
+
+	void normalize()
+	{
+		double len = norm();
+		if (len == 0.0)
+		{
+			return;
+		}
+
+		x /= len;
+		y /= len;
+		z /= len;
 	}
 
 	Vec3 reflect(const Vec3& normal) const

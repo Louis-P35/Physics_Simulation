@@ -10,3 +10,10 @@ ApplicationData::ApplicationData()
 {
 	
 }
+
+bool ApplicationData::simulationUpdate()
+{
+	std::cout << "Simulation update" << std::endl;
+
+	return true;
+}

@@ -40,8 +40,13 @@ int main(int argc, char** argv)
 
 	std::cout << "Application started" << std::endl;
     initAfterOpenGl(appData);
-	window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_monkey3D);
-    window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_bench3D);
+	for (auto& object : appData.m_objects3D)
+	{
+        if (object)
+        {
+            window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(*object);
+        }
+	}
     window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_ground3D);
 
     return app.exec();
@@ -60,17 +65,21 @@ bool initAfterOpenGl(ApplicationData& appData)
     //appData.m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
 
 	//exit(0);
-	
+
     //appData.m_monkey3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
-    appData.m_monkey3D.loadFromObjFile("../models/cube/", "cube.obj");
     //appData.m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
-    appData.m_monkey3D.setPosition({ 0.0f, 4.0f, 0.0f });
+
+    std::unique_ptr<Object3D> pCube = std::make_unique<Object3D>();
+    pCube->loadFromObjFile("../models/cube/", "cube.obj");
+    pCube->setPosition({ 0.0f, 2.0f, 0.0f });
+    pCube->setScale({ 0.3f, 0.3f, 0.3f });
+    appData.m_objects3D.push_back(std::move(pCube));
 
     //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
     //appData.m_bench3D.loadFromObjFile("../models/cube/", "cube.obj");
     //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table_b.obj");
-    appData.m_bench3D.setPosition({ 0.0f, 0.0f, 0.0f });
-    appData.m_bench3D.setScale({ 3.0f, 3.0f, 3.0f });
+    //appData.m_bench3D.setPosition({ 0.0f, 0.0f, 0.0f });
+    //appData.m_bench3D.setScale({ 3.0f, 3.0f, 3.0f });
 
     // Ground
 	//appData.m_ground3D.loadFromObjFile("../models/ground/", "ground.obj");

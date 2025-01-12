@@ -343,11 +343,11 @@ bool Object3D::computeTangentAndBitangentvectors()
 	// Normalize the vectors
 	for (int i = 0; i < m_vertices.size(); ++i)
 	{
-		m_tangent[i] = m_tangent[i].normalize();
-		m_bitangent[i] = m_bitangent[i].normalize();
+		m_tangent[i] = m_tangent[i].getNormalized();
+		m_bitangent[i] = m_bitangent[i].getNormalized();
 
-		std::cout << "Tangent: " << m_tangent[i].x << " " << m_tangent[i].y << " " << m_tangent[i].z << std::endl;
-		std::cout << "Bitangent: " << m_bitangent[i].x << " " << m_bitangent[i].y << " " << m_bitangent[i].z << std::endl;
+		//std::cout << "Tangent: " << m_tangent[i].x << " " << m_tangent[i].y << " " << m_tangent[i].z << std::endl;
+		//std::cout << "Bitangent: " << m_bitangent[i].x << " " << m_bitangent[i].y << " " << m_bitangent[i].z << std::endl;
 	}
 
 	return true;
@@ -393,8 +393,8 @@ std::tuple<Vec3, Vec3> Object3D::computeTangentAndBitangentVector(
     Vec3 bitangent = (deltaPos2 * deltaUV1u - deltaPos1 * deltaUV2u) * f;
 
     // Normalize
-    tangent = tangent.normalize();
-    bitangent = bitangent.normalize();
+    tangent = tangent.getNormalized();
+    bitangent = bitangent.getNormalized();
 
     return std::make_tuple(tangent, bitangent);
 }
