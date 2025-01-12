@@ -2,6 +2,7 @@
 #include "main.hpp"
 #include "mainWindow.hpp"
 #include "applicationData.hpp"
+#include "physicsWorker.hpp"
 
 // Includes from 3rd party
 #include <QApplication>
@@ -24,6 +25,7 @@
 // Epaisseur tissus
 // Poid du tissus
 // Elasticité du tissus
+// Texture & normal du tissu
 
 
 
@@ -48,6 +50,25 @@ int main(int argc, char** argv)
         }
 	}
     window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_ground3D);
+    window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_debugSphere3D);
+
+
+    // Create the physics simulation worker
+    PhysicsWorker physicsWorker;
+
+    // Start the simulation in a separate thread
+    physicsWorker.start([&]() {
+        // Perform your physics updates
+        appData.simulationUpdate();
+
+        // Emit a signal to update GUI if needed
+        //QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
+        });
+    
+    // Stop the worker when the application quits
+    QObject::connect(&app, &QApplication::aboutToQuit, [&]() {
+        physicsWorker.stop();
+        });
 
     return app.exec();
 }
@@ -71,7 +92,7 @@ bool initAfterOpenGl(ApplicationData& appData)
 
     std::unique_ptr<Object3D> pCube = std::make_unique<Object3D>();
     pCube->loadFromObjFile("../models/cube/", "cube.obj");
-    pCube->setPosition({ 0.0f, 2.0f, 0.0f });
+    pCube->setPosition({ 4.0f, 2.0f, 0.0f });
     pCube->setScale({ 0.3f, 0.3f, 0.3f });
     appData.m_objects3D.push_back(std::move(pCube));
 
@@ -82,8 +103,12 @@ bool initAfterOpenGl(ApplicationData& appData)
     //appData.m_bench3D.setScale({ 3.0f, 3.0f, 3.0f });
 
     // Ground
-	//appData.m_ground3D.loadFromObjFile("../models/ground/", "ground.obj");
     appData.m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
+
+	// Debug sphere
+	appData.m_debugSphere3D.loadFromObjFile("../models/sphere/", "sphere.obj");
+    appData.m_debugSphere3D.setScale({ 0.1f, 0.1f, 0.1f });
+    appData.m_debugSphere3D.setPosition({ 0.0f, 2.0f, 0.0f });
 
     return true;
 }

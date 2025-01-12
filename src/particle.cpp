@@ -43,7 +43,7 @@ Vec3 Particle::computeForces(const Vec3& gravity)
 	Vec3 forces = gravity * m_mass;
 
 	// Air friction
-	forces -= m_velocity * m_airFriction;
+	forces -= m_previousVelocity * m_airFriction;
 
 	// Object friction TODO
 
@@ -62,8 +62,29 @@ void Particle::computePFD(const Vec3& forces, const double dt)
 	m_acceleration = forces / m_mass;
 
 	// Update position using the old velocity and acceleration. Verlet Integration (more accurate)
-	m_position += m_velocity * dt + m_acceleration * 0.5 * dt * dt;
+	m_position += m_previousVelocity * dt + m_acceleration * 0.5 * dt * dt;
 
 	// Update velocity using the new acceleration
 	m_velocity += m_acceleration * dt;
+}
+
+void Particle::update(const double dt)
+{
+	// Compute the forces
+	const Vec3 gravity(0.0, -9.81, 0.0);
+	const Vec3 forces = computeForces(gravity);
+
+	// Compute the position, velocity and acceleration
+	computePFD(forces, dt);
+
+	// Handle collision with the ground
+	if (m_position.y < 0.0)
+	{
+		m_position.y = 0.0;
+		m_velocity.y = -m_velocity.y;
+	}
+
+	// Update the previous position and velocity
+	m_previousPosition = m_position;
+	m_previousVelocity = m_velocity;
 }

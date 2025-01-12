@@ -15,6 +15,7 @@ class ApplicationData
 public:
 	std::vector<std::unique_ptr<Object3D>> m_objects3D;
 	Object3D m_ground3D;
+	Object3D m_debugSphere3D;
 
 	Particle m_testParticle;
 

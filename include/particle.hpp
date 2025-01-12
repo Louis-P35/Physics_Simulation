@@ -45,6 +45,8 @@ public:
 	Particle();
 	~Particle();
 
+	void update(const double dt);
+
 private:
 	Vec3 computeForces(const Vec3& gravity);
 	void computePFD(const Vec3& forces, const double dt);

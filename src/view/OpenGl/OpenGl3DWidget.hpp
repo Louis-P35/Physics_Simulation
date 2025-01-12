@@ -28,9 +28,9 @@ struct ObjectRenderingInstance
 
     std::vector<VBOVertex> m_verticesData;
 
-    std::array<float, 3> m_position;
-    std::array<float, 3> m_rotation;
-    std::array<float, 3> m_scale;
+    std::array<float, 3>* m_pPosition;
+    std::array<float, 3>* m_pRotation;
+    std::array<float, 3>* m_pScale;
 
     std::unique_ptr<QOpenGLTexture> m_pColorTexture;
     std::unique_ptr<QOpenGLTexture> m_pNormalTexture;
@@ -49,6 +49,10 @@ class OpenGl3DWidget : public QOpenGLWidget, protected QOpenGLFunctions
 public:
 	std::vector<std::unique_ptr<ObjectRenderingInstance>> m_objectsToRenderList;
     Shader m_pShader;
+    QMatrix4x4 m_view;
+    QMatrix4x4 m_projection;
+    QVector3D m_lightPosition;
+    QVector3D m_cameraPosition;
 
 public:
     explicit OpenGl3DWidget(QWidget* pParent = nullptr);
@@ -56,6 +60,7 @@ public:
 
     void loadShaders(); // TODO: remove that and create a scene class
 	void initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
+    void drawObject(std::unique_ptr<ObjectRenderingInstance>& pObjRender);
 
 protected:
     void initializeGL() override;

@@ -15,6 +15,7 @@ set(SRC_FILES
     vec3.cpp
     applicationData.cpp
     particle.cpp
+    physicsWorker.cpp
     view/OpenGl/OpenGl3DWidget.cpp
     view/OpenGl/object3D.cpp
     view/OpenGl/shader.cpp
@@ -26,6 +27,7 @@ set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/include/main.hpp
     ${CMAKE_SOURCE_DIR}/include/applicationData.hpp
     ${CMAKE_SOURCE_DIR}/include/particle.hpp
+    ${CMAKE_SOURCE_DIR}/include/physicsWorker.hpp
     view/OpenGl/OpenGl3DWidget.hpp
     view/OpenGl/object3D.hpp
     view/OpenGl/shader.hpp
