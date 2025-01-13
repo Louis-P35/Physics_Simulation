@@ -37,5 +37,6 @@ public:
 	ApplicationData();
 	~ApplicationData() {};
 
+	void initSimulation();
 	bool simulationUpdate();
 };

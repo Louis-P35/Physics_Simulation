@@ -25,8 +25,6 @@ private:
 	double m_stiffness;
 	double m_damping;
 
-	//Object3D m_debugSphere;
-
 public:
 	Spring(Particle* pParticle, const double restLength, const double stiffness, const double damping);
 	~Spring();
@@ -56,6 +54,8 @@ public:
 	double m_objectFriction = 1.0;
 
 	std::vector<Spring> m_springs;
+
+	std::shared_ptr<ObjectHandle> m_debugSphere3DHandle;
 
 public:
 	Particle(Vec3 position, double mass);

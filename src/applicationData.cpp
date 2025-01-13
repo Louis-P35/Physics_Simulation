@@ -15,12 +15,18 @@ ApplicationData::ApplicationData()
 	double lenght = (m_testParticle2.m_position - m_testParticle.m_position).norm();
 	m_testParticle.m_springs.push_back(Spring(&m_testParticle2, lenght, 100.0, 0.0));*/
 
+	// Initialize the last update time
+	m_lastUpdateTime = std::chrono::steady_clock::now();
+	
+}
+
+void ApplicationData::initSimulation()
+{
 	Vec3 position = Vec3(0.0, 2.0, 0.0);
 	m_pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.0, 1.0, position);
 
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
-	
 }
 
 /*

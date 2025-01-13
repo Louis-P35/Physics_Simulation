@@ -41,6 +41,15 @@ int main(int argc, char** argv)
 	std::cout << "Application started" << std::endl;
     initAfterOpenGl(appData, window);
 
+	appData.initSimulation();
+    // Debug add a sphere to each particle of the cloth
+    for (auto& particle : appData.m_pCloth->m_particles)
+    {
+        particle.m_debugSphere3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
+		particle.m_debugSphere3DHandle->m_position = particle.m_position.toArray();
+		particle.m_debugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
+    }
+
     // Create the physics simulation worker
     PhysicsWorker physicsWorker;
 
