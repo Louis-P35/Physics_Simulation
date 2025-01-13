@@ -34,8 +34,11 @@ Vec3 Spring::computeForce(const Vec3& position, const Vec3& velocity) const
 }
 
 
-Particle::Particle()
+Particle::Particle(Vec3 position, double mass) : m_position(position), m_previousPosition(position), m_mass(mass)
 {
+	m_velocity = Vec3(0.0, 0.0, 0.0);
+	m_previousVelocity = Vec3(0.0, 0.0, 0.0);
+	m_acceleration = Vec3(0.0, 0.0, 0.0);
 }
 
 Particle::~Particle()

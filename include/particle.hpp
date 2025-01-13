@@ -2,6 +2,7 @@
 
 // Includes from project
 #include "vec3.hpp"
+#include "../src/view/OpenGl/object3D.hpp"
 
 // Includes from STL
 #include <vector>
@@ -23,6 +24,8 @@ private:
 	double m_restLength;
 	double m_stiffness;
 	double m_damping;
+
+	//Object3D m_debugSphere;
 
 public:
 	Spring(Particle* pParticle, const double restLength, const double stiffness, const double damping);
@@ -55,7 +58,7 @@ public:
 	std::vector<Spring> m_springs;
 
 public:
-	Particle();
+	Particle(Vec3 position, double mass);
 	~Particle();
 
 	void update(const double dt);
