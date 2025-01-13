@@ -28,12 +28,10 @@ struct ObjectRenderingInstance
 
     std::vector<VBOVertex> m_verticesData;
 
-    std::array<float, 3>* m_pPosition;
-    std::array<float, 3>* m_pRotation;
-    std::array<float, 3>* m_pScale;
+	std::shared_ptr<ObjectHandle> m_pPosRotScale;
 
-    std::unique_ptr<QOpenGLTexture> m_pColorTexture;
-    std::unique_ptr<QOpenGLTexture> m_pNormalTexture;
+    std::shared_ptr<QOpenGLTexture> m_pColorTexture;
+    std::shared_ptr<QOpenGLTexture> m_pNormalTexture;
 };
 
 
@@ -47,7 +45,7 @@ class OpenGl3DWidget : public QOpenGLWidget, protected QOpenGLFunctions
     Q_OBJECT
 
 public:
-	std::vector<std::unique_ptr<ObjectRenderingInstance>> m_objectsToRenderList;
+	std::vector<std::shared_ptr<ObjectRenderingInstance>> m_objectsToRenderList;
     Shader m_pShader;
     QMatrix4x4 m_view;
     QMatrix4x4 m_projection;
@@ -59,8 +57,9 @@ public:
     ~OpenGl3DWidget();
 
     void loadShaders(); // TODO: remove that and create a scene class
-	void initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
-    void drawObject(std::unique_ptr<ObjectRenderingInstance>& pObjRender);
+    std::shared_ptr<ObjectHandle> initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
+    void drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRender);
+    std::shared_ptr<ObjectHandle> addObject(Object3D& object3D);
 
 protected:
     void initializeGL() override;

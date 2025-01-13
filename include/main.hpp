@@ -3,7 +3,7 @@
 // Includes from project
 #include "view/OpenGl/object3D.hpp"
 #include "applicationData.hpp"
+#include "mainWindow.hpp"
 
 
-bool init(ApplicationData& appData);
-bool initAfterOpenGl(ApplicationData& appData);
+bool initAfterOpenGl(ApplicationData& appData, MainWindow& window);

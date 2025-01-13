@@ -131,14 +131,14 @@ void OpenGl3DWidget::paintGL()
 * @param pObjRender ObjectRenderingInstance to draw
 * @return void
 */
-void OpenGl3DWidget::drawObject(std::unique_ptr<ObjectRenderingInstance>& pObjRender)
+void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRender)
 {
     QMatrix4x4 model;
     model.setToIdentity();
     // Apply the translation
-    model.translate((*pObjRender->m_pPosition)[0], (*pObjRender->m_pPosition)[1], (*pObjRender->m_pPosition)[2]);
+    model.translate(pObjRender->m_pPosRotScale->m_position[0], pObjRender->m_pPosRotScale->m_position[1], pObjRender->m_pPosRotScale->m_position[2]);
     // Apply the scale
-    model.scale((*pObjRender->m_pScale)[0], (*pObjRender->m_pScale)[1], (*pObjRender->m_pScale)[2]);
+    model.scale(pObjRender->m_pPosRotScale->m_scale[0], pObjRender->m_pPosRotScale->m_scale[1], pObjRender->m_pPosRotScale->m_scale[2]);
 
     // Activate the shader and define the uniformes
     m_pShader.m_shaderProgram.bind();
@@ -195,11 +195,11 @@ void OpenGl3DWidget::drawObject(std::unique_ptr<ObjectRenderingInstance>& pObjRe
 * @param object3D Object3D to initialize
 * @return void
 */
-void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
+std::shared_ptr<ObjectHandle> OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
 {
     std::cout << "Initialize VAO & VBO" << std::endl;
 
-	std::unique_ptr<ObjectRenderingInstance> objInst = std::make_unique<ObjectRenderingInstance>();
+	std::shared_ptr<ObjectRenderingInstance> objInst = std::make_shared<ObjectRenderingInstance>();
 	objInst->m_verticesData = object3D.computeVBOVerticesData();
 
     // Initialize VAO
@@ -247,18 +247,17 @@ void OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
     objInst->m_vbo.release();
 
     // Share the adresses of the position, rotation and scale
-    objInst->m_pPosition = &(object3D.m_position);
-    objInst->m_pRotation = &(object3D.m_rotation);
-    objInst->m_pScale = &(object3D.m_scale);
+	objInst->m_pPosRotScale = std::make_shared<ObjectHandle>();
 
 	// Copy the textures
-	objInst->m_pColorTexture = std::move(object3D.m_pColorTexture);
-	objInst->m_pNormalTexture = std::move(object3D.m_pNormalTexture);
+	objInst->m_pColorTexture = object3D.m_pColorTexture;
+	objInst->m_pNormalTexture = object3D.m_pNormalTexture;
 
 
 	// Add it to the list of objects to render
-    // VAO are not copyable, so we move it
-    m_objectsToRenderList.push_back(std::move(objInst));
+    m_objectsToRenderList.push_back(objInst);
+
+    return objInst->m_pPosRotScale;
 }
 
 
@@ -273,4 +272,10 @@ void OpenGl3DWidget::loadShaders()
     {
         std::cout << "Shader loaded successfully" << std::endl;
     }
+}
+
+
+std::shared_ptr<ObjectHandle> OpenGl3DWidget::addObject(Object3D& object3D)
+{
+	return initialyzeObject3D(object3D);
 }

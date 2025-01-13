@@ -1,6 +1,5 @@
 // Includes from project
 #include "main.hpp"
-#include "mainWindow.hpp"
 #include "applicationData.hpp"
 #include "physicsWorker.hpp"
 
@@ -33,7 +32,6 @@ int main(int argc, char** argv)
 {
     // Init. TODO: Do the 3d object loading in a thread
 	ApplicationData appData;
-    init(appData);
 
     QApplication app(argc, argv);
     MainWindow window;
@@ -41,17 +39,7 @@ int main(int argc, char** argv)
     window.show();
 
 	std::cout << "Application started" << std::endl;
-    initAfterOpenGl(appData);
-	for (auto& object : appData.m_objects3D)
-	{
-        if (object)
-        {
-            window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(*object);
-        }
-	}
-    window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_ground3D);
-    window.m_pOpenGl3DWidgetClothSimulation->initialyzeObject3D(appData.m_debugSphere3D);
-
+    initAfterOpenGl(appData, window);
 
     // Create the physics simulation worker
     PhysicsWorker physicsWorker;
@@ -74,13 +62,7 @@ int main(int argc, char** argv)
 }
 
 
-bool init(ApplicationData& appData)
-{
-    return true;
-}
-
-
-bool initAfterOpenGl(ApplicationData& appData)
+bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
 {
     //Object3D test;
     //appData.m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
@@ -90,11 +72,11 @@ bool initAfterOpenGl(ApplicationData& appData)
     //appData.m_monkey3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
     //appData.m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
 
-    std::unique_ptr<Object3D> pCube = std::make_unique<Object3D>();
-    pCube->loadFromObjFile("../models/cube/", "cube.obj");
-    pCube->setPosition({ 0.0f, 2.0f, 0.0f });
-    pCube->setScale({ 0.3f, 0.3f, 0.3f });
-    appData.m_objects3D.push_back(std::move(pCube));
+    std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
+    appData.m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
+	appData.m_pCube3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
+	appData.m_pCube3DHandle->m_position = { 0.0f, 2.0f, 0.0f };
+	appData.m_pCube3DHandle->m_scale = { 0.3f, 0.3f, 0.3f };
 
     //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
     //appData.m_bench3D.loadFromObjFile("../models/cube/", "cube.obj");
@@ -104,11 +86,15 @@ bool initAfterOpenGl(ApplicationData& appData)
 
     // Ground
     appData.m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
+	appData.m_pGround3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_ground3D);
+	appData.m_pGround3DHandle->m_position = { 0.0f, 0.0f, 0.0f };
+	appData.m_pGround3DHandle->m_scale = { 1.0f, 1.0f, 1.0f };
 
 	// Debug sphere
 	appData.m_debugSphere3D.loadFromObjFile("../models/sphere/", "sphere.obj");
-    appData.m_debugSphere3D.setScale({ 0.1f, 0.1f, 0.1f });
-    appData.m_debugSphere3D.setPosition({ 0.0f, 2.0f, 0.0f });
+	appData.m_pDebugSphere3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
+	appData.m_pDebugSphere3DHandle->m_position = { 0.0f, 2.0f, 0.0f };
+	appData.m_pDebugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
 
     return true;
 }

@@ -275,9 +275,9 @@ std::vector<VBOVertex> Object3D::computeVBOVerticesData()
 * Load texture from file
 * 
 * @param path Path to the file
-* @return std::unique_ptr<QOpenGLTexture> Pointer to the texture
+* @return std::shared_ptr<QOpenGLTexture> Pointer to the texture
 */
-std::unique_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) const
+std::shared_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) const
 {
 	// Load the image from the disk
     QImage image(path.c_str());
@@ -292,14 +292,14 @@ std::unique_ptr<QOpenGLTexture> Object3D::loadTexture(const std::string& path) c
 
 	// Crate and configure the texture
     // Need to mirror the image to get it in line with the UVs...
-    std::unique_ptr<QOpenGLTexture> pTexture(new QOpenGLTexture(glImage.mirrored(false, true)));
+    std::shared_ptr<QOpenGLTexture> pTexture(new QOpenGLTexture(glImage.mirrored(false, true)));
 
 	// Configure the parameters of the texture
     pTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     pTexture->setMagnificationFilter(QOpenGLTexture::Linear);
     pTexture->setWrapMode(QOpenGLTexture::Repeat);
 
-	return std::move(pTexture); // std::move() not necessary ?
+	return pTexture;
 }
 
 

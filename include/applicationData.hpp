@@ -19,9 +19,12 @@
 class ApplicationData
 {
 public:
-	std::vector<std::unique_ptr<Object3D>> m_objects3D;
+	Object3D m_cube3D;
+	std::shared_ptr<ObjectHandle> m_pCube3DHandle;
 	Object3D m_ground3D;
+	std::shared_ptr<ObjectHandle> m_pGround3DHandle;
 	Object3D m_debugSphere3D;
+	std::shared_ptr<ObjectHandle> m_pDebugSphere3DHandle;
 
 	//Particle m_testParticle;
 	//Particle m_testParticle2;
