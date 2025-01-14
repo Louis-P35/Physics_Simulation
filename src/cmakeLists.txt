@@ -20,6 +20,7 @@ set(SRC_FILES
     view/OpenGl/OpenGl3DWidget.cpp
     view/OpenGl/object3D.cpp
     view/OpenGl/shader.cpp
+    view/Qt/clothWidget.cpp
 )
 
 set(HEADER_FILES
@@ -33,6 +34,7 @@ set(HEADER_FILES
     view/OpenGl/OpenGl3DWidget.hpp
     view/OpenGl/object3D.hpp
     view/OpenGl/shader.hpp
+    view/Qt/clothWidget.hpp
 )
 
 # Enable AUTOMOC (and optionally AUTOUIC, AUTORCC) 

@@ -1,5 +1,6 @@
 // Includes from project
 #include "mainWindow.hpp"
+#include "../src/view/Qt/clothWidget.hpp"
 
 // Includes from 3rd party
 #include <QMenuBar>
@@ -66,7 +67,8 @@ QWidget* MainWindow::createTab(const std::string& tabName, OpenGl3DWidget* pGlWi
     // Left widget: placeholder for future controls or content
     QWidget* pLeftWidget = new QWidget(pSplitter);
     QVBoxLayout* pLeftLayout = new QVBoxLayout(pLeftWidget);
-    pLeftLayout->addWidget(new QLabel("Left Pane Content"));
+	ClothWidget* pClothWidget = new ClothWidget(pLeftWidget);
+    pLeftLayout->addWidget(pClothWidget);
 
     // Right widget: for OpenGl rendering area
     QWidget* pRightWidget = new QWidget(pSplitter);
