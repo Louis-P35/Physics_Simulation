@@ -50,18 +50,22 @@ public:
 	Vec3 m_acceleration;
 
 	double m_mass = 1.0;
-	double m_airFriction = 0.2;
+	double m_airFriction = 4.0;
 	double m_objectFriction = 1.0;
 
 	std::vector<Spring> m_springs;
 
 	std::shared_ptr<ObjectHandle> m_debugSphere3DHandle;
 
+private:
+	bool isFixed = false;
+
 public:
 	Particle(Vec3 position, double mass);
 	~Particle();
 
 	void update(const double dt);
+	void setFixed(const bool fixState) { isFixed = fixState; };
 
 private:
 	Vec3 computeForces(const Vec3& gravity);

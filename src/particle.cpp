@@ -78,6 +78,12 @@ void Particle::computePFD(const Vec3& forces, const double dt)
 
 void Particle::update(const double dt)
 {
+	// Do not update the particle if it is fixed
+	if (isFixed)
+	{
+		return;
+	}
+
 	// Compute the forces
 	const Vec3 gravity(0.0, -9.81, 0.0);
 	const Vec3 forces = computeForces(gravity);
@@ -92,7 +98,10 @@ void Particle::update(const double dt)
 		m_velocity.y = -m_velocity.y;
 	}
 
-	// Update the previous position and velocity
-	m_previousPosition = m_position;
-	m_previousVelocity = m_velocity;
+	// Update the debug sphere position
+	if (m_debugSphere3DHandle)
+	{
+		// TODO: Outch, need mutex...
+		m_debugSphere3DHandle->m_position = m_position.toArray();
+	}
 }

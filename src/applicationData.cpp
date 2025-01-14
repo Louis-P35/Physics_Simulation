@@ -20,10 +20,16 @@ ApplicationData::ApplicationData()
 	
 }
 
+
+/*
+* Initialize the simulation
+* 
+* @return void
+*/
 void ApplicationData::initSimulation()
 {
-	Vec3 position = Vec3(0.0, 2.0, 0.0);
-	m_pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.0, 1.0, position);
+	Vec3 position = Vec3(-4.0, 2.0, -4.0);
+	m_pCloth = std::make_shared<Cloth>(30, 30, 5.0, 5.0, 0.0, 300.0, position);
 
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
@@ -43,6 +49,7 @@ bool ApplicationData::simulationUpdate()
 	std::chrono::duration<float> deltaTime = currentTime - m_lastUpdateTime;
 	m_lastUpdateTime = currentTime;
 
+	// Skip the first update to avoid a huge time step
 	if (firstUpdate)
 	{
 		firstUpdate = false;
@@ -52,10 +59,8 @@ bool ApplicationData::simulationUpdate()
 	// Convert deltaTime to seconds
 	float elapsedTimeInSeconds = deltaTime.count();
 
-	//m_testParticle.update(static_cast<double>(elapsedTimeInSeconds));
-	
-	// Outch, need mutex...
-	//m_debugSphere3D.m_position = m_testParticle.m_position.toArray();
+	// Update the simulation
+	m_pCloth->update(elapsedTimeInSeconds);
 
 	return true;
 }

@@ -17,15 +17,15 @@ public:
 	double m_width;
 	double m_height;
 	double m_thickness;
-	double m_particleMass;
+	double m_clothMass;
 
 	Vec3 m_position;
 
 	std::vector<Particle> m_particles;
 
 public:
-	Cloth(int resX, int resY, double width, double height, double thickness, double particleMass, Vec3 position);
+	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
 	~Cloth() {};
 
-	void update(const double dt);
+	void update(double dt);
 };

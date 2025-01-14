@@ -15,6 +15,11 @@ ClothWidget::ClothWidget(QWidget* pParent) : QWidget(pParent)
     setupUI();
 }
 
+/*
+* Setup the UI of the cloth creation widget
+* 
+* @return void
+*/
 void ClothWidget::setupUI()
 {
     QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -57,11 +62,23 @@ void ClothWidget::setupUI()
     connect(m_pSliderResolution, &QSlider::valueChanged, this, &ClothWidget::OnResolutionChange);
 }
 
+/*
+* Slot for size slider value change
+* 
+* @param value New value of the slider
+* @return void
+*/
 void ClothWidget::OnSizeChange(int value)
 {
     m_pSliderSizeValueLabel->setText(QString::number(value));
 }
 
+/*
+* Slot for resolution slider value change
+* 
+* @param value New value of the slider
+* @return void
+*/
 void ClothWidget::OnResolutionChange(int value)
 {
     m_pSliderResolutionValueLabel->setText(QString::number(value));
