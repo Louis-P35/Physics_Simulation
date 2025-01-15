@@ -47,6 +47,9 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 			}
 		}
 	}
+
+	// Initialize the mesh
+	initMesh();
 }
 
 
@@ -84,4 +87,51 @@ void Cloth::update(double dt)
 			m_particlesBottom[i][j].m_previousVelocity = m_particlesBottom[i][j].m_velocity;
 		}
 	}
+}
+
+
+void Cloth::initMesh()
+{
+	// Create the vertices
+	for (int i = 0; i < m_resX; ++i)
+	{
+		for (int j = 0; j < m_resY; ++j)
+		{
+			m_vertices.push_back(m_particlesBottom[i][j].m_position.toArray());
+			m_normals.push_back({ 0.0f, 1.0f, 0.0f }); // TODO
+		}
+	}
+
+	
+
+	// Create the faces
+	for (int i = 0; i < m_resX - 1; ++i)
+	{
+		for (int j = 0; j < m_resY - 1; ++j)
+		{
+			const int vertexIndexCurrent = i * m_resY + j;
+
+			const int vertexIndexRight = i * m_resY + j + 1;
+			const int vertexIndexTop = (i + 1) * m_resY + j;
+
+			const int vertexIndexTopRight = (i + 1) * m_resY + j + 1;
+
+			// Bottom face
+			if (vertexIndexRight >= 0 && vertexIndexRight < m_vertices.size() && 
+				vertexIndexTop >= 0 && vertexIndexTop < m_vertices.size())
+			{
+				m_faces.push_back({ vertexIndexCurrent, -1, vertexIndexCurrent, vertexIndexRight, -1, vertexIndexRight, vertexIndexTop, -1, vertexIndexTop });
+			}
+			// Top face
+			if (vertexIndexRight >= 0 && vertexIndexRight < m_vertices.size() && 
+				vertexIndexTop >= 0 && vertexIndexTop < m_vertices.size() &&
+				vertexIndexTopRight >= 0 && vertexIndexTopRight < m_vertices.size())
+			{
+				m_faces.push_back({ vertexIndexRight, -1, vertexIndexRight, vertexIndexTopRight, -1, vertexIndexTopRight, vertexIndexTop, -1, vertexIndexTop });
+			}
+		}
+	}
+
+	// Load textures, Compute the tangent and bitangent vectors
+	postProcess("", false, false);
 }

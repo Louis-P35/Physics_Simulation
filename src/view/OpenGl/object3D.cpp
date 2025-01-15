@@ -101,18 +101,35 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
 
     std::cout << "File: " << fullPath << " loaded successfully." << std::endl;
 
-	// Load the textures
+    // Load textures, Compute the tangent and bitangent vectors
+    bool ppRet = postProcess(path, hasNormal, hasUV);
+
+    return ppRet;
+}
+
+
+/*
+* Load texture, compute the tangent and bitangent vectors
+* 
+* @param path Path to the directory containing the textures/ folder
+* @param hasNormals True if the object has normals, false otherwise
+* @param hasUVs True if the object has UVs, false otherwise
+* @return bool True if the post processing is successful, false otherwise
+*/
+bool Object3D::postProcess(const std::string& path, bool hasNormals, bool hasUVs)
+{
+    // Load the textures
     // Color
     const fs::path colorTexturePath = fs::path(path) / "textures" / "color.png";
     m_pColorTexture = loadTexture(colorTexturePath.string());
-	if (m_pColorTexture != nullptr)
-	{
-		std::cout << "Color texture loaded successfully." << std::endl;
-	}
+    if (m_pColorTexture != nullptr)
+    {
+        std::cout << "Color texture loaded successfully." << std::endl;
+    }
     else
-	{
-		std::cerr << "Error: Failed to load color texture : " << colorTexturePath.string() << std::endl;
-	}
+    {
+        std::cerr << "Error: Failed to load color texture : " << colorTexturePath.string() << std::endl;
+    }
 
     // Normal
     const fs::path normalTexturePath = fs::path(path) / "textures" / "normal.png";
@@ -126,13 +143,13 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
         std::cerr << "Error: Failed to load normal texture : " << normalTexturePath.string() << std::endl;
     }
 
-	// Compute tangent and bitangent vectors (needed for normal mapping)
-	if (hasNormal && hasUV)
-	{
-		computeTangentAndBitangentvectors();
-	}
+    // Compute tangent and bitangent vectors (needed for normal mapping)
+    if (hasNormals && hasUVs)
+    {
+        computeTangentAndBitangentvectors();
+    }
 
-	return true;
+    return true;
 }
 
 

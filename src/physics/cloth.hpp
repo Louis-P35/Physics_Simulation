@@ -13,8 +13,9 @@
 * Class Cloth
 * The cloth is made of particles, each particle is connected to its neighbors by springs
 * The cloth is one or two grid of particles (depending on its thickness)
+* Cloth is derived from Object3D because it is a 3D object
 */
-class Cloth
+class Cloth : public Object3D
 {
 public:
 	int m_resX;
@@ -31,7 +32,10 @@ public:
 
 public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
-	~Cloth() {};
+	virtual ~Cloth() {};
 
 	void update(double dt);
+
+private:
+	void initMesh();
 };

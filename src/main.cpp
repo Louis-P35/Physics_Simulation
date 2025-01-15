@@ -52,6 +52,11 @@ int main(int argc, char** argv)
             appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
         }
     }
+    // Debug add cloth mesh
+    if (auto clothObject = std::dynamic_pointer_cast<Object3D>(appData.m_pCloth))
+    {
+        window.m_pOpenGl3DWidgetClothSimulation->addObject(*clothObject);
+    }
 
     // Create the physics simulation worker
     PhysicsWorker physicsWorker;
