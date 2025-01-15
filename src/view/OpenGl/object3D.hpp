@@ -1,7 +1,7 @@
 #pragma once
 
 // Include from project
-#include "vec3.hpp"
+#include "../src/math/vec3.hpp"
 
 // Includes from 3rd party
 #include <QOpenGLFunctions>

@@ -2,7 +2,7 @@
 
 // Includes from project
 #include "particle.hpp"
-#include "vec3.hpp"
+#include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
 
 // Includes from STL

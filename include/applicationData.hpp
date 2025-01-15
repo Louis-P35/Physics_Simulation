@@ -3,8 +3,8 @@
 // Includes from project
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
-#include "particle.hpp"
-#include "cloth.hpp"
+#include "../src/physics/particle.hpp"
+#include "../src/physics/cloth.hpp"
 
 // Includes from STL
 #include <memory>

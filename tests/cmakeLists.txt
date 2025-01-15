@@ -27,11 +27,11 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/tests/test_main.cpp
     ${CMAKE_SOURCE_DIR}/tests/tangent_bitangent_test.cpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.cpp
-    ${CMAKE_SOURCE_DIR}/src/vec3.cpp
+    ${CMAKE_SOURCE_DIR}/src/math/vec3.cpp
 )
 
 set(HEADER_FILES
-    ${CMAKE_SOURCE_DIR}/include/vec3.hpp
+    ${CMAKE_SOURCE_DIR}/src/math/vec3.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp
 )
 

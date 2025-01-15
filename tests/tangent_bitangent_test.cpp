@@ -3,7 +3,7 @@
 #include <array>
 #include <tuple>
 
-#include "../include/Vec3.hpp"
+#include "../src/math/Vec3.hpp"
 #include "../src/view/OpenGl/Object3D.hpp"
 
 class Object3DTestWrapper : public Object3D

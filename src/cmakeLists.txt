@@ -10,31 +10,31 @@ option(BUILD_LIBRARY "Enable building of the library target" OFF)
 # It's a good practice not to use file(GLOB ...) for production builds,
 # but explicitly list files.
 set(SRC_FILES
-    main.cpp
-    mainWindow.cpp
-    vec3.cpp
-    applicationData.cpp
-    particle.cpp
-    physicsWorker.cpp
-    cloth.cpp
-    view/OpenGl/OpenGl3DWidget.cpp
-    view/OpenGl/object3D.cpp
-    view/OpenGl/shader.cpp
-    view/Qt/clothWidget.cpp
+    ${CMAKE_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_SOURCE_DIR}/src/view/Qt/mainWindow.cpp
+    ${CMAKE_SOURCE_DIR}/src/math/vec3.cpp
+    ${CMAKE_SOURCE_DIR}/src/applicationData.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/particle.cpp
+    ${CMAKE_SOURCE_DIR}/src/physicsWorker.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/cloth.cpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/OpenGl3DWidget.cpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.cpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/shader.cpp
+    ${CMAKE_SOURCE_DIR}/src/view/Qt/clothWidget.cpp
 )
 
 set(HEADER_FILES
-    ${CMAKE_SOURCE_DIR}/include/mainWindow.hpp
-    ${CMAKE_SOURCE_DIR}/include/vec3.hpp
+    ${CMAKE_SOURCE_DIR}/src/view/Qt/mainWindow.hpp
+    ${CMAKE_SOURCE_DIR}/src/math/vec3.hpp
     ${CMAKE_SOURCE_DIR}/include/main.hpp
     ${CMAKE_SOURCE_DIR}/include/applicationData.hpp
-    ${CMAKE_SOURCE_DIR}/include/particle.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/particle.hpp
     ${CMAKE_SOURCE_DIR}/include/physicsWorker.hpp
-    ${CMAKE_SOURCE_DIR}/include/cloth.hpp
-    view/OpenGl/OpenGl3DWidget.hpp
-    view/OpenGl/object3D.hpp
-    view/OpenGl/shader.hpp
-    view/Qt/clothWidget.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/cloth.hpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/OpenGl3DWidget.hpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp
+    ${CMAKE_SOURCE_DIR}/src/view/OpenGl/shader.hpp
+    ${CMAKE_SOURCE_DIR}/src/view/Qt/clothWidget.hpp
 )
 
 # Enable AUTOMOC (and optionally AUTOUIC, AUTORCC) 
