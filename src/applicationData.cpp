@@ -29,7 +29,7 @@ ApplicationData::ApplicationData()
 void ApplicationData::initSimulation()
 {
 	Vec3 position = Vec3(-4.0, 2.0, -4.0);
-	m_pCloth = std::make_shared<Cloth>(30, 30, 5.0, 5.0, 0.0, 300.0, position);
+	m_pCloth = std::make_shared<Cloth>(5, 5, 5.0, 5.0, 0.0, 300.0, position);
 
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
@@ -61,6 +61,9 @@ bool ApplicationData::simulationUpdate()
 
 	// Update the simulation
 	m_pCloth->update(elapsedTimeInSeconds);
+
+	// Update the cloth's mesh, TODO: MUTEX
+	m_pCloth->updateMesh();
 
 	return true;
 }

@@ -141,3 +141,21 @@ void Cloth::initMesh()
 	// Load textures, Compute the tangent and bitangent vectors
 	postProcess("", false, false);
 }
+
+
+void Cloth::updateMesh()
+{
+	if (!m_pRenderingInstance)
+	{
+		return;
+	}
+
+	for (int i = 0; i < m_resX - 1; ++i)
+	{
+		for (int j = 0; j < m_resY - 1; ++j)
+		{
+			const int vertexIndex = i * m_resY + j;
+			m_pRenderingInstance->m_verticesData[vertexIndex].position = m_particlesBottom[i][j].m_position.toArray();
+		}
+	}
+}

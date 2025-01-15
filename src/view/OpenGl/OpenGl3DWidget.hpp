@@ -32,6 +32,8 @@ struct ObjectRenderingInstance
 
     std::shared_ptr<QOpenGLTexture> m_pColorTexture;
     std::shared_ptr<QOpenGLTexture> m_pNormalTexture;
+
+    bool m_isStatic = true;
 };
 
 
@@ -56,8 +58,9 @@ public:
     explicit OpenGl3DWidget(QWidget* pParent = nullptr);
     ~OpenGl3DWidget();
 
-    void loadShaders(); // TODO: remove that and create a scene class
-    std::shared_ptr<ObjectRenderingInstance> initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
+    void loadShaders();
+    std::shared_ptr<ObjectRenderingInstance> initialyzeObject3D(Object3D& object3D);
+    void updateObject3D(std::shared_ptr<ObjectRenderingInstance> pObjInst);
     void drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRender);
     std::shared_ptr<ObjectRenderingInstance> addObject(Object3D& object3D);
 

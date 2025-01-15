@@ -55,7 +55,8 @@ int main(int argc, char** argv)
     // Debug add cloth mesh
     if (auto clothObject = std::dynamic_pointer_cast<Object3D>(appData.m_pCloth))
     {
-        window.m_pOpenGl3DWidgetClothSimulation->addObject(*clothObject);
+        appData.m_pCloth->m_pRenderingInstance = window.m_pOpenGl3DWidgetClothSimulation->addObject(*clothObject);
+		appData.m_pCloth->m_pRenderingInstance->m_isStatic = false;
     }
 
     // Create the physics simulation worker

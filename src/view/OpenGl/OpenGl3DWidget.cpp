@@ -117,6 +117,13 @@ void OpenGl3DWidget::paintGL()
 	// draw all 3d objects
 	for (auto& renderer : m_objectsToRenderList)
 	{
+        // Resend the vertices' data to the GPU if the mesh is dynamic
+		if (!renderer->m_isStatic)
+		{
+            updateObject3D(renderer);
+		}
+
+		// Draw the object
         drawObject(renderer);
 	}
 
@@ -258,6 +265,27 @@ std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::initialyzeObject3D(Obje
     m_objectsToRenderList.push_back(objInst);
 
     return objInst; //objInst->m_pPosRotScale;
+}
+
+
+/*
+* Update the 3D object renderer (push the new vertices data to the graphic card's memory)
+* 
+* @param objInst ObjectRenderingInstance to update
+* @return void
+*/
+void OpenGl3DWidget::updateObject3D(std::shared_ptr<ObjectRenderingInstance> pObjInst)
+{
+    pObjInst->m_vao.bind();
+    pObjInst->m_vbo.bind();
+
+    // Same size, no need to reallocate
+	//pObjInst->m_vbo.allocate(pObjInst->m_verticesData.data(), int(pObjInst->m_verticesData.size() * sizeof(VBOVertex)));
+
+    pObjInst->m_vbo.write(0, pObjInst->m_verticesData.data(), static_cast<int>(pObjInst->m_verticesData.size() * sizeof(VBOVertex)));
+
+    pObjInst->m_vbo.release();
+    pObjInst->m_vao.release();
 }
 
 
