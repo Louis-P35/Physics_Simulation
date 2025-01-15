@@ -9,6 +9,11 @@
 #include <vector>
 
 
+/*
+* Class Cloth
+* The cloth is made of particles, each particle is connected to its neighbors by springs
+* The cloth is one or two grid of particles (depending on its thickness)
+*/
 class Cloth
 {
 public:
@@ -21,7 +26,8 @@ public:
 
 	Vec3 m_position;
 
-	std::vector<Particle> m_particles;
+	std::vector< std::vector<Particle>> m_particlesBottom;
+	std::vector< std::vector<Particle>> m_particlesTop;
 
 public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);

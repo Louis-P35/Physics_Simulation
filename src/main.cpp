@@ -43,11 +43,14 @@ int main(int argc, char** argv)
 
 	appData.initSimulation();
     // Debug add a sphere to each particle of the cloth
-    for (auto& particle : appData.m_pCloth->m_particles)
+    for (int i = 0; i < appData.m_pCloth->m_resX; ++i)
     {
-        particle.m_debugSphere3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
-		particle.m_debugSphere3DHandle->m_position = particle.m_position.toArray();
-		particle.m_debugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
+        for (int j = 0; j < appData.m_pCloth->m_resY; ++j)
+        {
+            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
+            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle->m_position = appData.m_pCloth->m_particlesBottom[i][j].m_position.toArray();
+            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
+        }
     }
 
     // Create the physics simulation worker

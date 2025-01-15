@@ -9,12 +9,15 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	// Create particles
 	for (int i = 0; i < m_resX; ++i)
 	{
+		std::vector<Particle> rowBottom;
 		for (int j = 0; j < m_resY; ++j)
 		{
 			Vec3 pos = Vec3(m_position.x + static_cast<double>(i) * m_width / m_resX, m_position.y, m_position.z + static_cast<double>(j) * m_height / m_resY);
 			double particleMass = clothMass / static_cast<double>(nbParticles);
-			m_particles.push_back(Particle(pos, particleMass));
+			rowBottom.push_back(Particle(pos, particleMass));
 		}
+
+		m_particlesBottom.push_back(rowBottom);
 	}
 
 	// Create the springs
@@ -22,44 +25,25 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
-			const int particleIndex = i * m_resY + j;
-
-			const int particleIndexRight = (i + 1) * m_resY + j;
-			const int particleIndexLeft = (i - 1) * m_resY + j;
-
-			const int particleIndexUp = i * m_resY + j - 1;
-			const int particleIndexDown = i * m_resY + j + 1;
-			
-			const int particleIndexDiag1 = (i + 1) * m_resY + j + 1;
-			const int particleIndexDiag2 = (i + 1) * m_resY + j - 1;
-			const int particleIndexDiag3 = (i - 1) * m_resY + j + 1;
-			const int particleIndexDiag4 = (i - 1) * m_resY + j - 1;
-
-			std::vector<int> neighboursIndexs = { 
-				particleIndexRight,
-				particleIndexLeft,
-				particleIndexUp,
-				particleIndexDown,
-				particleIndexDiag1,
-				particleIndexDiag2,
-				particleIndexDiag3,
-				particleIndexDiag4
-			};
-
-			for (int neighbourIndex : neighboursIndexs)
+			// Loop over the neighbors
+			for (int ii = i - 1; ii <= i + 1; ++ii)
 			{
-				if (neighbourIndex >= 0 && neighbourIndex < m_particles.size())
+				for (int jj = j - 1; jj <= j + 1; ++jj)
 				{
-					const double distance = (m_particles[particleIndex].m_position - m_particles[neighbourIndex].m_position).norm();
+					if ((ii == i && jj == j) || ii < 0 || ii >= m_resX || jj < 0 || jj >= m_resY)
+					{
+						continue;
+					}
+					const double distance = (m_particlesBottom[i][j].m_position - m_particlesBottom[ii][jj].m_position).norm();
 
-					m_particles[particleIndex].m_springs.push_back(Spring(&m_particles[neighbourIndex], distance, 500.0, 0.0));
+					m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesBottom[ii][jj], distance, 500.0, 0.0));
 				}
 			}
 
 			// Debug
 			if (j == (m_resY - 1) || j == 0 || i == 0 || i == (m_resX - 1))
 			{
-				m_particles[particleIndex].setFixed(true);
+				m_particlesBottom[i][j].setFixed(true);
 			}
 		}
 	}
@@ -83,15 +67,21 @@ void Cloth::update(double dt)
 
 
 	// Update the particles
-	for (auto& particle : m_particles)
+	for (int i = 0; i < m_resX; ++i)
 	{
-		particle.update(dt);
+		for (int j = 0; j < m_resY; ++j)
+		{
+			m_particlesBottom[i][j].update(dt);
+		}
 	}
 
 	// Update the previous position and velocity
-	for (auto& particle : m_particles)
+	for (int i = 0; i < m_resX; ++i)
 	{
-		particle.m_previousPosition = particle.m_position;
-		particle.m_previousVelocity = particle.m_velocity;
+		for (int j = 0; j < m_resY; ++j)
+		{
+			m_particlesBottom[i][j].m_previousPosition = m_particlesBottom[i][j].m_position;
+			m_particlesBottom[i][j].m_previousVelocity = m_particlesBottom[i][j].m_velocity;
+		}
 	}
 }
