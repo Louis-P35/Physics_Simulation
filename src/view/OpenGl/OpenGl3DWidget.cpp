@@ -195,7 +195,7 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
 * @param object3D Object3D to initialize
 * @return void
 */
-std::shared_ptr<ObjectHandle> OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
+std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
 {
     std::cout << "Initialize VAO & VBO" << std::endl;
 
@@ -257,7 +257,7 @@ std::shared_ptr<ObjectHandle> OpenGl3DWidget::initialyzeObject3D(Object3D& objec
 	// Add it to the list of objects to render
     m_objectsToRenderList.push_back(objInst);
 
-    return objInst->m_pPosRotScale;
+    return objInst; //objInst->m_pPosRotScale;
 }
 
 
@@ -275,7 +275,7 @@ void OpenGl3DWidget::loadShaders()
 }
 
 
-std::shared_ptr<ObjectHandle> OpenGl3DWidget::addObject(Object3D& object3D)
+std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::addObject(Object3D& object3D)
 {
 	return initialyzeObject3D(object3D);
 }

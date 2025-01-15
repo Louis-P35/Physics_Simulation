@@ -57,9 +57,9 @@ public:
     ~OpenGl3DWidget();
 
     void loadShaders(); // TODO: remove that and create a scene class
-    std::shared_ptr<ObjectHandle> initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
+    std::shared_ptr<ObjectRenderingInstance> initialyzeObject3D(Object3D& object3D);  // TODO: remove that and create a scene class
     void drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRender);
-    std::shared_ptr<ObjectHandle> addObject(Object3D& object3D);
+    std::shared_ptr<ObjectRenderingInstance> addObject(Object3D& object3D);
 
 protected:
     void initializeGL() override;

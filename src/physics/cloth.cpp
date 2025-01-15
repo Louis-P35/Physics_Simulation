@@ -102,8 +102,6 @@ void Cloth::initMesh()
 		}
 	}
 
-	
-
 	// Create the faces
 	for (int i = 0; i < m_resX - 1; ++i)
 	{
@@ -120,14 +118,22 @@ void Cloth::initMesh()
 			if (vertexIndexRight >= 0 && vertexIndexRight < m_vertices.size() && 
 				vertexIndexTop >= 0 && vertexIndexTop < m_vertices.size())
 			{
-				m_faces.push_back({ vertexIndexCurrent, -1, vertexIndexCurrent, vertexIndexRight, -1, vertexIndexRight, vertexIndexTop, -1, vertexIndexTop });
+				m_faces.push_back(
+					{ vertexIndexCurrent, -1, vertexIndexCurrent, 
+					vertexIndexRight, -1, vertexIndexRight, 
+					vertexIndexTop, -1, vertexIndexTop }
+				);
 			}
 			// Top face
 			if (vertexIndexRight >= 0 && vertexIndexRight < m_vertices.size() && 
 				vertexIndexTop >= 0 && vertexIndexTop < m_vertices.size() &&
 				vertexIndexTopRight >= 0 && vertexIndexTopRight < m_vertices.size())
 			{
-				m_faces.push_back({ vertexIndexRight, -1, vertexIndexRight, vertexIndexTopRight, -1, vertexIndexTopRight, vertexIndexTop, -1, vertexIndexTop });
+				m_faces.push_back(
+					{ vertexIndexRight, -1, vertexIndexRight, 
+					vertexIndexTopRight, -1, vertexIndexTopRight, 
+					vertexIndexTop, -1, vertexIndexTop }
+				);
 			}
 		}
 	}

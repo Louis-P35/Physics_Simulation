@@ -99,9 +99,9 @@ void Particle::update(const double dt)
 	}
 
 	// Update the debug sphere position
-	if (m_debugSphere3DHandle)
+	if (m_debugSphere3DRenderer)
 	{
 		// TODO: Outch, need mutex...
-		m_debugSphere3DHandle->m_position = m_position.toArray();
+		m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_position.toArray();
 	}
 }

@@ -20,11 +20,11 @@ class ApplicationData
 {
 public:
 	Object3D m_cube3D;
-	std::shared_ptr<ObjectHandle> m_pCube3DHandle;
+	std::shared_ptr<ObjectRenderingInstance> m_pCube3DRenderer;
 	Object3D m_ground3D;
-	std::shared_ptr<ObjectHandle> m_pGround3DHandle;
+	std::shared_ptr<ObjectRenderingInstance> m_pGround3DRenderer;
 	Object3D m_debugSphere3D;
-	std::shared_ptr<ObjectHandle> m_pDebugSphere3DHandle;
+	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
 	//Particle m_testParticle;
 	//Particle m_testParticle2;

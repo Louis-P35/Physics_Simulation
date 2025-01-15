@@ -47,9 +47,9 @@ int main(int argc, char** argv)
     {
         for (int j = 0; j < appData.m_pCloth->m_resY; ++j)
         {
-            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
-            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle->m_position = appData.m_pCloth->m_particlesBottom[i][j].m_position.toArray();
-            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
+            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
+            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = appData.m_pCloth->m_particlesBottom[i][j].m_position.toArray();
+            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
         }
     }
     // Debug add cloth mesh
@@ -91,9 +91,9 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
 
     std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
     appData.m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
-	appData.m_pCube3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
-	appData.m_pCube3DHandle->m_position = { 0.0f, 2.0f, 0.0f };
-	appData.m_pCube3DHandle->m_scale = { 0.3f, 0.3f, 0.3f };
+	appData.m_pCube3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
+	appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
+	appData.m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
     //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
     //appData.m_bench3D.loadFromObjFile("../models/cube/", "cube.obj");
@@ -103,15 +103,15 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
 
     // Ground
     appData.m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
-	appData.m_pGround3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_ground3D);
-	appData.m_pGround3DHandle->m_position = { 0.0f, 0.0f, 0.0f };
-	appData.m_pGround3DHandle->m_scale = { 1.0f, 1.0f, 1.0f };
+	appData.m_pGround3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_ground3D);
+	appData.m_pGround3DRenderer->m_pPosRotScale->m_position = { 0.0f, 0.0f, 0.0f };
+	appData.m_pGround3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
 
 	// Debug sphere
 	appData.m_debugSphere3D.loadFromObjFile("../models/sphere/", "sphere.obj");
-	appData.m_pDebugSphere3DHandle = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
-	appData.m_pDebugSphere3DHandle->m_position = { 0.0f, 2.0f, 0.0f };
-	appData.m_pDebugSphere3DHandle->m_scale = { 0.1f, 0.1f, 0.1f };
+	appData.m_pDebugSphere3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
+	appData.m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
+	appData.m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
 
     return true;
 }

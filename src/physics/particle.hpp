@@ -3,6 +3,7 @@
 // Includes from project
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
+#include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 
 // Includes from STL
 #include <vector>
@@ -55,7 +56,7 @@ public:
 
 	std::vector<Spring> m_springs;
 
-	std::shared_ptr<ObjectHandle> m_debugSphere3DHandle;
+	std::shared_ptr<ObjectRenderingInstance> m_debugSphere3DRenderer;
 
 private:
 	bool isFixed = false;

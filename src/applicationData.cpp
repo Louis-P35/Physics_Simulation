@@ -60,7 +60,7 @@ bool ApplicationData::simulationUpdate()
 	float elapsedTimeInSeconds = deltaTime.count();
 
 	// Update the simulation
-	//m_pCloth->update(elapsedTimeInSeconds);
+	m_pCloth->update(elapsedTimeInSeconds);
 
 	return true;
 }
