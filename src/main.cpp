@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 	appData.initSimulation();
     // Debug add a sphere to each particle of the cloth
-    for (int i = 0; i < appData.m_pCloth->m_resX; ++i)
+    /*for (int i = 0; i < appData.m_pCloth->m_resX; ++i)
     {
         for (int j = 0; j < appData.m_pCloth->m_resY; ++j)
         {
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
             appData.m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = appData.m_pCloth->m_particlesTop[i][j].m_position.toArray();
             appData.m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
         }
-    }
+    }*/
     // Debug add cloth mesh
     if (auto clothObject = std::dynamic_pointer_cast<Object3D>(appData.m_pCloth))
     {

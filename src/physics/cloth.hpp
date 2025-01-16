@@ -33,6 +33,9 @@ public:
 
 	std::shared_ptr<ObjectRenderingInstance> m_pRenderingInstance;
 
+private:
+	int m_meshNbFacesOneSide = 0;
+
 public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
 	virtual ~Cloth() {};
@@ -43,4 +46,5 @@ public:
 private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace);
+	void initMeshSides();
 };

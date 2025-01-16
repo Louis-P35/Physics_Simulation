@@ -132,7 +132,9 @@ void Cloth::initMesh()
 {
 	// Create the vertices and normals for the bottom and top faces
 	initMeshOneFace(0, m_particlesBottom);
+	m_meshNbFacesOneSide = m_faces.size();
 	initMeshOneFace(m_vertices.size(), m_particlesTop);
+	initMeshSides();
 
 	// Load textures, Compute the tangent and bitangent vectors
 	postProcess("", false, false);
@@ -197,6 +199,73 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 
 
 /*
+* Initialize the 4 sides of the mesh of the cloth
+* 
+* @return void
+*/
+void Cloth::initMeshSides()
+{
+	// Lambda to create 2 sides
+	auto createSide1Lambda = [this](const int i) {
+		const int nbVerticesPerFace = m_resX * m_resY;
+
+		for (int j = 0; j < m_resY - 1; ++j)
+		{
+			const int vertexIndexCurrent = i * m_resY + j;
+			const int vertexIndexRight = i * m_resY + (j + 1);
+			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
+
+			m_faces.push_back(
+				{ vertexIndexCurrent, -1, vertexIndexCurrent,
+				vertexIndexRight, -1, vertexIndexRight,
+				vertexIndexTop, -1, vertexIndexTop }
+			);
+
+			const int vertexIndexTopRight = nbVerticesPerFace + i * m_resY + (j + 1);
+
+			m_faces.push_back(
+				{ vertexIndexTop, -1, vertexIndexTop,
+				vertexIndexRight, -1, vertexIndexRight,
+				vertexIndexTopRight, -1, vertexIndexTopRight }
+			);
+		}
+	};
+
+	// Lambda to create the 2 others sides on the other axis
+	auto createSide2Lambda = [this](const int j) {
+		const int nbVerticesPerFace = m_resX * m_resY;
+
+		for (int i = 0; i < m_resX - 1; ++i)
+		{
+			const int vertexIndexCurrent = i * m_resY + j;
+			const int vertexIndexRight = (i + 1) * m_resY + j;
+			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
+
+			m_faces.push_back(
+				{ vertexIndexCurrent, -1, vertexIndexCurrent,
+				vertexIndexRight, -1, vertexIndexRight,
+				vertexIndexTop, -1, vertexIndexTop }
+			);
+
+			const int vertexIndexTopRight = nbVerticesPerFace + (i + 1) * m_resY + j;
+
+			m_faces.push_back(
+				{ vertexIndexTop, -1, vertexIndexTop,
+				vertexIndexRight, -1, vertexIndexRight,
+				vertexIndexTopRight, -1, vertexIndexTopRight }
+			);
+		}
+	};
+
+	// Create the sides
+	createSide1Lambda(0);
+	createSide1Lambda(m_resX - 1);
+	createSide2Lambda(0);
+	createSide2Lambda(m_resY - 1);
+}
+
+
+/*
 * Update the mesh vertices
 * Need to be called after the update of the particles and before the rendering
 * 
@@ -210,7 +279,6 @@ void Cloth::updateMesh()
 	}
 
 	// Recompute the normals
-	const int half = m_faces.size() / 2;
 	for (int i = 0; i < m_faces.size(); ++i)
 	{
 		Vec3 p0 = Vec3(m_vertices[m_faces[i][0]]);
@@ -219,7 +287,7 @@ void Cloth::updateMesh()
 
 		Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
 		// Invert the normal for the bottom face
-		if (i < half)
+		if (i < m_meshNbFacesOneSide)
 		{
 			normal *= -1.0;
 		}
@@ -233,6 +301,7 @@ void Cloth::updateMesh()
 	std::lock_guard<std::mutex> lock(m_pRenderingInstance->m_mutex);
 
 	// TODO: Optize that! Do not realloc
+	// Update the VBO vertices data
 	m_pRenderingInstance->m_verticesData.clear();
 	m_pRenderingInstance->m_verticesData = computeVBOVerticesData();
 }
