@@ -267,7 +267,7 @@ std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::initialyzeObject3D(Obje
 	// Add it to the list of objects to render
     m_objectsToRenderList.push_back(objInst);
 
-    return objInst; //objInst->m_pPosRotScale;
+    return objInst;
 }
 
 

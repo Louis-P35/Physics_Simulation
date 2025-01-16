@@ -25,6 +25,8 @@ class ApplicationData : public QObject
 	Q_OBJECT
 
 public:
+	OpenGl3DWidget* m_pOpenGl3DWidget;
+
 	Object3D m_cube3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pCube3DRenderer;
 	Object3D m_ground3D;
@@ -42,7 +44,7 @@ public:
 	ApplicationData();
 	~ApplicationData() {};
 
-	void initSimulation();
+	bool initSimulation();
 	bool simulationUpdate();
-	void resetSimulation();
+	bool resetSimulation();
 };

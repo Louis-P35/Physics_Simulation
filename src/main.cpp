@@ -41,6 +41,7 @@ int main(int argc, char** argv)
 	std::cout << "Application started" << std::endl;
     initAfterOpenGl(appData, window);
 
+	appData.m_pOpenGl3DWidget = window.m_pOpenGl3DWidgetClothSimulation;
 	appData.initSimulation();
     // Debug add a sphere to each particle of the cloth
     /*for (int i = 0; i < appData.m_pCloth->m_resX; ++i)
@@ -57,14 +58,11 @@ int main(int argc, char** argv)
         }
     }*/
     // Debug add cloth mesh
-    if (auto clothObject = std::dynamic_pointer_cast<Object3D>(appData.m_pCloth))
+    /*if (auto clothObject = std::dynamic_pointer_cast<Object3D>(appData.m_pCloth))
     {
         appData.m_pCloth->m_pRenderingInstance = window.m_pOpenGl3DWidgetClothSimulation->addObject(*clothObject);
 		appData.m_pCloth->m_pRenderingInstance->m_isStatic = false;
-    }
-
-    // Create the physics simulation worker
-    //PhysicsWorker physicsWorker;
+    }*/
 
     
     

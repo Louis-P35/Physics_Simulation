@@ -10,17 +10,22 @@ ApplicationData::ApplicationData()
 {
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
-	
 }
 
 
 /*
 * Initialize the simulation
 * 
-* @return void
+* @return bool True if the simulation was initialized successfully, false otherwise
 */
-void ApplicationData::initSimulation()
+bool ApplicationData::initSimulation()
 {
+	if (!m_pOpenGl3DWidget)
+	{
+		std::cerr << "Error: OpenGl3DWidget is not initialized" << std::endl;
+		return false;
+	}
+
 	// Create a cloth
 	Vec3 position = Vec3(-4.0, 2.0, -4.0);
 	if (!m_pCloth)
@@ -29,7 +34,8 @@ void ApplicationData::initSimulation()
 	}
 	else
 	{
-
+		std::cerr << "Error: Cloth already created" << std::endl;
+		return false;
 	}
 
 	// Initialize the last update time
@@ -43,6 +49,27 @@ void ApplicationData::initSimulation()
 		// Emit a signal to update GUI if needed
 		//QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
 		});
+
+	// Add the mesh of the cloth to the rendering widget
+	if (auto clothObject = std::dynamic_pointer_cast<Object3D>(m_pCloth))
+	{
+		m_pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(*clothObject);
+		m_pCloth->m_pRenderingInstance->m_isStatic = false;
+	}
+
+	for (int i = 0; i < m_pCloth->m_resX; ++i)
+	{
+		for (int j = 0; j < m_pCloth->m_resY; ++j)
+		{
+			m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_pCloth->m_particlesBottom[i][j].m_position.toArray();
+			m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
+
+			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_pCloth->m_particlesTop[i][j].m_position.toArray();
+			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
+		}
+	}
 }
 
 /*
@@ -85,11 +112,15 @@ bool ApplicationData::simulationUpdate()
 * 
 * @return void
 */
-void ApplicationData::resetSimulation()
+bool ApplicationData::resetSimulation()
 {
 	// Stop the physics simulation
 	m_physicsWorker.stop();
 
+	m_pCloth = nullptr;
+
 	// Reset the and restart the simulation
-	initSimulation();
+	int res = initSimulation();
+
+	return res;
 }
