@@ -116,6 +116,9 @@ void OpenGl3DWidget::paintGL()
 	// draw all 3d objects
 	for (auto& renderer : m_objectsToRenderList)
 	{
+        // Lock the mutex to prevent the physics simulation thread to access the vertices data
+        std::lock_guard<std::mutex> lock(renderer->m_mutex);
+
         // Resend the vertices' data to the GPU if the mesh is dynamic
 		if (!renderer->m_isStatic)
 		{

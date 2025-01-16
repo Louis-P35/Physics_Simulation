@@ -13,6 +13,7 @@
 // Includes from STL
 #include <vector>
 #include <memory>
+#include <mutex>
 
 
 /*
@@ -34,6 +35,7 @@ struct ObjectRenderingInstance
     std::shared_ptr<QOpenGLTexture> m_pNormalTexture;
 
     bool m_isStatic = true;
+    mutable std::mutex m_mutex;
 };
 
 
