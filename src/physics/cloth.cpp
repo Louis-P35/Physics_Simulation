@@ -85,6 +85,9 @@ void Cloth::update(double dt)
 		{
 			m_particlesBottom[i][j].m_previousPosition = m_particlesBottom[i][j].m_position;
 			m_particlesBottom[i][j].m_previousVelocity = m_particlesBottom[i][j].m_velocity;
+
+			// Update mesh vertices
+			m_vertices[i * m_resY + j] = m_particlesBottom[i][j].m_position.toArray();
 		}
 	}
 }
@@ -150,12 +153,27 @@ void Cloth::updateMesh()
 		return;
 	}
 
-	for (int i = 0; i < m_resX - 1; ++i)
+	// TODO: Optize that! Do not realloc
+	m_pRenderingInstance->m_verticesData.clear();
+	m_pRenderingInstance->m_verticesData = computeVBOVerticesData();
+
+	/*for (const auto& face : m_faces)
 	{
-		for (int j = 0; j < m_resY - 1; ++j)
+		for (int i = 0; i < 3; i++)
+		{
+			const int vertexIndex = face[i * 3];
+			m_vertices[face[i * 3]];
+
+			m_pRenderingInstance->m_verticesData[vertexIndex].position = m_particlesBottom[i][j].m_position.toArray();
+		}
+	}*/
+
+	/*for (int i = 0; i < m_resX; ++i)
+	{
+		for (int j = 0; j < m_resY; ++j)
 		{
 			const int vertexIndex = i * m_resY + j;
 			m_pRenderingInstance->m_verticesData[vertexIndex].position = m_particlesBottom[i][j].m_position.toArray();
 		}
-	}
+	}*/
 }
