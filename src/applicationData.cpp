@@ -62,7 +62,7 @@ bool ApplicationData::simulationUpdate()
 	// Update the simulation
 	m_pCloth->update(elapsedTimeInSeconds);
 
-	// Update the cloth's mesh, TODO: MUTEX
+	// Update the cloth's mesh
 	m_pCloth->updateMesh();
 
 	return true;

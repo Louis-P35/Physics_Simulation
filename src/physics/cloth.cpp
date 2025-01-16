@@ -93,6 +93,11 @@ void Cloth::update(double dt)
 }
 
 
+/*
+* Initialize the mesh of the cloth
+* 
+* @return void
+*/
 void Cloth::initMesh()
 {
 	// Create the vertices
@@ -157,6 +162,20 @@ void Cloth::updateMesh()
 	if (!m_pRenderingInstance)
 	{
 		return;
+	}
+
+	// Recompute the normals
+	for (const auto& face : m_faces)
+	{
+		Vec3 p0 = Vec3(m_vertices[face[0]]);
+		Vec3 p1 = Vec3(m_vertices[face[3]]);
+		Vec3 p2 = Vec3(m_vertices[face[6]]);
+
+		Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
+
+		m_normals[face[2]] = normal.toArray();
+		m_normals[face[5]] = normal.toArray();
+		m_normals[face[8]] = normal.toArray();
 	}
 
 	// Lock the mutex to prevent the rendering thread to access the vertices data
