@@ -9,6 +9,9 @@
 #include <QPushButton>
 #include <Qstring>
 
+// Includes from STL
+#include <iostream>
+
 
 ClothWidget::ClothWidget(QWidget* pParent) : QWidget(pParent)
 {
@@ -50,9 +53,12 @@ void ClothWidget::setupUI()
     pResolutionLayout->addWidget(m_pSliderResolution);
     pResolutionLayout->addWidget(m_pSliderResolutionValueLabel);
 
+    QPushButton* pResetSimulationButton = new QPushButton("Reset simulation", this);
+
     // Add the grouped layouts to the main vertical layout
     pLayout->addLayout(pSizeLayout);
     pLayout->addLayout(pResolutionLayout);
+	pLayout->addWidget(pResetSimulationButton);
 
     // Add spacing or stretch as needed
     pLayout->addStretch();
@@ -60,6 +66,7 @@ void ClothWidget::setupUI()
 
     connect(m_pSliderSize, &QSlider::valueChanged, this, &ClothWidget::OnSizeChange);
     connect(m_pSliderResolution, &QSlider::valueChanged, this, &ClothWidget::OnResolutionChange);
+    connect(pResetSimulationButton, &QPushButton::clicked, this, &ClothWidget::OnResetButtonClicked);
 }
 
 /*
@@ -82,4 +89,15 @@ void ClothWidget::OnSizeChange(int value)
 void ClothWidget::OnResolutionChange(int value)
 {
     m_pSliderResolutionValueLabel->setText(QString::number(value));
+}
+
+
+/*
+* Slot for reset simulation button clicked
+* 
+* @return void
+*/
+void ClothWidget::OnResetButtonClicked()
+{
+	std::cout << "Reset button clicked" << std::endl;
 }

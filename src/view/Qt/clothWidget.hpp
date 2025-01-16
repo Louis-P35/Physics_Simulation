@@ -26,5 +26,6 @@ private:
 private slots:
 	void OnSizeChange(int value);
 	void OnResolutionChange(int value);
+	void OnResetButtonClicked();
 
 };
