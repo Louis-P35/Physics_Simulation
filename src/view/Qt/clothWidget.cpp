@@ -66,7 +66,8 @@ void ClothWidget::setupUI()
 
     connect(m_pSliderSize, &QSlider::valueChanged, this, &ClothWidget::OnSizeChange);
     connect(m_pSliderResolution, &QSlider::valueChanged, this, &ClothWidget::OnResolutionChange);
-    connect(pResetSimulationButton, &QPushButton::clicked, this, &ClothWidget::OnResetButtonClicked);
+    // Connect the button to emit the signal
+    connect(pResetSimulationButton, &QPushButton::clicked, this, &ClothWidget::resetClickedSignal);
 }
 
 /*
@@ -89,15 +90,4 @@ void ClothWidget::OnSizeChange(int value)
 void ClothWidget::OnResolutionChange(int value)
 {
     m_pSliderResolutionValueLabel->setText(QString::number(value));
-}
-
-
-/*
-* Slot for reset simulation button clicked
-* 
-* @return void
-*/
-void ClothWidget::OnResetButtonClicked()
-{
-	std::cout << "Reset button clicked" << std::endl;
 }

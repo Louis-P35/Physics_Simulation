@@ -5,6 +5,10 @@
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/physics/particle.hpp"
 #include "../src/physics/cloth.hpp"
+#include "physicsWorker.hpp"
+
+// Includes from 3rd party
+#include <QObject>
 
 // Includes from STL
 #include <memory>
@@ -16,8 +20,10 @@
 * 
 * This class is used to store the data of the application (model)
 */
-class ApplicationData
+class ApplicationData : public QObject
 {
+	Q_OBJECT
+
 public:
 	Object3D m_cube3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pCube3DRenderer;
@@ -26,9 +32,8 @@ public:
 	Object3D m_debugSphere3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
-	//Particle m_testParticle;
-	//Particle m_testParticle2;
 	std::shared_ptr<Cloth> m_pCloth;
+	PhysicsWorker m_physicsWorker;
 
 private:
 	std::chrono::steady_clock::time_point m_lastUpdateTime;
@@ -39,4 +44,5 @@ public:
 
 	void initSimulation();
 	bool simulationUpdate();
+	void resetSimulation();
 };

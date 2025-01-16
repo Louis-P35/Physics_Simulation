@@ -1,6 +1,5 @@
 // Includes from project
 #include "mainWindow.hpp"
-#include "../src/view/Qt/clothWidget.hpp"
 
 // Includes from 3rd party
 #include <QMenuBar>
@@ -15,7 +14,10 @@
 #include <QTabWidget>
 #include <QSplitter>
 
-MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
+// Includes from STL
+#include <iostream>
+
+MainWindow::MainWindow(ApplicationData& appData, QWidget* pParent) : QMainWindow(pParent), m_appData(appData)
 {
     // Set title
 	setWindowTitle("Physics simulation");
@@ -35,15 +37,17 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
 
 	// Create a tab for Cloth simulation
     m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(this);
-	this->createTab("Cloth simulation", m_pOpenGl3DWidgetClothSimulation, pTabWidget);
-    
+    m_pClothWidget = new ClothWidget(this);
+	this->createTab("Cloth simulation", m_pOpenGl3DWidgetClothSimulation, m_pClothWidget, pTabWidget);
 
     // Create second tab
-	this->createTab("Fluid simulation", nullptr, pTabWidget);
-
+	this->createTab("Fluid simulation", nullptr, nullptr, pTabWidget);
 
     // Set the QTabWidget as the central widget of the main window
     setCentralWidget(pTabWidget);
+
+    // Connect reset the signal to a slot that calls AppData
+    connect(m_pClothWidget, &ClothWidget::resetClickedSignal, this, &MainWindow::onResetClicked);
 }
 
 
@@ -53,10 +57,11 @@ MainWindow::MainWindow(QWidget* pParent) : QMainWindow(pParent)
 * 
 * @param tabName Name of the tab
 * @param pGlWidget OpenGl3DWidget to add to the tab
+* @param pLeftPannel QWidget to add to the left pane
 * @param pTabWidget QTabWidget to add the tab to
 * @return QWidget* Pointer to the created tab
 */
-QWidget* MainWindow::createTab(const std::string& tabName, OpenGl3DWidget* pGlWidget, QTabWidget* pTabWidget)
+QWidget* MainWindow::createTab(const std::string& tabName, OpenGl3DWidget* pGlWidget, QWidget* pLeftPannel, QTabWidget* pTabWidget)
 {
 	// Create a tab
 	QWidget* pTab = new QWidget();
@@ -67,8 +72,11 @@ QWidget* MainWindow::createTab(const std::string& tabName, OpenGl3DWidget* pGlWi
     // Left widget: placeholder for future controls or content
     QWidget* pLeftWidget = new QWidget(pSplitter);
     QVBoxLayout* pLeftLayout = new QVBoxLayout(pLeftWidget);
-	ClothWidget* pClothWidget = new ClothWidget(pLeftWidget);
-    pLeftLayout->addWidget(pClothWidget);
+    if (pLeftPannel)
+    {
+		pLeftPannel->setParent(pLeftWidget);
+        pLeftLayout->addWidget(pLeftPannel);
+    }
 
     // Right widget: for OpenGl rendering area
     QWidget* pRightWidget = new QWidget(pSplitter);
@@ -103,4 +111,16 @@ QWidget* MainWindow::createTab(const std::string& tabName, OpenGl3DWidget* pGlWi
     pTabWidget->addTab(pTab, tabName.c_str());
 
 	return pTab;
+}
+
+
+/*
+* Slot called when the reset button is clicked
+* 
+* @return void
+*/
+void MainWindow::onResetClicked()
+{
+	std::cout << "Reset clicked" << std::endl;
+	m_appData.resetSimulation();
 }

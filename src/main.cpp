@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 	ApplicationData appData;
 
     QApplication app(argc, argv);
-    MainWindow window;
+    MainWindow window(appData);
 	
     window.show();
 
@@ -64,20 +64,13 @@ int main(int argc, char** argv)
     }
 
     // Create the physics simulation worker
-    PhysicsWorker physicsWorker;
+    //PhysicsWorker physicsWorker;
 
-    // Start the simulation in a separate thread
-    physicsWorker.start([&]() {
-        // Perform your physics updates
-        appData.simulationUpdate();
-
-        // Emit a signal to update GUI if needed
-        //QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
-        });
+    
     
     // Stop the worker when the application quits
     QObject::connect(&app, &QApplication::aboutToQuit, [&]() {
-        physicsWorker.stop();
+        appData.m_physicsWorker.stop();
         });
 
     return app.exec();

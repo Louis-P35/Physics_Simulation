@@ -26,6 +26,8 @@ private:
 private slots:
 	void OnSizeChange(int value);
 	void OnResolutionChange(int value);
-	void OnResetButtonClicked();
+
+signals:
+	void resetClickedSignal(); // Signal emitted when the reset button is clicked
 
 };
