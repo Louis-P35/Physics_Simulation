@@ -28,8 +28,8 @@ public:
 
 	Vec3 m_position;
 
-	std::vector< std::vector<Particle>> m_particlesBottom;
-	std::vector< std::vector<Particle>> m_particlesTop;
+	std::vector<std::vector<Particle>> m_particlesBottom;
+	std::vector<std::vector<Particle>> m_particlesTop;
 
 	std::shared_ptr<ObjectRenderingInstance> m_pRenderingInstance;
 
@@ -42,4 +42,5 @@ public:
 
 private:
 	void initMesh();
+	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace);
 };
