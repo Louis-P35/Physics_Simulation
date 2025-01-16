@@ -22,11 +22,9 @@ private:
 
 public:
 	PhysicsWorker() : m_running(false) {};
-	~PhysicsWorker() {
-		stop();
-	};
+	~PhysicsWorker();
 
-	void start(std::function<void()> updateCallback);
-	void stop();
+	void startWorker(std::function<void()> updateCallback);
+	void stopWorker();
 	void run();
 };

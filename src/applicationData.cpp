@@ -20,6 +20,7 @@ ApplicationData::ApplicationData()
 */
 bool ApplicationData::initSimulation()
 {
+	static double high = 1.0;
 	if (!m_pOpenGl3DWidget)
 	{
 		std::cerr << "Error: OpenGl3DWidget is not initialized" << std::endl;
@@ -27,8 +28,11 @@ bool ApplicationData::initSimulation()
 	}
 
 	// Create a cloth
-	Vec3 position = Vec3(-4.0, 2.0, -4.0);
-	if (!m_pCloth)
+	Vec3 position = Vec3(-4.0, /*2.0*/high, -4.0);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.1, 300.0, position);
+	m_pCloths.push_back(pCloth);
+	high += 0.5;
+	/*if (!m_pCloth)
 	{
 		m_pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.1, 300.0, position);
 	}
@@ -36,13 +40,13 @@ bool ApplicationData::initSimulation()
 	{
 		std::cerr << "Error: Cloth already created" << std::endl;
 		return false;
-	}
+	}*/
 
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
 
 	// Start the simulation in a separate thread
-	m_physicsWorker.start([&]() {
+	pCloth->startWorker([&]() {
 		// Perform physics updates
 		simulationUpdate();
 
@@ -51,13 +55,13 @@ bool ApplicationData::initSimulation()
 		});
 
 	// Add the mesh of the cloth to the rendering widget
-	if (auto clothObject = std::dynamic_pointer_cast<Object3D>(m_pCloth))
-	{
-		m_pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(*clothObject);
-		m_pCloth->m_pRenderingInstance->m_isStatic = false;
-	}
+	//if (auto clothObject = std::dynamic_pointer_cast<Object3D>(pCloth))
+	//{
+	pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(pCloth->m_object3D);//*clothObject);
+	pCloth->m_pRenderingInstance->m_isStatic = false;
+	//}
 
-	for (int i = 0; i < m_pCloth->m_resX; ++i)
+	/*for (int i = 0; i < m_pCloth->m_resX; ++i)
 	{
 		for (int j = 0; j < m_pCloth->m_resY; ++j)
 		{
@@ -69,7 +73,7 @@ bool ApplicationData::initSimulation()
 			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_pCloth->m_particlesTop[i][j].m_position.toArray();
 			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
 		}
-	}
+	}*/
 }
 
 /*
@@ -96,11 +100,18 @@ bool ApplicationData::simulationUpdate()
 	// Convert deltaTime to seconds
 	float elapsedTimeInSeconds = deltaTime.count();
 
-	// Update the simulation
-	m_pCloth->update(elapsedTimeInSeconds);
+	// Update the simulation & mesh
+	for (auto& pCloth : m_pCloths)
+	{
+		if (pCloth)
+		{
+			// Update the simulation
+			pCloth->update(elapsedTimeInSeconds);
 
-	// Update the cloth's mesh
-	m_pCloth->updateMesh();
+			// Update the cloth's mesh
+			pCloth->updateMesh();
+		}
+	}
 
 	return true;
 }
@@ -115,9 +126,12 @@ bool ApplicationData::simulationUpdate()
 bool ApplicationData::resetSimulation()
 {
 	// Stop the physics simulation
-	m_physicsWorker.stop();
+	//m_pCloth->stopWorker();
 
-	m_pCloth = nullptr;
+	//m_pCloth = nullptr;
+
+	//m_pOpenGl3DWidget->removeAllObjects();
+
 
 	// Reset the and restart the simulation
 	int res = initSimulation();

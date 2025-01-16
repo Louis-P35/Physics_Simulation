@@ -34,8 +34,8 @@ public:
 	Object3D m_debugSphere3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
-	std::shared_ptr<Cloth> m_pCloth;
-	PhysicsWorker m_physicsWorker;
+	//std::shared_ptr<Cloth> m_pCloth;
+	std::vector<std::shared_ptr<Cloth>> m_pCloths;
 
 private:
 	std::chrono::steady_clock::time_point m_lastUpdateTime;

@@ -1,6 +1,15 @@
 // Include from project
 #include "cloth.hpp"
 
+// Includes from STL
+#include <iostream>
+
+
+Cloth::~Cloth()
+{
+	std::cout << "Cloth destroyed" << std::endl;
+}
+
 
 Cloth::Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position) :
 	m_resX(resX), m_resY(resY), m_width(width), m_height(height), m_thickness(thickness), m_clothMass(clothMass), m_position(position)
@@ -116,8 +125,8 @@ void Cloth::update(double dt)
 			m_particlesTop[i][j].m_previousVelocity = m_particlesTop[i][j].m_velocity;
 
 			// Update mesh vertices
-			m_vertices[i * m_resY + j] = m_particlesBottom[i][j].m_position.toArray(); // Bottom side
-			m_vertices[offsetTopBottom + i * m_resY + j] = m_particlesTop[i][j].m_position.toArray(); // Top side
+			m_object3D.m_vertices[i * m_resY + j] = m_particlesBottom[i][j].m_position.toArray(); // Bottom side
+			m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = m_particlesTop[i][j].m_position.toArray(); // Top side
 		}
 	}
 }
@@ -132,12 +141,12 @@ void Cloth::initMesh()
 {
 	// Create the vertices and normals for the bottom and top faces
 	initMeshOneFace(0, m_particlesBottom);
-	m_meshNbFacesOneSide = m_faces.size();
-	initMeshOneFace(m_vertices.size(), m_particlesTop);
+	m_meshNbFacesOneSide = m_object3D.m_faces.size();
+	initMeshOneFace(m_object3D.m_vertices.size(), m_particlesTop);
 	initMeshSides();
 
 	// Load textures, Compute the tangent and bitangent vectors
-	postProcess("", false, false);
+	m_object3D.postProcess("", false, false);
 }
 
 
@@ -155,8 +164,8 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
-			m_vertices.push_back(topBottomFace[i][j].m_position.toArray());
-			m_normals.push_back({ 0.0f, 1.0f, 0.0f }); // TODO
+			m_object3D.m_vertices.push_back(topBottomFace[i][j].m_position.toArray());
+			m_object3D.m_normals.push_back({ 0.0f, 1.0f, 0.0f }); // TODO
 		}
 	}
 
@@ -173,21 +182,21 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 			const int vertexIndexTopRight = offset + (i + 1) * m_resY + j + 1;
 
 			// Bottom face
-			if (vertexIndexRight >= 0 && vertexIndexRight < m_vertices.size() &&
-				vertexIndexTop >= 0 && vertexIndexTop < m_vertices.size())
+			if (vertexIndexRight >= 0 && vertexIndexRight < m_object3D.m_vertices.size() &&
+				vertexIndexTop >= 0 && vertexIndexTop < m_object3D.m_vertices.size())
 			{
-				m_faces.push_back(
+				m_object3D.m_faces.push_back(
 					{ vertexIndexCurrent, -1, vertexIndexCurrent,
 					vertexIndexRight, -1, vertexIndexRight,
 					vertexIndexTop, -1, vertexIndexTop }
 				);
 			}
 			// Top face
-			if (vertexIndexRight >= 0 && vertexIndexRight < m_vertices.size() &&
-				vertexIndexTop >= 0 && vertexIndexTop < m_vertices.size() &&
-				vertexIndexTopRight >= 0 && vertexIndexTopRight < m_vertices.size())
+			if (vertexIndexRight >= 0 && vertexIndexRight < m_object3D.m_vertices.size() &&
+				vertexIndexTop >= 0 && vertexIndexTop < m_object3D.m_vertices.size() &&
+				vertexIndexTopRight >= 0 && vertexIndexTopRight < m_object3D.m_vertices.size())
 			{
-				m_faces.push_back(
+				m_object3D.m_faces.push_back(
 					{ vertexIndexRight, -1, vertexIndexRight,
 					vertexIndexTopRight, -1, vertexIndexTopRight,
 					vertexIndexTop, -1, vertexIndexTop }
@@ -215,7 +224,7 @@ void Cloth::initMeshSides()
 			const int vertexIndexRight = i * m_resY + (j + 1);
 			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
 
-			m_faces.push_back(
+			m_object3D.m_faces.push_back(
 				{ vertexIndexCurrent, -1, vertexIndexCurrent,
 				vertexIndexRight, -1, vertexIndexRight,
 				vertexIndexTop, -1, vertexIndexTop }
@@ -223,7 +232,7 @@ void Cloth::initMeshSides()
 
 			const int vertexIndexTopRight = nbVerticesPerFace + i * m_resY + (j + 1);
 
-			m_faces.push_back(
+			m_object3D.m_faces.push_back(
 				{ vertexIndexTop, -1, vertexIndexTop,
 				vertexIndexRight, -1, vertexIndexRight,
 				vertexIndexTopRight, -1, vertexIndexTopRight }
@@ -241,7 +250,7 @@ void Cloth::initMeshSides()
 			const int vertexIndexRight = (i + 1) * m_resY + j;
 			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
 
-			m_faces.push_back(
+			m_object3D.m_faces.push_back(
 				{ vertexIndexCurrent, -1, vertexIndexCurrent,
 				vertexIndexRight, -1, vertexIndexRight,
 				vertexIndexTop, -1, vertexIndexTop }
@@ -249,7 +258,7 @@ void Cloth::initMeshSides()
 
 			const int vertexIndexTopRight = nbVerticesPerFace + (i + 1) * m_resY + j;
 
-			m_faces.push_back(
+			m_object3D.m_faces.push_back(
 				{ vertexIndexTop, -1, vertexIndexTop,
 				vertexIndexRight, -1, vertexIndexRight,
 				vertexIndexTopRight, -1, vertexIndexTopRight }
@@ -279,11 +288,11 @@ void Cloth::updateMesh()
 	}
 
 	// Recompute the normals
-	for (int i = 0; i < m_faces.size(); ++i)
+	for (int i = 0; i < m_object3D.m_faces.size(); ++i)
 	{
-		Vec3 p0 = Vec3(m_vertices[m_faces[i][0]]);
-		Vec3 p1 = Vec3(m_vertices[m_faces[i][3]]);
-		Vec3 p2 = Vec3(m_vertices[m_faces[i][6]]);
+		Vec3 p0 = Vec3(m_object3D.m_vertices[m_object3D.m_faces[i][0]]);
+		Vec3 p1 = Vec3(m_object3D.m_vertices[m_object3D.m_faces[i][3]]);
+		Vec3 p2 = Vec3(m_object3D.m_vertices[m_object3D.m_faces[i][6]]);
 
 		Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
 		// Invert the normal for the bottom face
@@ -292,9 +301,9 @@ void Cloth::updateMesh()
 			normal *= -1.0;
 		}
 
-		m_normals[m_faces[i][2]] = normal.toArray();
-		m_normals[m_faces[i][5]] = normal.toArray();
-		m_normals[m_faces[i][8]] = normal.toArray();
+		m_object3D.m_normals[m_object3D.m_faces[i][2]] = normal.toArray();
+		m_object3D.m_normals[m_object3D.m_faces[i][5]] = normal.toArray();
+		m_object3D.m_normals[m_object3D.m_faces[i][8]] = normal.toArray();
 	}
 
 	// Lock the mutex to prevent the rendering thread to access the vertices data
@@ -303,5 +312,5 @@ void Cloth::updateMesh()
 	// TODO: Optize that! Do not realloc
 	// Update the VBO vertices data
 	m_pRenderingInstance->m_verticesData.clear();
-	m_pRenderingInstance->m_verticesData = computeVBOVerticesData();
+	m_pRenderingInstance->m_verticesData = m_object3D.computeVBOVerticesData();
 }

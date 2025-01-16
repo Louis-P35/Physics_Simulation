@@ -2,6 +2,12 @@
 #include "physicsWorker.hpp"
 
 
+PhysicsWorker::~PhysicsWorker()
+{
+    stopWorker();
+}
+
+
 /*
 * Start the physics simulation
 * 
@@ -10,7 +16,7 @@
 * @param updateCallback Callback function that is called to update the physics simulation
 * @return void
 */
-void PhysicsWorker::start(std::function<void()> updateCallback)
+void PhysicsWorker::startWorker(std::function<void()> updateCallback)
 {
     m_running = true;
     m_thread = std::thread([this, updateCallback]()
@@ -29,7 +35,7 @@ void PhysicsWorker::start(std::function<void()> updateCallback)
 /*
 * Stop the physics simulation
 */
-void PhysicsWorker::stop()
+void PhysicsWorker::stopWorker()
 {
     m_running = false;
     if (m_thread.joinable())

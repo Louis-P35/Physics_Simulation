@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <iostream>
 
 
 /*
@@ -21,8 +22,9 @@
 * 
 * m_verticesData is a list of VBOVertex that represent the vertices of the object
 */
-struct ObjectRenderingInstance
+class ObjectRenderingInstance
 {
+public:
     QOpenGLBuffer m_vbo;
     QOpenGLVertexArrayObject m_vao;
     GLuint m_shaderProgram;
@@ -36,6 +38,21 @@ struct ObjectRenderingInstance
 
     bool m_isStatic = true;
     mutable std::mutex m_mutex;
+
+public:
+	ObjectRenderingInstance() {};
+	~ObjectRenderingInstance()
+    {
+		std::cout << "ObjectRenderingInstance destroyed " << m_verticesData.size() << std::endl;
+        if (m_vbo.isCreated())
+        {
+            m_vbo.destroy();
+        }
+        if (m_vao.isCreated())
+        {
+            m_vao.destroy();
+        }
+    };
 };
 
 
@@ -65,6 +82,7 @@ public:
     void updateObject3D(std::shared_ptr<ObjectRenderingInstance> pObjInst);
     void drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRender);
     std::shared_ptr<ObjectRenderingInstance> addObject(Object3D& object3D);
+	void removeAllObjects();
 
 protected:
     void initializeGL() override;

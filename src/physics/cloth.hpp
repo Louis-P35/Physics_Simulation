@@ -5,6 +5,7 @@
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
+#include "physicsWorker.hpp"
 
 // Includes from STL
 #include <vector>
@@ -14,9 +15,8 @@
 * Class Cloth
 * The cloth is made of particles, each particle is connected to its neighbors by springs
 * The cloth is one or two grid of particles (depending on its thickness)
-* Cloth is derived from Object3D because it is a 3D object
 */
-class Cloth : public Object3D
+class Cloth : public PhysicsWorker
 {
 public:
 	int m_resX;
@@ -31,6 +31,7 @@ public:
 	std::vector<std::vector<Particle>> m_particlesBottom;
 	std::vector<std::vector<Particle>> m_particlesTop;
 
+	Object3D m_object3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pRenderingInstance;
 
 private:
@@ -38,7 +39,7 @@ private:
 
 public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
-	virtual ~Cloth() {};
+	virtual ~Cloth();
 
 	void update(double dt);
 	void updateMesh();

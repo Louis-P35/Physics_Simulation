@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <QSurfaceFormat>
 #include <QMatrix4x4>
+#include <QTimer>
 
 // Includes from STL
 #include <cmath>
@@ -22,6 +23,11 @@ OpenGl3DWidget::OpenGl3DWidget(QWidget* pParent) : QOpenGLWidget(pParent)
     format.setProfile(QSurfaceFormat::CompatibilityProfile);
     format.setVersion(2, 1);  // Requesting an older version for compatibility
     setFormat(format);
+
+	// Create a timer to trigger the paintGL() function
+    QTimer* pTimer = new QTimer(this);
+    connect(pTimer, &QTimer::timeout, this, QOverload<>::of(&OpenGl3DWidget::update));
+    pTimer->start(16);
 }
 
 /*
@@ -129,9 +135,6 @@ void OpenGl3DWidget::paintGL()
 		// Draw the object
         drawObject(renderer);
 	}
-
-    // Trigger a repaint for continuous rotation (TODO: use timer for fps handling)
-    update();
 }
 
 
@@ -208,6 +211,8 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
 std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::initialyzeObject3D(Object3D& object3D)
 {
     std::cout << "Initialize VAO & VBO" << std::endl;
+    // Force the OpenGL context to be the current one
+    makeCurrent();
 
 	std::shared_ptr<ObjectRenderingInstance> objInst = std::make_shared<ObjectRenderingInstance>();
 	objInst->m_verticesData = object3D.computeVBOVerticesData();
@@ -263,7 +268,6 @@ std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::initialyzeObject3D(Obje
 	objInst->m_pColorTexture = object3D.m_pColorTexture;
 	objInst->m_pNormalTexture = object3D.m_pNormalTexture;
 
-
 	// Add it to the list of objects to render
     m_objectsToRenderList.push_back(objInst);
 
@@ -309,4 +313,9 @@ void OpenGl3DWidget::loadShaders()
 std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::addObject(Object3D& object3D)
 {
 	return initialyzeObject3D(object3D);
+}
+
+void OpenGl3DWidget::removeAllObjects()
+{
+	m_objectsToRenderList.clear();
 }

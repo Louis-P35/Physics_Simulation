@@ -43,32 +43,17 @@ int main(int argc, char** argv)
 
 	appData.m_pOpenGl3DWidget = window.m_pOpenGl3DWidgetClothSimulation;
 	appData.initSimulation();
-    // Debug add a sphere to each particle of the cloth
-    /*for (int i = 0; i < appData.m_pCloth->m_resX; ++i)
-    {
-        for (int j = 0; j < appData.m_pCloth->m_resY; ++j)
-        {
-            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
-            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = appData.m_pCloth->m_particlesBottom[i][j].m_position.toArray();
-            appData.m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
 
-            appData.m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
-            appData.m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = appData.m_pCloth->m_particlesTop[i][j].m_position.toArray();
-            appData.m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-        }
-    }*/
-    // Debug add cloth mesh
-    /*if (auto clothObject = std::dynamic_pointer_cast<Object3D>(appData.m_pCloth))
-    {
-        appData.m_pCloth->m_pRenderingInstance = window.m_pOpenGl3DWidgetClothSimulation->addObject(*clothObject);
-		appData.m_pCloth->m_pRenderingInstance->m_isStatic = false;
-    }*/
-
-    
     
     // Stop the worker when the application quits
     QObject::connect(&app, &QApplication::aboutToQuit, [&]() {
-        appData.m_physicsWorker.stop();
+		for (auto& pCloth : appData.m_pCloths)
+		{
+            if (pCloth)
+            {
+                pCloth->stopWorker();
+            }
+		}
         });
 
     return app.exec();
@@ -85,7 +70,7 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
     //appData.m_monkey3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
     //appData.m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
 
-    std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
+    //std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
     appData.m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
 	appData.m_pCube3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
 	appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };

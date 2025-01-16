@@ -52,7 +52,6 @@ public:
 	std::shared_ptr<QOpenGLTexture> m_pColorTexture;
 	std::shared_ptr<QOpenGLTexture> m_pNormalTexture;
 
-protected:
 	std::vector<std::array<float, 3>> m_vertices;
 	std::vector<std::array<float, 3>> m_normals;
 	std::vector<std::array<float, 2>> m_uvs;
@@ -68,6 +67,7 @@ public:
 
 	bool loadFromObjFile(const std::string& path, const std::string& filename);
 	std::vector<VBOVertex> computeVBOVerticesData();
+	bool postProcess(const std::string& path, bool hasNormals, bool hasUVs);
 
 protected:
 	bool parseFaceLine(const std::string& line);
@@ -81,5 +81,5 @@ protected:
 		const std::array<float, 2>& uv1,
 		const std::array<float, 2>& uv2
 	);
-	bool postProcess(const std::string& path, bool hasNormals, bool hasUVs);
+	
 };
