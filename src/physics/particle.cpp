@@ -76,7 +76,7 @@ void Particle::computePFD(const Vec3& forces, const double dt)
 	m_position += m_velocity * dt;
 }
 
-void Particle::update(const double dt)
+void Particle::update(const double dt, const std::vector<std::shared_ptr<Collider>>& colliders)
 {
 	// Do not update the particle if it is fixed
 	if (isFixed)
@@ -96,6 +96,28 @@ void Particle::update(const double dt)
 	{
 		m_position.y = 0.0;
 		m_velocity.y = -m_velocity.y;
+		m_velocity.y *= 0.1;
+	}
+
+	// Handle collision with the colliders
+	for (const auto& pCollider : colliders)
+	{
+		if (!pCollider)
+		{
+			continue;
+		}
+
+		Vec3 collPosition;
+		Vec3 collNormal;
+		Vec3 bounceVect;
+		if (pCollider->hasCollided(collPosition, collNormal, bounceVect, m_previousPosition, m_position))
+		{
+			// Compute the new position
+			m_position = collPosition;
+			// Compute the new velocity
+			m_velocity = bounceVect * m_velocity.norm();
+			m_velocity *= 0.1;
+		}
 	}
 
 	// Update the debug sphere position

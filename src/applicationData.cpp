@@ -1,15 +1,17 @@
 // Includes from project
 #include "applicationData.hpp"
+#include "../src/physics/sphereCollider.hpp"
 
 // Includes from STL
 #include <iostream>
 
 
 
-ApplicationData::ApplicationData()
+ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 {
-
+	m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-1.5, 1.0, -1.5), 1.0));
 }
+
 
 
 /*
@@ -19,7 +21,6 @@ ApplicationData::ApplicationData()
 */
 bool ApplicationData::initSimulation()
 {
-	static double high = 1.0;
 	if (!m_pOpenGl3DWidget)
 	{
 		std::cerr << "Error: OpenGl3DWidget is not initialized" << std::endl;
@@ -27,38 +28,37 @@ bool ApplicationData::initSimulation()
 	}
 
 	// Create a cloth
-	Vec3 position = Vec3(-4.0, /*2.0*/high, -4.0);
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.1, 300.0, position);
+	Vec3 position = Vec3(-4.0, 2.5, -4.0);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(30, 30, 5.0, 5.0, 0.1, 300.0, position);
 	m_pCloths.push_back(pCloth);
-	high += 0.5;
 
 	// Add the mesh of the cloth to the rendering widget
 	pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(pCloth->m_object3D);
 	pCloth->m_pRenderingInstance->m_isStatic = false;
 
+	/*for (int i = 0; i < pCloth->m_resX; ++i)
+	{
+		for (int j = 0; j < pCloth->m_resY; ++j)
+		{
+			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesBottom[i][j].m_position.toArray();
+			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
+
+			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesTop[i][j].m_position.toArray();
+			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
+		}
+	}*/
+
 	// Start the simulation in a separate thread
 	// Capture a copy on the pointer instead of a reference to avoid a dangling pointer
-	pCloth->startWorker([pCloth]() {
+	pCloth->startWorker([pCloth, pColliders = &m_colliders]() {
 		// Perform physics updates
-		pCloth->updateSimulation();
+		pCloth->updateSimulation(*pColliders);
 
 		// Emit a signal to update GUI if needed
 		//QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
 		});
-
-	/*for (int i = 0; i < m_pCloth->m_resX; ++i)
-	{
-		for (int j = 0; j < m_pCloth->m_resY; ++j)
-		{
-			m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
-			m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_pCloth->m_particlesBottom[i][j].m_position.toArray();
-			m_pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-
-			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
-			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_pCloth->m_particlesTop[i][j].m_position.toArray();
-			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-		}
-	}*/
 }
 
 

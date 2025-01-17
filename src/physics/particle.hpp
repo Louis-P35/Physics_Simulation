@@ -4,6 +4,7 @@
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
+#include "../src/physics/collider.hpp"
 
 // Includes from STL
 #include <vector>
@@ -65,7 +66,7 @@ public:
 	Particle(Vec3 position, double mass);
 	~Particle();
 
-	void update(const double dt);
+	void update(const double dt, const std::vector<std::shared_ptr<Collider>>& colliders);
 	void setFixed(const bool fixState) { isFixed = fixState; };
 
 private:

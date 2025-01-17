@@ -76,8 +76,8 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 			// Debug
 			if (j == (m_resY - 1) || j == 0 || i == 0 || i == (m_resX - 1))
 			{
-				m_particlesBottom[i][j].setFixed(true);
-				m_particlesTop[i][j].setFixed(true);
+				//m_particlesBottom[i][j].setFixed(true);
+				//m_particlesTop[i][j].setFixed(true);
 			}
 		}
 	}
@@ -95,7 +95,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 * 
 * @return void
 */
-void Cloth::updateSimulation()
+void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders)
 {
 	static bool firstUpdate = true;
 
@@ -115,7 +115,7 @@ void Cloth::updateSimulation()
 	float elapsedTimeInSeconds = deltaTime.count();
 
 	// Update the simulation
-	updateParticles(elapsedTimeInSeconds);
+	updateParticles(elapsedTimeInSeconds, colliders);
 
 	// Update the cloth's mesh
 	updateMesh();
@@ -128,7 +128,7 @@ void Cloth::updateSimulation()
 * @param dt Time step
 * @return void
 */
-void Cloth::updateParticles(double dt)
+void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders)
 {
 	// Clamp the time step to avoid huge time steps
 	// This is a simple way to avoid instability in the simulation
@@ -143,8 +143,8 @@ void Cloth::updateParticles(double dt)
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
-			m_particlesBottom[i][j].update(dt);
-			m_particlesTop[i][j].update(dt);
+			m_particlesBottom[i][j].update(dt, colliders);
+			m_particlesTop[i][j].update(dt, colliders);
 		}
 	}
 

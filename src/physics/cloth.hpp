@@ -5,6 +5,7 @@
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
+#include "../src/physics/collider.hpp"
 #include "physicsWorker.hpp"
 
 // Includes from STL
@@ -43,8 +44,8 @@ public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
 	virtual ~Cloth();
 
-	void updateParticles(double dt);
-	void updateSimulation();
+	void updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders);
+	void updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders);
 	void updateMesh();
 
 private:

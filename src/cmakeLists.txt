@@ -17,6 +17,8 @@ set(SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/physics/particle.cpp
     ${CMAKE_SOURCE_DIR}/src/physicsWorker.cpp
     ${CMAKE_SOURCE_DIR}/src/physics/cloth.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/collider.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/sphereCollider.cpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/OpenGl3DWidget.cpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.cpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/shader.cpp
@@ -31,6 +33,8 @@ set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/physics/particle.hpp
     ${CMAKE_SOURCE_DIR}/include/physicsWorker.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/cloth.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/collider.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/sphereCollider.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/OpenGl3DWidget.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/shader.hpp

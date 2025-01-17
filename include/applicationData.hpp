@@ -5,6 +5,7 @@
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/physics/particle.hpp"
 #include "../src/physics/cloth.hpp"
+#include "../src/physics/sphereCollider.hpp"
 #include "physicsWorker.hpp"
 
 // Includes from 3rd party
@@ -33,8 +34,8 @@ public:
 	Object3D m_debugSphere3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
-	//std::shared_ptr<Cloth> m_pCloth;
 	std::vector<std::shared_ptr<Cloth>> m_pCloths;
+	std::vector<std::shared_ptr<Collider>> m_colliders;
 
 public:
 	ApplicationData();

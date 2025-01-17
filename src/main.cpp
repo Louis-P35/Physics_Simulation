@@ -71,16 +71,10 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
     //appData.m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
 
     //std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
-    appData.m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
-	appData.m_pCube3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
-	appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
-	appData.m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
-
-    //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table.obj");
-    //appData.m_bench3D.loadFromObjFile("../models/cube/", "cube.obj");
-    //appData.m_bench3D.loadFromObjFile("../models/workBench_2/", "Table_b.obj");
-    //appData.m_bench3D.setPosition({ 0.0f, 0.0f, 0.0f });
-    //appData.m_bench3D.setScale({ 3.0f, 3.0f, 3.0f });
+    //appData.m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
+	//appData.m_pCube3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
+	//appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
+	//appData.m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
     // Ground
     appData.m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
