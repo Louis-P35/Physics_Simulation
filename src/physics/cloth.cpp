@@ -84,6 +84,41 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 
 	// Initialize the mesh
 	initMesh();
+
+	// Initialize the last update time
+	m_lastUpdateTime = std::chrono::steady_clock::now();
+}
+
+
+/*
+* Update the cloth's physics (all particles) and mesh
+* 
+* @return void
+*/
+void Cloth::updateSimulation()
+{
+	static bool firstUpdate = true;
+
+	// Calculate the time elapsed since the last update
+	auto currentTime = std::chrono::steady_clock::now();
+	std::chrono::duration<float> deltaTime = currentTime - m_lastUpdateTime;
+	m_lastUpdateTime = currentTime;
+
+	// Skip the first update to avoid a huge time step
+	if (firstUpdate)
+	{
+		firstUpdate = false;
+		return;
+	}
+
+	// Convert deltaTime to seconds
+	float elapsedTimeInSeconds = deltaTime.count();
+
+	// Update the simulation
+	updateParticles(elapsedTimeInSeconds);
+
+	// Update the cloth's mesh
+	updateMesh();
 }
 
 
@@ -93,7 +128,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 * @param dt Time step
 * @return void
 */
-void Cloth::update(double dt)
+void Cloth::updateParticles(double dt)
 {
 	// Clamp the time step to avoid huge time steps
 	// This is a simple way to avoid instability in the simulation

@@ -9,6 +9,7 @@
 
 // Includes from STL
 #include <vector>
+#include <chrono>
 
 
 /*
@@ -36,12 +37,14 @@ public:
 
 private:
 	int m_meshNbFacesOneSide = 0;
+	std::chrono::steady_clock::time_point m_lastUpdateTime;
 
 public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
 	virtual ~Cloth();
 
-	void update(double dt);
+	void updateParticles(double dt);
+	void updateSimulation();
 	void updateMesh();
 
 private:

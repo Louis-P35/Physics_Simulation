@@ -13,7 +13,6 @@
 // Includes from STL
 #include <memory>
 #include <vector>
-#include <chrono>
 
 /*
 * ApplicationData class
@@ -37,14 +36,10 @@ public:
 	//std::shared_ptr<Cloth> m_pCloth;
 	std::vector<std::shared_ptr<Cloth>> m_pCloths;
 
-private:
-	std::chrono::steady_clock::time_point m_lastUpdateTime;
-
 public:
 	ApplicationData();
 	~ApplicationData() {};
 
 	bool initSimulation();
-	bool simulationUpdate();
 	bool resetSimulation();
 };

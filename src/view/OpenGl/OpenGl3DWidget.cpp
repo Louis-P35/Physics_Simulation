@@ -119,7 +119,7 @@ void OpenGl3DWidget::paintGL()
 
     m_projection = QMatrix4x4();
     m_projection.perspective(45.0f, float(width()) / height(), 0.1f, 100.0f);
-
+    
 	// draw all 3d objects
 	for (auto& renderer : m_objectsToRenderList)
 	{

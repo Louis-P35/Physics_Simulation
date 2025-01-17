@@ -8,8 +8,7 @@
 
 ApplicationData::ApplicationData()
 {
-	// Initialize the last update time
-	m_lastUpdateTime = std::chrono::steady_clock::now();
+
 }
 
 
@@ -42,24 +41,22 @@ bool ApplicationData::initSimulation()
 		return false;
 	}*/
 
-	// Initialize the last update time
-	m_lastUpdateTime = std::chrono::steady_clock::now();
-
-	// Start the simulation in a separate thread
-	pCloth->startWorker([&]() {
-		// Perform physics updates
-		simulationUpdate();
-
-		// Emit a signal to update GUI if needed
-		//QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
-		});
-
 	// Add the mesh of the cloth to the rendering widget
 	//if (auto clothObject = std::dynamic_pointer_cast<Object3D>(pCloth))
 	//{
 	pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(pCloth->m_object3D);//*clothObject);
 	pCloth->m_pRenderingInstance->m_isStatic = false;
 	//}
+
+	// Start the simulation in a separate thread
+	// Capture a copy on the pointer instead of a reference to avoid a dangling pointer
+	pCloth->startWorker([pCloth]() {
+		// Perform physics updates
+		pCloth->updateSimulation();
+
+		// Emit a signal to update GUI if needed
+		//QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
+		});
 
 	/*for (int i = 0; i < m_pCloth->m_resX; ++i)
 	{
@@ -74,46 +71,6 @@ bool ApplicationData::initSimulation()
 			m_pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
 		}
 	}*/
-}
-
-/*
-* Update one frame of the simulation
-* 
-* @return bool True if the simulation was updated successfully, false otherwise
-*/
-bool ApplicationData::simulationUpdate()
-{
-	static bool firstUpdate = true;
-
-	// Calculate the time elapsed since the last update
-	auto currentTime = std::chrono::steady_clock::now();
-	std::chrono::duration<float> deltaTime = currentTime - m_lastUpdateTime;
-	m_lastUpdateTime = currentTime;
-
-	// Skip the first update to avoid a huge time step
-	if (firstUpdate)
-	{
-		firstUpdate = false;
-		return true;
-	}
-
-	// Convert deltaTime to seconds
-	float elapsedTimeInSeconds = deltaTime.count();
-
-	// Update the simulation & mesh
-	for (auto& pCloth : m_pCloths)
-	{
-		if (pCloth)
-		{
-			// Update the simulation
-			pCloth->update(elapsedTimeInSeconds);
-
-			// Update the cloth's mesh
-			pCloth->updateMesh();
-		}
-	}
-
-	return true;
 }
 
 
