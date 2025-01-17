@@ -83,6 +83,7 @@ public:
     void drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRender);
     std::shared_ptr<ObjectRenderingInstance> addObject(Object3D& object3D);
 	void removeAllObjects();
+    void removeObject(std::shared_ptr<ObjectRenderingInstance> pObject);
 
 protected:
     void initializeGL() override;

@@ -310,12 +310,42 @@ void OpenGl3DWidget::loadShaders()
 }
 
 
+/*
+* Add a 3D object to the list of objects to render
+* 
+* @param object3D Object3D to add
+* @return std::shared_ptr<ObjectRenderingInstance> Pointer to the object handle (to access its vertices, position, rotation and scale)
+*/
 std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::addObject(Object3D& object3D)
 {
 	return initialyzeObject3D(object3D);
 }
 
+/*
+* Remove all the objects from the list of objects to render
+* 
+* @return void
+*/
 void OpenGl3DWidget::removeAllObjects()
 {
 	m_objectsToRenderList.clear();
+}
+
+
+/*
+* Remove a 3D object from the list of objects to render
+* 
+* @param pObject ObjectRenderingInstance to remove
+* @return void
+*/
+void OpenGl3DWidget::removeObject(std::shared_ptr<ObjectRenderingInstance> pObject)
+{
+	for (auto it = m_objectsToRenderList.begin(); it != m_objectsToRenderList.end(); ++it)
+	{
+		if (*it == pObject)
+		{
+			m_objectsToRenderList.erase(it);
+			return;
+		}
+	}
 }

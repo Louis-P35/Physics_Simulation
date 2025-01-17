@@ -31,22 +31,10 @@ bool ApplicationData::initSimulation()
 	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.1, 300.0, position);
 	m_pCloths.push_back(pCloth);
 	high += 0.5;
-	/*if (!m_pCloth)
-	{
-		m_pCloth = std::make_shared<Cloth>(10, 10, 5.0, 5.0, 0.1, 300.0, position);
-	}
-	else
-	{
-		std::cerr << "Error: Cloth already created" << std::endl;
-		return false;
-	}*/
 
 	// Add the mesh of the cloth to the rendering widget
-	//if (auto clothObject = std::dynamic_pointer_cast<Object3D>(pCloth))
-	//{
-	pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(pCloth->m_object3D);//*clothObject);
+	pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(pCloth->m_object3D);
 	pCloth->m_pRenderingInstance->m_isStatic = false;
-	//}
 
 	// Start the simulation in a separate thread
 	// Capture a copy on the pointer instead of a reference to avoid a dangling pointer
@@ -82,13 +70,20 @@ bool ApplicationData::initSimulation()
 */
 bool ApplicationData::resetSimulation()
 {
-	// Stop the physics simulation
-	//m_pCloth->stopWorker();
+	// Stop the physics simulation for all the cloths
+	for (auto& pCloth : m_pCloths)
+	{
+		pCloth->stopWorker();
+	}
 
-	//m_pCloth = nullptr;
+	// Remove all the cloths from the rendering widget
+	for (auto& pCloth : m_pCloths)
+	{
+		m_pOpenGl3DWidget->removeObject(pCloth->m_pRenderingInstance);
+	}
 
-	//m_pOpenGl3DWidget->removeAllObjects();
-
+	// Clear the list of cloths
+	m_pCloths.clear();
 
 	// Reset the and restart the simulation
 	int res = initSimulation();
