@@ -76,6 +76,12 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
 	//appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
 	//appData.m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
+    std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
+    appData.m_cube3D.loadFromObjFile("../models/sphere_highRes/", "untitled.obj");
+    appData.m_pCube3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
+    appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { -2.5, 1.0, -2.5 };
+    appData.m_pCube3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+
     // Ground
     appData.m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
 	appData.m_pGround3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_ground3D);
@@ -83,10 +89,10 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
 	appData.m_pGround3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
 
 	// Debug sphere
-	appData.m_debugSphere3D.loadFromObjFile("../models/sphere/", "sphere.obj");
-	appData.m_pDebugSphere3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
-	appData.m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
-	appData.m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
+	//appData.m_debugSphere3D.loadFromObjFile("../models/sphere/", "sphere.obj");
+	//appData.m_pDebugSphere3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_debugSphere3D);
+	//appData.m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
+	//appData.m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
 
     return true;
 }

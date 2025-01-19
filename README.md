@@ -2,6 +2,9 @@
 This is a physics simulator project (C++, Qt, OpenGl)
 
 
+![Simulation Animation](imgs/Physicssimulation2025-01-19.gif)
+
+
 # Project setup
 
 ## On linux, make the scripts executable:
