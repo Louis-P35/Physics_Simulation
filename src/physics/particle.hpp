@@ -52,8 +52,8 @@ public:
 	Vec3 m_acceleration;
 
 	double m_mass = 1.0;
-	double m_airFriction = 4.0;
-	double m_objectFriction = 1.0;
+	double m_airFriction = 2.0;
+	double m_objectFriction = 1.25;
 
 	std::vector<Spring> m_springs;
 

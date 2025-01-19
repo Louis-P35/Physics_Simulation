@@ -96,7 +96,10 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 	{
 		m_position.y = 0.0;
 		m_velocity.y = -m_velocity.y;
-		m_velocity.y *= 0.1;
+		if (m_objectFriction > 0.0)
+		{
+			m_velocity.y *= 1.0 / m_objectFriction;
+		}
 	}
 
 	// Handle collision with the colliders
@@ -116,7 +119,10 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 			m_position = collPosition;
 			// Compute the new velocity
 			m_velocity = bounceVect * m_velocity.norm();
-			m_velocity *= 0.1;
+			if (m_objectFriction > 0.0)
+			{
+				m_velocity *= 1.0 / m_objectFriction;
+			}
 		}
 	}
 

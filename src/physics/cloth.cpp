@@ -14,7 +14,7 @@ Cloth::~Cloth()
 Cloth::Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position) :
 	m_resX(resX), m_resY(resY), m_width(width), m_height(height), m_thickness(thickness), m_clothMass(clothMass), m_position(position)
 {
-	const int nbParticles = m_resX * m_resY * 2.0;
+	const int nbParticles = m_resX * m_resY;// * 2.0;
 	const double particleMass = clothMass / static_cast<double>(nbParticles);
 
 	// Create particles
@@ -44,32 +44,39 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
-			const double distanceBetweenSame = (m_particlesTop[i][j].m_position - m_particlesBottom[i][j].m_position).norm();
-			m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesTop[i][j], distanceBetweenSame, springStrengh, springDamping));
-			m_particlesTop[i][j].m_springs.push_back(Spring(&m_particlesBottom[i][j], distanceBetweenSame, springStrengh, springDamping));
+			//const double distanceBetweenSame = (m_particlesTop[i][j].m_position - m_particlesBottom[i][j].m_position).norm();
+			//m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesTop[i][j], distanceBetweenSame, springStrengh, springDamping));
+			//m_particlesTop[i][j].m_springs.push_back(Spring(&m_particlesBottom[i][j], distanceBetweenSame, springStrengh, springDamping));
 
+			const int distEffect = 2;
 			// Loop over the neighbors
-			for (int ii = i - 1; ii <= i + 1; ++ii)
+			for (int ii = i - distEffect; ii <= i + distEffect; ++ii)
 			{
-				for (int jj = j - 1; jj <= j + 1; ++jj)
+				for (int jj = j - distEffect; jj <= j + distEffect; ++jj)
 				{
+					// Skip the current particle (and the indexes outside the grid)
 					if ((ii == i && jj == j) || ii < 0 || ii >= m_resX || jj < 0 || jj >= m_resY)
 					{
 						continue;
 					}
+
+					const int dist = std::max(std::abs(ii - i), std::abs(jj - j)); // dist can not be 0
+					const double strenghDecreaseFactor = 2.0;
+					const double springStrenghLocal = springStrengh / (static_cast<double>(dist) * strenghDecreaseFactor);
+
 					// Compute the distance between the particles, it is the same for top and bottom
 					const double distanceSameLayer = (m_particlesBottom[i][j].m_position - m_particlesBottom[ii][jj].m_position).norm();
-					const double distanceBetweenLayer = (m_particlesTop[i][j].m_position - m_particlesBottom[ii][jj].m_position).norm();
+					//const double distanceBetweenLayer = (m_particlesTop[i][j].m_position - m_particlesBottom[ii][jj].m_position).norm();
 
 					// Add the neighbor
-					m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesBottom[ii][jj], distanceSameLayer, springStrengh, springDamping));
+					m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesBottom[ii][jj], distanceSameLayer, springStrenghLocal, springDamping));
 					// Add the neighbor top particles
-					m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesTop[ii][jj], distanceBetweenLayer, springStrengh, springDamping));
+					//m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesTop[ii][jj], distanceBetweenLayer, springStrenghLocal, springDamping));
 
 					// Add the neighbor
-					m_particlesTop[i][j].m_springs.push_back(Spring(&m_particlesTop[ii][jj], distanceSameLayer, springStrengh, springDamping));
+					//m_particlesTop[i][j].m_springs.push_back(Spring(&m_particlesTop[ii][jj], distanceSameLayer, springStrenghLocal, springDamping));
 					// Add the neighbor top particles
-					m_particlesTop[i][j].m_springs.push_back(Spring(&m_particlesBottom[ii][jj], distanceBetweenLayer, springStrengh, springDamping));
+					//m_particlesTop[i][j].m_springs.push_back(Spring(&m_particlesBottom[ii][jj], distanceBetweenLayer, springStrenghLocal, springDamping));
 				}
 			}
 
@@ -144,7 +151,7 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 		for (int j = 0; j < m_resY; ++j)
 		{
 			m_particlesBottom[i][j].update(dt, colliders);
-			m_particlesTop[i][j].update(dt, colliders);
+			//m_particlesTop[i][j].update(dt, colliders);
 		}
 	}
 
@@ -156,12 +163,37 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 		{
 			m_particlesBottom[i][j].m_previousPosition = m_particlesBottom[i][j].m_position;
 			m_particlesBottom[i][j].m_previousVelocity = m_particlesBottom[i][j].m_velocity;
-			m_particlesTop[i][j].m_previousPosition = m_particlesTop[i][j].m_position;
-			m_particlesTop[i][j].m_previousVelocity = m_particlesTop[i][j].m_velocity;
+			//m_particlesTop[i][j].m_previousPosition = m_particlesTop[i][j].m_position;
+			//m_particlesTop[i][j].m_previousVelocity = m_particlesTop[i][j].m_velocity;
 
 			// Update mesh vertices
-			m_object3D.m_vertices[i * m_resY + j] = m_particlesBottom[i][j].m_position.toArray(); // Bottom side
-			m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = m_particlesTop[i][j].m_position.toArray(); // Top side
+			// Bottom side is updated according to the particlesBottom's positions
+			m_object3D.m_vertices[i * m_resY + j] = m_particlesBottom[i][j].m_position.toArray();
+
+			// Top side is updated according to the normals of the bottom side at a fixed distance (thickness)
+			Vec3 p0 = m_particlesBottom[i][j].m_position;
+			int nextI = i + 1;
+			int nextJ = j + 1;
+			bool isInverted = false;
+			if (nextI >= m_resX)
+			{
+				nextI = i - 1;
+				isInverted = true;
+			}
+			if (nextJ >= m_resY)
+			{
+				nextJ = j - 1;
+				isInverted = !isInverted; // XOR
+			}
+			Vec3 p1 = m_particlesBottom[nextI][j].m_position;
+			Vec3 p2 = m_particlesBottom[i][nextJ].m_position;
+			Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
+			if (!isInverted)
+			{
+				normal = normal * -1.0;
+			}
+			Vec3 posTop = m_particlesBottom[i][j].m_position + normal * m_thickness;
+			m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = posTop.toArray(); // Top side
 		}
 	}
 }
