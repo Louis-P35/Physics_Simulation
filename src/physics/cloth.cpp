@@ -213,7 +213,7 @@ void Cloth::initMesh()
 	initMeshSides();
 
 	// Load textures, Compute the tangent and bitangent vectors
-	m_object3D.postProcess("", false, false);
+	m_object3D.postProcess("C:\\Users\\louis\\Documents\\Repos\\Louis-P35\\Physics_Simulation\\models\\flippedNormals_fabrics_free\\flippedNormals_fabrics_free\\_final", true, true);
 }
 
 
@@ -226,13 +226,22 @@ void Cloth::initMesh()
 */
 void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace)
 {
-	// Create the vertices
+	constexpr float uvScale = 5.0f;
+
+	// Create the vertices, normals, UVs
 	for (int i = 0; i < m_resX; ++i)
 	{
+		const float u = (static_cast<float>(i) / static_cast<float>(m_resX - 1)) * uvScale;
+
 		for (int j = 0; j < m_resY; ++j)
 		{
+			// vertices
 			m_object3D.m_vertices.push_back(topBottomFace[i][j].m_position.toArray());
+			// Normals
 			m_object3D.m_normals.push_back({ 0.0f, 1.0f, 0.0f }); // TODO
+			// UVs
+			const float v = (static_cast<float>(j) / static_cast<float>(m_resY - 1)) * uvScale;
+			m_object3D.m_uvs.push_back({ u, v });
 		}
 	}
 
@@ -253,9 +262,9 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 				vertexIndexTop >= 0 && vertexIndexTop < m_object3D.m_vertices.size())
 			{
 				m_object3D.m_faces.push_back(
-					{ vertexIndexCurrent, -1, vertexIndexCurrent,
-					vertexIndexRight, -1, vertexIndexRight,
-					vertexIndexTop, -1, vertexIndexTop }
+					{ vertexIndexCurrent, vertexIndexCurrent, vertexIndexCurrent,
+					vertexIndexRight, vertexIndexRight, vertexIndexRight,
+					vertexIndexTop, vertexIndexTop, vertexIndexTop }
 				);
 			}
 			// Top face
@@ -264,9 +273,9 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 				vertexIndexTopRight >= 0 && vertexIndexTopRight < m_object3D.m_vertices.size())
 			{
 				m_object3D.m_faces.push_back(
-					{ vertexIndexRight, -1, vertexIndexRight,
-					vertexIndexTopRight, -1, vertexIndexTopRight,
-					vertexIndexTop, -1, vertexIndexTop }
+					{ vertexIndexRight, vertexIndexRight, vertexIndexRight,
+					vertexIndexTopRight, vertexIndexTopRight, vertexIndexTopRight,
+					vertexIndexTop, vertexIndexTop, vertexIndexTop }
 				);
 			}
 		}
@@ -291,18 +300,20 @@ void Cloth::initMeshSides()
 			const int vertexIndexRight = i * m_resY + (j + 1);
 			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
 
+			// XXX: UVs are not correct ?
 			m_object3D.m_faces.push_back(
-				{ vertexIndexCurrent, -1, vertexIndexCurrent,
-				vertexIndexRight, -1, vertexIndexRight,
-				vertexIndexTop, -1, vertexIndexTop }
+				{ vertexIndexCurrent, vertexIndexCurrent, vertexIndexCurrent,
+				vertexIndexRight, vertexIndexRight, vertexIndexRight,
+				vertexIndexTop, vertexIndexTop, vertexIndexTop }
 			);
 
 			const int vertexIndexTopRight = nbVerticesPerFace + i * m_resY + (j + 1);
 
+			// XXX: UVs are not correct ?
 			m_object3D.m_faces.push_back(
-				{ vertexIndexTop, -1, vertexIndexTop,
-				vertexIndexRight, -1, vertexIndexRight,
-				vertexIndexTopRight, -1, vertexIndexTopRight }
+				{ vertexIndexTop, vertexIndexTop, vertexIndexTop,
+				vertexIndexRight, vertexIndexRight, vertexIndexRight,
+				vertexIndexTopRight, vertexIndexTopRight, vertexIndexTopRight }
 			);
 		}
 	};
@@ -317,18 +328,20 @@ void Cloth::initMeshSides()
 			const int vertexIndexRight = (i + 1) * m_resY + j;
 			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
 
+			// XXX: UVs are not correct ?
 			m_object3D.m_faces.push_back(
-				{ vertexIndexCurrent, -1, vertexIndexCurrent,
-				vertexIndexRight, -1, vertexIndexRight,
-				vertexIndexTop, -1, vertexIndexTop }
+				{ vertexIndexCurrent, vertexIndexCurrent, vertexIndexCurrent,
+				vertexIndexRight, vertexIndexRight, vertexIndexRight,
+				vertexIndexTop, vertexIndexTop, vertexIndexTop }
 			);
 
 			const int vertexIndexTopRight = nbVerticesPerFace + (i + 1) * m_resY + j;
 
+			// XXX: UVs are not correct ?
 			m_object3D.m_faces.push_back(
-				{ vertexIndexTop, -1, vertexIndexTop,
-				vertexIndexRight, -1, vertexIndexRight,
-				vertexIndexTopRight, -1, vertexIndexTopRight }
+				{ vertexIndexTop, vertexIndexTop, vertexIndexTop,
+				vertexIndexRight, vertexIndexRight, vertexIndexRight,
+				vertexIndexTopRight, vertexIndexTopRight, vertexIndexTopRight }
 			);
 		}
 	};
