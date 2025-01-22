@@ -21,7 +21,7 @@ OpenGl3DWidget::OpenGl3DWidget(QWidget* pParent) : QOpenGLWidget(pParent)
     // Request a compatibility profile for fixed-function pipeline support
     QSurfaceFormat format;
     format.setProfile(QSurfaceFormat::CompatibilityProfile);
-    format.setVersion(2, 1);  // Requesting an older version for compatibility
+    format.setVersion(4, 6);  // Requesting an older version for compatibility
     setFormat(format);
 
 	// Create a timer to trigger the paintGL() function
@@ -47,6 +47,8 @@ OpenGl3DWidget::~OpenGl3DWidget()
 void OpenGl3DWidget::initializeGL()
 {
     initializeOpenGLFunctions();
+
+    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
     // Set clear color and enable depth testing
     glClearColor(0.229f, 0.508f, 0.622f, 1.0f);
@@ -164,11 +166,15 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
     // Light pos and camera pos
     m_pShader.m_shaderProgram.setUniformValue("lightPos", m_lightPosition);
     m_pShader.m_shaderProgram.setUniformValue("viewPos", m_cameraPosition);
+    // Bump
+    m_pShader.m_shaderProgram.setUniformValue("displacementScale", 0.05f);
+    m_pShader.m_shaderProgram.setUniformValue("tessellationFactor", 20.0f);
 
     // Set textures
-    // color
+    // Color (diffuse)
     bool colorTextureAvailable = (pObjRender->m_pColorTexture != nullptr);
     m_pShader.m_shaderProgram.setUniformValue("useColorTexture", colorTextureAvailable);
+	
     if (colorTextureAvailable)
     {
         glActiveTexture(GL_TEXTURE0);  // Select texture 0 unit
@@ -179,7 +185,7 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
         m_pShader.m_shaderProgram.setUniformValue("colorTexture", 0);  // Link sampler to texture unit 0
     }
 
-    // normal
+    // Normal
     bool normalTextureAvailable = (pObjRender->m_pNormalTexture != nullptr);
     m_pShader.m_shaderProgram.setUniformValue("useNormalTexture", normalTextureAvailable);
     if (normalTextureAvailable)
@@ -192,8 +198,22 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
         m_pShader.m_shaderProgram.setUniformValue("normalTexture", 1);  // Link sampler to texture unit 1
     }
 
+    // Bump
+    bool bumpTextureAvailable = (pObjRender->m_pBumpTexture != nullptr);
+    m_pShader.m_shaderProgram.setUniformValue("useBumpTexture", bumpTextureAvailable);
+    if (bumpTextureAvailable)
+    {
+        glActiveTexture(GL_TEXTURE2);  // Select texture 2 unit
+        if (pObjRender->m_pBumpTexture)
+        {
+            pObjRender->m_pBumpTexture->bind();
+        }
+        m_pShader.m_shaderProgram.setUniformValue("bumpTexture", 2);  // Link sampler to texture unit 2
+    }
+
     pObjRender->m_vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, GLsizei(pObjRender->m_verticesData.size()));
+    glPatchParameteri(GL_PATCH_VERTICES, 3);  // 3 vertices per patch (triangle)
+    glDrawArrays(GL_PATCHES, 0, GLsizei(pObjRender->m_verticesData.size())); // GL_PATCHES for tessellation
     pObjRender->m_vao.release();
 
     m_pShader.m_shaderProgram.release();
@@ -267,6 +287,7 @@ std::shared_ptr<ObjectRenderingInstance> OpenGl3DWidget::initialyzeObject3D(Obje
 	// Copy the textures
 	objInst->m_pColorTexture = object3D.m_pColorTexture;
 	objInst->m_pNormalTexture = object3D.m_pNormalTexture;
+    objInst->m_pBumpTexture = object3D.m_pBumpTexture;
 
 	// Add it to the list of objects to render
     m_objectsToRenderList.push_back(objInst);
@@ -303,7 +324,7 @@ void OpenGl3DWidget::updateObject3D(std::shared_ptr<ObjectRenderingInstance> pOb
 */
 void OpenGl3DWidget::loadShaders()
 {
-    if (m_pShader.loadShader("../shaders/vertex.glsl", "../shaders/fragment.glsl"))
+    if (m_pShader.loadShader("../shaders/vertex.glsl", "../shaders/tessellationControl.glsl", "../shaders/tessellationEvaluation.glsl", "../shaders/fragment.glsl"))
     {
         std::cout << "Shader loaded successfully" << std::endl;
     }

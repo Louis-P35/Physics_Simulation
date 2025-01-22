@@ -121,27 +121,26 @@ bool Object3D::postProcess(const std::string& path, bool hasNormals, bool hasUVs
     // Load the textures
     // Color
     const fs::path colorTexturePath = fs::path(path) / "textures" / "color.png";
-    m_pColorTexture = loadTexture(colorTexturePath.string());
-    if (m_pColorTexture != nullptr)
-    {
-        std::cout << "Color texture loaded successfully." << std::endl;
-    }
-    else
-    {
-        std::cerr << "Error: Failed to load color texture : " << colorTexturePath.string() << std::endl;
-    }
+    auto loadText = [this](std::shared_ptr<QOpenGLTexture>& pTexture, const std::string path){
+            pTexture = loadTexture(path);
+            if (pTexture != nullptr)
+            {
+                std::cout << "Texture " << path << " loaded successfully." << std::endl;
+            }
+            else
+            {
+                std::cerr << "Error: Failed to load texture : " << path << std::endl;
+            }
+        };
+	loadText(m_pColorTexture, colorTexturePath.string());
 
     // Normal
     const fs::path normalTexturePath = fs::path(path) / "textures" / "normal.png";
-    m_pNormalTexture = loadTexture(normalTexturePath.string());
-    if (m_pNormalTexture != nullptr)
-    {
-        std::cout << "Normal texture loaded successfully." << std::endl;
-    }
-    else
-    {
-        std::cerr << "Error: Failed to load normal texture : " << normalTexturePath.string() << std::endl;
-    }
+    loadText(m_pNormalTexture, normalTexturePath.string());
+
+    // Bump
+    const fs::path bumpTexturePath = fs::path(path) / "textures" / "bump.png";
+    loadText(m_pBumpTexture, bumpTexturePath.string());
 
     // Compute tangent and bitangent vectors (needed for normal mapping)
     if (hasNormals && hasUVs)

@@ -1,8 +1,8 @@
 #version 330 core
-in vec2 fragUV;
-in vec3 fragNormal;
-in vec3 fragPosition;
-in mat3 TBN;
+in vec2 tessUV;
+in vec3 tessNormal;
+in vec3 tessPosition;
+in mat3 tessTBN;
 out vec4 FragColor;
 
 uniform vec3 lightPos;              // Position of the light source
@@ -15,22 +15,22 @@ uniform bool useNormalTexture;
 void main()
 {
     // Normalize the normal
-    vec3 normal = normalize(fragNormal);
+    vec3 normal = normalize(tessNormal);
 
     // Apply normal mapping if activated
     if(useNormalTexture)
     {
         // Get the normal from the normal map
-        vec3 tangentNormal = texture(normalTexture, fragUV).rgb;
+        vec3 tangentNormal = texture(normalTexture, tessUV).rgb;
         // Remap it's coordinates from [0,1] to [-1,1]
         // Because texture store RGB data between [0, 1] but normal vectors are between the [-1, 1] range
         tangentNormal = tangentNormal * 2.0 - 1.0;
         // Transform the normale from tangent space to world/camera space with the TBN matrix
-        normal = normalize(TBN * tangentNormal);
+        normal = normalize(tessTBN * tangentNormal);
     }
     
     // Compute the direction of the light source
-    vec3 lightDir = normalize(lightPos - fragPosition);
+    vec3 lightDir = normalize(lightPos - tessPosition);
     
     // Diffuse component of the lambertian reflection model
     float diff = max(dot(normal, lightDir), 0.0);
@@ -39,7 +39,7 @@ void main()
     vec3 baseColor;
     if(useColorTexture)
     {
-        baseColor = texture(colorTexture, fragUV).rgb;
+        baseColor = texture(colorTexture, tessUV).rgb;
     }
     else
     {

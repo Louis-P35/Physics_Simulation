@@ -6,7 +6,8 @@
 
 // Includes from 3rd party
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+//#include <QOpenGLFunctions>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
@@ -35,6 +36,7 @@ public:
 
     std::shared_ptr<QOpenGLTexture> m_pColorTexture;
     std::shared_ptr<QOpenGLTexture> m_pNormalTexture;
+    std::shared_ptr<QOpenGLTexture> m_pBumpTexture;
 
     bool m_isStatic = true;
     mutable std::mutex m_mutex;
@@ -61,7 +63,7 @@ public:
 * 
 * This class is a custom QOpenGLWidget that is used to render 3D graphics
 */
-class OpenGl3DWidget : public QOpenGLWidget, protected QOpenGLFunctions
+class OpenGl3DWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
 

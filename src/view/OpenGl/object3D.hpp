@@ -51,6 +51,7 @@ class Object3D
 public:
 	std::shared_ptr<QOpenGLTexture> m_pColorTexture;
 	std::shared_ptr<QOpenGLTexture> m_pNormalTexture;
+	std::shared_ptr<QOpenGLTexture> m_pBumpTexture;
 
 	std::vector<std::array<float, 3>> m_vertices;
 	std::vector<std::array<float, 3>> m_normals;

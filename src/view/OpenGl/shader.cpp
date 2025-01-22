@@ -17,16 +17,24 @@ namespace fs = std::filesystem;
 * @param vertexPath Path to the vertex shader
 * @param fragmentPath Path to the fragment shader
 */
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
+Shader::Shader(
+    const std::string& vertexPath,
+    const std::string& tessControlPath,
+    const std::string& tessEvalPath,
+    const std::string& fragmentPath)
 {
-	if (!loadShader(vertexPath, fragmentPath))
+	if (!loadShader(vertexPath, tessControlPath, tessEvalPath, fragmentPath))
 	{
 		throw std::runtime_error("Failed to load shader");
 	}
 }
 
 
-bool Shader::loadShader(const std::string& vertexPath, const std::string& fragmentPath)
+bool Shader::loadShader(
+    const std::string& vertexPath,
+    const std::string& tessControlPath,
+    const std::string& tessEvalPath,
+    const std::string& fragmentPath)
 {
     if (!fs::exists(vertexPath))
     {
@@ -56,6 +64,28 @@ bool Shader::loadShader(const std::string& vertexPath, const std::string& fragme
         std::string errorMsg = errorLog.toStdString();
         std::cerr << "Failed to load fragment shader :" << std::endl << errorMsg << std::endl;
         return false;
+    }
+    if (!tessControlPath.empty())
+    {
+        if (!m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::TessellationControl, tessControlPath.c_str()))
+        {
+            // Get the error message from the exception
+            QString errorLog = m_shaderProgram.log();
+            std::string errorMsg = errorLog.toStdString();
+            std::cerr << "Failed to load tessellation Control shader :" << std::endl << errorMsg << std::endl;
+            return false;
+        }
+    }
+    if (!tessEvalPath.empty())
+    {
+        if (!m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, tessEvalPath.c_str()))
+        {
+            // Get the error message from the exception
+            QString errorLog = m_shaderProgram.log();
+            std::string errorMsg = errorLog.toStdString();
+            std::cerr << "Failed to load tessellation Evaluation shader :" << std::endl << errorMsg << std::endl;
+            return false;
+        }
     }
 
     // Link shaders
