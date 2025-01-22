@@ -51,7 +51,8 @@ Vec3 Particle::computeForces(const Vec3& gravity)
 	Vec3 forces = gravity * m_mass;
 
 	// Air friction
-	forces -= m_previousVelocity * m_airFriction;
+	double velNorm = m_previousVelocity.norm();
+	forces -= m_previousVelocity.getNormalized() * m_airFriction * velNorm * velNorm;
 
 	// Object friction TODO
 
