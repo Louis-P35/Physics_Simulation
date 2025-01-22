@@ -102,7 +102,8 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
     std::cout << "File: " << fullPath << " loaded successfully." << std::endl;
 
     // Load textures, Compute the tangent and bitangent vectors
-    bool ppRet = postProcess(path, hasNormal, hasUV);
+    const fs::path texturePath = fs::path(path) / "textures";
+    bool ppRet = postProcess(texturePath.string(), hasNormal, hasUV);
 
     return ppRet;
 }
@@ -120,26 +121,26 @@ bool Object3D::postProcess(const std::string& path, bool hasNormals, bool hasUVs
 {
     // Load the textures
     // Color
-    const fs::path colorTexturePath = fs::path(path) / "textures" / "color.png";
-    auto loadText = [this](std::shared_ptr<QOpenGLTexture>& pTexture, const std::string path){
-            pTexture = loadTexture(path);
+    const fs::path colorTexturePath = fs::path(path) / "color.png";
+    auto loadText = [this](std::shared_ptr<QOpenGLTexture>& pTexture, const std::string _path){
+            pTexture = loadTexture(_path);
             if (pTexture != nullptr)
             {
-                std::cout << "Texture " << path << " loaded successfully." << std::endl;
+                std::cout << "Texture " << _path << " loaded successfully." << std::endl;
             }
             else
             {
-                std::cerr << "Error: Failed to load texture : " << path << std::endl;
+                std::cerr << "Error: Failed to load texture : " << _path << std::endl;
             }
         };
 	loadText(m_pColorTexture, colorTexturePath.string());
 
     // Normal
-    const fs::path normalTexturePath = fs::path(path) / "textures" / "normal.png";
+    const fs::path normalTexturePath = fs::path(path) / "normal.png";
     loadText(m_pNormalTexture, normalTexturePath.string());
 
     // Bump
-    const fs::path bumpTexturePath = fs::path(path) / "textures" / "bump.png";
+    const fs::path bumpTexturePath = fs::path(path) / "bump.png";
     loadText(m_pBumpTexture, bumpTexturePath.string());
 
     // Compute tangent and bitangent vectors (needed for normal mapping)

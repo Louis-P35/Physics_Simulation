@@ -213,7 +213,7 @@ void Cloth::initMesh()
 	initMeshSides();
 
 	// Load textures, Compute the tangent and bitangent vectors
-	m_object3D.postProcess("C:\\Users\\louis\\Documents\\Repos\\Louis-P35\\Physics_Simulation\\models\\flippedNormals_fabrics_free\\flippedNormals_fabrics_free\\_final", true, true);
+	m_object3D.postProcess("../models/fabrics_textures/1", true, true);
 }
 
 

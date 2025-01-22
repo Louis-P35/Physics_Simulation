@@ -1,9 +1,9 @@
 #version 400 core
 layout(triangles, equal_spacing, ccw) in;
 
-uniform sampler2D bumpTexture;   // Bump map utilisée pour le displacement
+uniform sampler2D bumpTexture;   // Bump map used for displacement
 uniform bool useBumpTexture;
-uniform float displacementScale;  // Intensité du displacement
+uniform float displacementScale;  // Displacementc scale factor
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -26,7 +26,7 @@ void main()
               tcsTBN[1] * gl_TessCoord.y +
               tcsTBN[2] * gl_TessCoord.z;
 
-    // Interpolation barycentrique des UV et autres attributs
+    // Barycentric interpolation of UVs and others attributs
     tessUV = tcsUV[0] * gl_TessCoord.x +
              tcsUV[1] * gl_TessCoord.y +
              tcsUV[2] * gl_TessCoord.z;
@@ -39,7 +39,7 @@ void main()
                   tcsNormal[1] * gl_TessCoord.y +
                   tcsNormal[2] * gl_TessCoord.z;
 
-    // Applique le displacement mapping
+    // Apply displacement mapping
     float displacement = 0.0;
     if (useBumpTexture)
     {
@@ -48,7 +48,7 @@ void main()
     
     pos += normalize(normal) * displacement;
 
-    // Passe les attributs transformés au fragment shader
+    // Give the transformed attributs to the fragment shader
     tessPosition = pos;
     tessNormal = normalize(normal);
     gl_Position = projection * view * model * vec4(pos, 1.0);
