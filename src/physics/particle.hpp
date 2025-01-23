@@ -54,6 +54,7 @@ public:
 	double m_mass = 1.0;
 	double m_airFriction = 1.5;
 	double m_objectFriction = 1.25;
+	double m_groundFriction = 4.0;
 
 	std::vector<Spring> m_springs;
 

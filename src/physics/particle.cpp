@@ -97,9 +97,9 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 	{
 		m_position.y = 0.0;
 		m_velocity.y = -m_velocity.y;
-		if (m_objectFriction > 0.0)
+		if (m_groundFriction > 0.0)
 		{
-			m_velocity.y *= 1.0 / m_objectFriction;
+			m_velocity *= 1.0 / m_groundFriction;
 		}
 	}
 
