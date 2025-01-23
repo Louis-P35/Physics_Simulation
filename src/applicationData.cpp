@@ -9,7 +9,58 @@
 
 ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 {
-	m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-1.5, 1.0, -1.5), 1.0));
+	m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-2.5, 1.5, -2.5), 1.0));
+}
+
+
+ApplicationData::~ApplicationData()
+{
+	std::cout << "STOP WORKERS" << std::endl;
+	// Stop the physics simulation for all the cloths
+	for (auto& pCloth : m_pCloths)
+	{
+		if (pCloth)
+		{
+			pCloth->stopWorker();
+		}
+	}
+}
+
+
+bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
+{
+	//Object3D test;
+	//m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
+
+	//m_monkey3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
+	//m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
+
+	//std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
+	//m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
+	//m_pCube3DRenderer = pGl3dWidget->addObject(m_cube3D);
+	//m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
+	//m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
+
+	std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
+	m_cube3D.loadFromObjFile("../models/sphere_highRes/", "untitled.obj");
+	//m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
+	m_pCube3DRenderer = pGl3dWidget->addObject(m_cube3D);
+	m_pCube3DRenderer->m_pPosRotScale->m_position = { -2.5, 1.5, -2.5 };
+	m_pCube3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+
+	// Ground
+	m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
+	m_pGround3DRenderer = pGl3dWidget->addObject(m_ground3D);
+	m_pGround3DRenderer->m_pPosRotScale->m_position = { 0.0f, 0.0f, 0.0f };
+	m_pGround3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+
+	// Debug sphere
+	//m_debugSphere3D.loadFromObjFile("../models/sphere/", "sphere.obj");
+	//m_pDebugSphere3DRenderer = pGl3dWidget->addObject(m_debugSphere3D);
+	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
+	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
+
+	return true;
 }
 
 
