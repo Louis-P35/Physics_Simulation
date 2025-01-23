@@ -9,7 +9,7 @@
 
 ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 {
-	m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-2.5, 1.0, -2.5), 1.0));
+	m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-1.5, 1.0, -1.5), 1.0));
 }
 
 
@@ -29,7 +29,7 @@ bool ApplicationData::initSimulation()
 
 	// Create a cloth
 	Vec3 position = Vec3(-4.0, 2.5, -4.0);
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(50, 50, 5.0, 5.0, 0.025, 300.0, position);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(40, 40, 5.0, 5.0, 0.025, 300.0, position);
 	m_pCloths.push_back(pCloth);
 
 	// Add the mesh of the cloth to the rendering widget

@@ -75,6 +75,8 @@ bool Shader::loadShader(
             std::cerr << "Failed to load tessellation Control shader :" << std::endl << errorMsg << std::endl;
             return false;
         }
+
+        m_useTessellation = true;
     }
     if (!tessEvalPath.empty())
     {

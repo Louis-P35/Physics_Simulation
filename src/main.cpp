@@ -78,8 +78,9 @@ bool initAfterOpenGl(ApplicationData& appData, MainWindow& window)
 
     std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
     appData.m_cube3D.loadFromObjFile("../models/sphere_highRes/", "untitled.obj");
+    //appData.m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
     appData.m_pCube3DRenderer = window.m_pOpenGl3DWidgetClothSimulation->addObject(appData.m_cube3D);
-    appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { -2.5, 1.0, -2.5 };
+    appData.m_pCube3DRenderer->m_pPosRotScale->m_position = { -1.5, 1.0, -1.5 };
     appData.m_pCube3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
 
     // Ground

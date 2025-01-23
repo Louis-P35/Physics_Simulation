@@ -174,7 +174,7 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
     // Color (diffuse)
     bool colorTextureAvailable = (pObjRender->m_pColorTexture != nullptr);
     m_pShader.m_shaderProgram.setUniformValue("useColorTexture", colorTextureAvailable);
-	
+
     if (colorTextureAvailable)
     {
         glActiveTexture(GL_TEXTURE0);  // Select texture 0 unit
@@ -212,8 +212,13 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
     }
 
     pObjRender->m_vao.bind();
-    glPatchParameteri(GL_PATCH_VERTICES, 3);  // 3 vertices per patch (triangle)
-    glDrawArrays(GL_PATCHES, 0, GLsizei(pObjRender->m_verticesData.size())); // GL_PATCHES for tessellation
+    GLenum drawMode = GL_TRIANGLES;
+    if (m_pShader.m_useTessellation)
+    {
+        glPatchParameteri(GL_PATCH_VERTICES, 3);  // 3 vertices per patch (triangle)
+        drawMode = GL_PATCHES;
+    }
+    glDrawArrays(drawMode, 0, GLsizei(pObjRender->m_verticesData.size())); // GL_PATCHES for tessellation
     pObjRender->m_vao.release();
 
     m_pShader.m_shaderProgram.release();
@@ -325,6 +330,7 @@ void OpenGl3DWidget::updateObject3D(std::shared_ptr<ObjectRenderingInstance> pOb
 void OpenGl3DWidget::loadShaders()
 {
     if (m_pShader.loadShader("../shaders/vertex.glsl", "../shaders/tessellationControl.glsl", "../shaders/tessellationEvaluation.glsl", "../shaders/fragment.glsl"))
+    //if (m_pShader.loadShader("../shaders/vertex.glsl", "", "", "../shaders/fragment.glsl"))
     {
         std::cout << "Shader loaded successfully" << std::endl;
     }

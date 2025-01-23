@@ -14,6 +14,7 @@ class Shader
 {
 public:
     QOpenGLShaderProgram m_shaderProgram;
+    bool m_useTessellation = false;
 
 public:
     Shader(
