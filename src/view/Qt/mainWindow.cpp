@@ -39,6 +39,7 @@ MainWindow::MainWindow(ApplicationData& appData, QWidget* pParent) : QMainWindow
     m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(this);
     m_pClothWidget = new ClothWidget(this);
 	this->createTab("Cloth simulation", m_pOpenGl3DWidgetClothSimulation, m_pClothWidget, pTabWidget);
+    appData.m_pOpenGl3DWidget = m_pOpenGl3DWidgetClothSimulation;
 
     // Create second tab
 	this->createTab("Fluid simulation", nullptr, nullptr, pTabWidget);

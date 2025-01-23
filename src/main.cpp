@@ -41,8 +41,5 @@ int main(int argc, char** argv)
 	std::cout << "Application started" << std::endl;
     appData.initAfterOpenGl(window.m_pOpenGl3DWidgetClothSimulation);
 
-	appData.m_pOpenGl3DWidget = window.m_pOpenGl3DWidgetClothSimulation;
-	appData.initSimulation();
-
     return app.exec();
 }

@@ -1,6 +1,7 @@
 // Includes from project
 #include "applicationData.hpp"
 #include "../src/physics/sphereCollider.hpp"
+#include "../src/physics/clothFactory.hpp"
 
 // Includes from STL
 #include <iostream>
@@ -60,7 +61,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
 	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
 
-	return true;
+	return initSimulation();
 }
 
 
@@ -80,36 +81,8 @@ bool ApplicationData::initSimulation()
 
 	// Create a cloth
 	Vec3 position = Vec3(-4.0, 2.5, -4.0);
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(40, 40, 5.0, 5.0, 0.025, 300.0, position);
+	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(40, 40, 5.0, 5.0, 0.025, 300.0, position, m_pOpenGl3DWidget, m_colliders);
 	m_pCloths.push_back(pCloth);
-
-	// Add the mesh of the cloth to the rendering widget
-	pCloth->m_pRenderingInstance = m_pOpenGl3DWidget->addObject(pCloth->m_object3D);
-	pCloth->m_pRenderingInstance->m_isStatic = false;
-
-	/*for (int i = 0; i < pCloth->m_resX; ++i)
-	{
-		for (int j = 0; j < pCloth->m_resY; ++j)
-		{
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesBottom[i][j].m_position.toArray();
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesTop[i][j].m_position.toArray();
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-		}
-	}*/
-
-	// Start the simulation in a separate thread
-	// Capture a copy on the pointer instead of a reference to avoid a dangling pointer
-	pCloth->startWorker([pCloth, pColliders = &m_colliders]() {
-		// Perform physics updates
-		pCloth->updateSimulation(*pColliders);
-
-		// Emit a signal to update GUI if needed
-		//QApplication::postEvent(&window, new QEvent(QEvent::UpdateRequest));
-		});
 }
 
 
