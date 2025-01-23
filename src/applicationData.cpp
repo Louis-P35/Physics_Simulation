@@ -1,7 +1,8 @@
 // Includes from project
 #include "applicationData.hpp"
 #include "../src/physics/sphereCollider.hpp"
-#include "../src/physics/clothFactory.hpp"
+#include "clothFactory.hpp"
+#include "objectsFactory.hpp"
 
 // Includes from STL
 #include <iostream>
@@ -10,7 +11,7 @@
 
 ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 {
-	m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-2.5, 1.5, -2.5), 1.0));
+	//m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-2.5, 1.5, -2.5), 1.0));
 }
 
 
@@ -42,12 +43,25 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	//m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
 	//m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
-	std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
-	m_cube3D.loadFromObjFile("../models/sphere_highRes/", "untitled.obj");
-	//m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
-	m_pCube3DRenderer = pGl3dWidget->addObject(m_cube3D);
-	m_pCube3DRenderer->m_pPosRotScale->m_position = { -2.5, 1.5, -2.5 };
-	m_pCube3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+	//m_cube3D.loadFromObjFile("../models/sphere_highRes/", "untitled.obj");
+	////m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
+	//m_pCube3DRenderer = pGl3dWidget->addObject(m_cube3D);
+	//m_pCube3DRenderer->m_pPosRotScale->m_position = { -2.5, 1.5, -2.5 };
+	//m_pCube3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+
+	std::shared_ptr<Collider> pCollider = nullptr;
+	ObjectsFactory::load3dObject(
+		m_cube3D,
+		m_pCube3DRenderer,
+		pCollider,
+		pGl3dWidget,
+		"sphere_highRes/",
+		"untitled.obj",
+		Vec3(-2.5, 1.5, -2.5),
+		Vec3(1.0, 1.0, 1.0)
+	);
+	m_colliders.push_back(pCollider);
+	
 
 	// Ground
 	m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");

@@ -27,7 +27,8 @@ namespace fs = std::filesystem;
 */
 bool Object3D::loadFromObjFile(const std::string& path, const std::string& filename)
 {
-	const std::string fullPath = path + filename;
+    const fs::path _fullPath = fs::path(path) / fs::path(filename);
+    const std::string fullPath = _fullPath.string();
     bool hasNormal = false;
 	bool hasUV = false;
 

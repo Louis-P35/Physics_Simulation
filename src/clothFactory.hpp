@@ -1,7 +1,7 @@
 #pragma once
 
 // Includes from project
-#include "cloth.hpp"
+#include "../src/physics/cloth.hpp"
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/physics/collider.hpp"
@@ -23,8 +23,8 @@
 class ClothFactory
 {
 public:
-	ClothFactory() {};
-	~ClothFactory() {};
+	ClothFactory() = delete;
+	~ClothFactory() = delete;
 
 	static std::shared_ptr<Cloth> createCloth(
 		int resX, 

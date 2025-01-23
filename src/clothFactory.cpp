@@ -7,6 +7,20 @@
 #include <iostream>
 
 
+/*
+* Static method to create a cloth
+* 
+* @param resX Resolution of the cloth in the X direction
+* @param resY Resolution of the cloth in the Y direction
+* @param width Width of the cloth
+* @param height Height of the cloth
+* @param thickness Thickness of the cloth
+* @param clothMass Mass of the cloth (mass of each particle is computed from this value)
+* @param position Position of the cloth
+* @param pOpenGl3DWidget OpenGl3DWidget to add the cloth to
+* @param colliders List of colliders
+* @return std::shared_ptr<Cloth> Pointer to the created cloth
+*/
 std::shared_ptr<Cloth> ClothFactory::createCloth(
 	int resX,
 	int resY,
@@ -32,6 +46,7 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);
 	pCloth->m_pRenderingInstance->m_isStatic = false;
 
+	// Debug view of the particles
 	/*for (int i = 0; i < pCloth->m_resX; ++i)
 	{
 		for (int j = 0; j < pCloth->m_resY; ++j)

@@ -7,7 +7,6 @@
 #include "../src/physics/cloth.hpp"
 #include "../src/physics/sphereCollider.hpp"
 #include "physicsWorker.hpp"
-#include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 
 // Includes from 3rd party
 #include <QObject>
