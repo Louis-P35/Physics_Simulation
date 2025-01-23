@@ -20,6 +20,7 @@ set(SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/clothFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/objectsFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/physics/collider.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/aabb.cpp
     ${CMAKE_SOURCE_DIR}/src/physics/sphereCollider.cpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/OpenGl3DWidget.cpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.cpp
@@ -38,6 +39,7 @@ set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/clothFactory.hpp
     ${CMAKE_SOURCE_DIR}/src/objectsFactory.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/collider.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/aabb.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/sphereCollider.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/OpenGl3DWidget.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp

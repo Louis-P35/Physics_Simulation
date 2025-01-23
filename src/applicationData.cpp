@@ -11,13 +11,12 @@
 
 ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 {
-	//m_colliders.push_back(std::make_shared<SphereCollider>(Vec3(-2.5, 1.5, -2.5), 1.0));
+	
 }
 
 
 ApplicationData::~ApplicationData()
 {
-	std::cout << "STOP WORKERS" << std::endl;
 	// Stop the physics simulation for all the cloths
 	for (auto& pCloth : m_pCloths)
 	{
@@ -31,6 +30,12 @@ ApplicationData::~ApplicationData()
 
 bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 {
+	if (!pGl3dWidget)
+	{
+		std::cerr << "Error: OpenGl3DWidget is not initialized" << std::endl;
+		return false;
+	}
+
 	//Object3D test;
 	//m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
 

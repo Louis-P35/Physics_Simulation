@@ -5,6 +5,7 @@
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/physics/collider.hpp"
+#include "../src/physics/aabb.hpp"
 
 // Includes from STL
 #include <vector>
@@ -62,6 +63,7 @@ public:
 
 private:
 	bool isFixed = false;
+	AABB m_aabb;
 
 public:
 	Particle(Vec3 position, double mass);

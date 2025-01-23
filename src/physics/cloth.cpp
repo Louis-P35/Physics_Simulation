@@ -22,6 +22,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	{
 		std::vector<Particle> rowBottom;
 		std::vector<Particle> rowTop;
+
 		for (int j = 0; j < m_resY; ++j)
 		{
 			Vec3 posBottom = Vec3(m_position.x + static_cast<double>(i) * m_width / m_resX, m_position.y, m_position.z + static_cast<double>(j) * m_height / m_resY);
@@ -36,7 +37,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	}
 
 	// Define the spring parameters
-	const double springStrengh = 500.0;
+	const double springStrengh = 1000.0;
 	const double springDamping = 0.0;
 
 	// Create the springs
@@ -127,9 +128,9 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 {
 	// Clamp the time step to avoid huge time steps
 	// This is a simple way to avoid instability in the simulation
-	if (dt > 0.1)
+	if (dt > 0.01)
 	{
-		dt = 0.1;
+		dt = 0.01;
 	}
 
 
