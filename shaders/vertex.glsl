@@ -16,9 +16,11 @@ out mat3 TBN;  // TBN matrix for normal mapping
 
 void main()
 {
+    //gl_Position = vec4(inPosition, 1.0);
     vec4 worldPosition = model * vec4(inPosition, 1.0);
     fragPosition = worldPosition.xyz;
     fragNormal = mat3(transpose(inverse(model))) * inNormal;
+    //fragNormal = inNormal;
     fragUV = inUV;
 
     // Transformation of tangent, bitangent and normal vectors in world space
@@ -26,12 +28,10 @@ void main()
     vec3 B = normalize(mat3(model) * inBitangent);
     vec3 N = normalize(mat3(model) * inNormal);
 
-    //vec3 T = vec3(1.0, 0.0, 0.0);       // Tangente constante
-    //vec3 B = vec3(0.0, 0.0, -1.0);      // Binormale constante
-    //vec3 N = vec3(0.0, 1.0, 0.0);       // Normale constante
-
     // Construction of the TBN matrix
     TBN = mat3(T, B, N);
 
-    gl_Position = projection * view * worldPosition;
+    // The projection * view will be handled in the tessellation evaluation shader
+    //gl_Position = projection * view * worldPosition;
+    gl_Position = worldPosition;
 }
