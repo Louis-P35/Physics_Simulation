@@ -28,10 +28,30 @@ public:
 	ObjectsFactory() = delete;
 	~ObjectsFactory() = delete;
 
-	static void load3dObject(
+	static void create3dObject(
 		Object3D& object3d,
 		std::shared_ptr<ObjectRenderingInstance>& pRenderingInstance,
 		std::shared_ptr<Collider>& pCollider,
+		OpenGl3DWidget* pGl3dWidget,
+		const std::string& folderName,
+		const std::string& fileName,
+		Vec3 pos,
+		Vec3 scale
+	);
+
+	static void createSphere(
+		Object3D& object3d,
+		std::shared_ptr<ObjectRenderingInstance>& pRenderingInstance,
+		std::shared_ptr<Collider>& pCollider,
+		OpenGl3DWidget* pGl3dWidget,
+		Vec3 pos,
+		double radius
+	);
+
+private:
+	static void load3dObject(
+		Object3D& object3d,
+		std::shared_ptr<ObjectRenderingInstance>& pRenderingInstance,
 		OpenGl3DWidget* pGl3dWidget,
 		const std::string& folderName,
 		const std::string& fileName,
