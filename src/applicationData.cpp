@@ -92,7 +92,7 @@ bool ApplicationData::initSimulation()
 
 	// Create a cloth
 	Vec3 position = Vec3(-4.0, 2.5, -4.0);
-	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(40, 40, 5.0, 5.0, 0.025, 300.0, position, m_pOpenGl3DWidget, m_colliders);
+	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(20, 20, 5.0, 5.0, 0.025, 300.0, position, m_pOpenGl3DWidget, m_colliders);
 	m_pCloths.push_back(pCloth);
 }
 

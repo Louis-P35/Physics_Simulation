@@ -16,6 +16,9 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 {
 	const int nbParticles = m_resX * m_resY;
 	const double particleMass = clothMass / static_cast<double>(nbParticles);
+	const double distBetweenParticlesX = m_width / static_cast<double>(m_resX);
+	const double distBetweenParticlesY = m_height / static_cast<double>(m_resY);
+	const double halfDistBetweenParticles = std::max(distBetweenParticlesX, distBetweenParticlesY) / 2.0;
 
 	// Create particles
 	for (int i = 0; i < m_resX; ++i)
@@ -25,19 +28,28 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 
 		for (int j = 0; j < m_resY; ++j)
 		{
+			// Create the particles
 			Vec3 posBottom = Vec3(m_position.x + static_cast<double>(i) * m_width / m_resX, m_position.y, m_position.z + static_cast<double>(j) * m_height / m_resY);
-			rowBottom.push_back(Particle(posBottom, particleMass));
-
+			Particle particleBottom = Particle(posBottom, particleMass);
+			
 			Vec3 posTop = Vec3(m_position.x + static_cast<double>(i) * m_width / m_resX, m_position.y + thickness, m_position.z + static_cast<double>(j) * m_height / m_resY);
-			rowTop.push_back(Particle(posTop, particleMass));
+			Particle particleTop = Particle(posTop, particleMass);
+			
+			// Create the AABB for the particle (only for the bottom side)
+			particleBottom.m_pAabb = std::make_shared<AABB>(halfDistBetweenParticles * 2.0);
+			particleBottom.m_pAabb->constructAABB(posBottom);
+
+			// Add the particles to the lists
+			rowBottom.push_back(particleBottom);
+			rowTop.push_back(particleTop);
 		}
 
 		m_particlesBottom.push_back(rowBottom);
-		m_particlesTop.push_back(rowTop);
+		m_particlesTop.push_back(rowTop); // Still needed for creating the mesh
 	}
 
 	// Define the spring parameters
-	const double springStrengh = 1000.0;
+	const double springStrengh = 500.0;
 	const double springDamping = 0.0;
 
 	// Create the springs
@@ -139,7 +151,11 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
+			// Update the particles
 			m_particlesBottom[i][j].update(dt, colliders);
+
+			// Handle collision with itself
+			handleCollisionWithItself(i, j);
 		}
 	}
 
@@ -156,7 +172,7 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 			// Bottom side is updated according to the particlesBottom's positions
 			m_object3D.m_vertices[i * m_resY + j] = m_particlesBottom[i][j].m_position.toArray();
 
-			// Top side is updated according to the normals of the bottom side at a fixed distance (thickness)
+			// Top side is hard fixed according to the normals of the bottom side at a fixed distance (thickness)
 			Vec3 p0 = m_particlesBottom[i][j].m_position;
 			int nextI = i + 1;
 			int nextJ = j + 1;
@@ -180,6 +196,50 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 			}
 			Vec3 posTop = m_particlesBottom[i][j].m_position + normal * m_thickness;
 			m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = posTop.toArray(); // Top side
+		}
+	}
+}
+
+
+void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
+{
+	// Update the AABB
+	m_particlesBottom[currentI][currentJ].m_pAabb->constructAABB(m_particlesBottom[currentI][currentJ].m_position);
+
+	// Check collision with the other particles (TODO: Optimize that with an octree)
+	for (int i = 0; i < m_resX; ++i)
+	{
+		for (int j = 0; j < m_resY; ++j)
+		{
+			// Skip the current particle and the neightbors
+			const bool isJneighbor = (j == (currentJ - 1) || j == (currentJ) || j == (currentJ + 1));
+			const bool isIneighbor = (i == (currentI - 1) || i == (currentI) || i == (currentI + 1));
+			if (isIneighbor && isJneighbor)
+			{
+				continue;
+			}
+			if (!m_particlesBottom[i][j].m_pAabb)
+			{
+				continue;
+			}
+			// Check collision with the AABB
+			if (m_particlesBottom[currentI][currentJ].m_pAabb->hasCollided(*m_particlesBottom[i][j].m_pAabb))
+			{
+				// Check collision with the sphere
+				const double distance = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[i][j].m_previousPosition).norm();
+				const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
+				if (distance < radius)
+				{
+					//Vec3 dir = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[i][j].m_previousPosition).getNormalized();
+					//m_particlesBottom[currentI][currentJ].m_externalForces += dir * 1000.0;
+
+					// Move the particle to the surface of the sphere
+					//Vec3 dir = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[i][j].m_previousPosition).getNormalized();
+					//m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[i][j].m_previousPosition + dir * radius;
+					m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
+					m_particlesBottom[currentI][currentJ].m_velocity = Vec3(0.0, 0.0, 0.0);
+				}
+			}
 		}
 	}
 }

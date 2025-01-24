@@ -18,12 +18,15 @@ class AABB
 private:
 	Vec3 m_min;
 	Vec3 m_max;
+public:
+	double m_halfSize = -1;
 
 public:
 	AABB(const Vec3& min, const Vec3& max) : m_min(min), m_max(max) {}
-	AABB() {};
+	AABB(const double halfSize);
 	~AABB() {}
 	bool hasCollided(const AABB& other) const;
 	bool hasCollided(const Vec3& p0, const Vec3& p1) const;
 	void constructAABB(const Vec3& pos, const double halfSize);
+	void constructAABB(const Vec3& pos);
 };

@@ -51,6 +51,7 @@ public:
 	Vec3 m_velocity;
 	Vec3 m_previousVelocity;
 	Vec3 m_acceleration;
+	Vec3 m_externalForces;
 
 	double m_mass = 1.0;
 	double m_airFriction = 1.5;
@@ -59,11 +60,12 @@ public:
 
 	std::vector<Spring> m_springs;
 
+	std::shared_ptr<AABB> m_pAabb;
+
 	std::shared_ptr<ObjectRenderingInstance> m_debugSphere3DRenderer;
 
 private:
 	bool isFixed = false;
-	AABB m_aabb;
 
 public:
 	Particle(Vec3 position, double mass);

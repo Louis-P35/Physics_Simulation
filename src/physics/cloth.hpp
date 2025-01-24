@@ -46,6 +46,7 @@ public:
 
 	void updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders);
 	void updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders);
+	void handleCollisionWithItself(const int currentI, const int currentJ);
 	void updateMesh();
 
 private:

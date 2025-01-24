@@ -39,6 +39,7 @@ Particle::Particle(Vec3 position, double mass) : m_position(position), m_previou
 	m_velocity = Vec3(0.0, 0.0, 0.0);
 	m_previousVelocity = Vec3(0.0, 0.0, 0.0);
 	m_acceleration = Vec3(0.0, 0.0, 0.0);
+	m_externalForces = Vec3(0.0, 0.0, 0.0);
 }
 
 Particle::~Particle()
@@ -55,6 +56,9 @@ Vec3 Particle::computeForces(const Vec3& gravity)
 	forces -= m_previousVelocity.getNormalized() * m_airFriction * velNorm * velNorm;
 
 	// Object friction TODO
+
+	forces += m_externalForces;
+	m_externalForces = Vec3(0.0, 0.0, 0.0);
 
 	// Spring forces
 	for (const auto& spring : m_springs)
@@ -126,6 +130,7 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 			}
 		}
 	}
+
 
 	// Update the debug sphere position
 	if (m_debugSphere3DRenderer)
