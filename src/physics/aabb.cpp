@@ -19,7 +19,7 @@ AABB::AABB(const double halfSize) : m_halfSize(halfSize)
 * @param halfSize The half lenght of one side of the cube (cubic AABB)
 * @return void
 */
-void AABB::constructAABB(const Vec3& pos, const double halfSize)
+void AABB::constructCubicAABB(const Vec3& pos, const double halfSize)
 {
 	m_halfSize = halfSize;
 	m_min = pos - Vec3(halfSize, halfSize, halfSize);
@@ -35,7 +35,7 @@ void AABB::constructAABB(const Vec3& pos, const double halfSize)
 * @param halfSize The half lenght of one side of the cube (cubic AABB)
 * @return void
 */
-void AABB::constructAABB(const Vec3& pos)
+void AABB::constructCubicAABB(const Vec3& pos)
 {
     m_min = pos - Vec3(m_halfSize, m_halfSize, m_halfSize);
     m_max = pos + Vec3(m_halfSize, m_halfSize, m_halfSize);

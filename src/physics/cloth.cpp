@@ -37,7 +37,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 			
 			// Create the AABB for the particle (only for the bottom side)
 			particleBottom.m_pAabb = std::make_shared<AABB>(halfDistBetweenParticles * 2.0);
-			particleBottom.m_pAabb->constructAABB(posBottom);
+			particleBottom.m_pAabb->constructCubicAABB(posBottom);
 
 			// Add the particles to the lists
 			rowBottom.push_back(particleBottom);
@@ -204,7 +204,7 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
 {
 	// Update the AABB
-	m_particlesBottom[currentI][currentJ].m_pAabb->constructAABB(m_particlesBottom[currentI][currentJ].m_position);
+	m_particlesBottom[currentI][currentJ].m_pAabb->constructCubicAABB(m_particlesBottom[currentI][currentJ].m_position);
 
 	// Check collision with the other particles (TODO: Optimize that with an octree)
 	for (int i = 0; i < m_resX; ++i)
