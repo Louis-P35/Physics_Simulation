@@ -2,7 +2,11 @@
 This is a physics simulator project (C++, Qt, OpenGl)
 
 
+## Cloth simulation
 ![Simulation Animation](imgs/Physicssimulation2025-01-23.gif)
+
+## Self collision
+![Collision on itself Animation](imgs/Enregistrement2025-01-24135156-ezgif.com-optimize.gif)
 
 
 # Project setup

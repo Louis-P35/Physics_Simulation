@@ -58,6 +58,19 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		1.0
 	);
 	m_colliders.push_back(pCollider);
+
+	Object3D sphere3D;
+	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
+	std::shared_ptr<Collider> pCollider2 = nullptr;
+	ObjectsFactory::createSphere(
+		sphere3D,
+		pSphere3DRenderer,
+		pCollider2,
+		pGl3dWidget,
+		Vec3(0.0, 1.5, -2.5),
+		1.0
+	);
+	m_colliders.push_back(pCollider2);
 	
 
 	// Ground
