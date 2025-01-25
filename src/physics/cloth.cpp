@@ -51,7 +51,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	}
 
 	// Define the spring parameters
-	const double springStrengh = 500.0;
+	const double springStrengh = 2000.0;
 	const double springDamping = 0.0;
 
 	// Create the springs
@@ -223,13 +223,17 @@ void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
 		return;
 	}
 
-	//auto ct = std::chrono::steady_clock::now();
+	auto ct = std::chrono::steady_clock::now();
 	std::vector<OctreeNode*> collidedList;
 	collidedList = m_pCollisionTree->detectCollision(*m_particlesBottom[currentI][currentJ].m_pAabb);
-	//int cnt1 = collidedList.size();
-	//auto ct2 = std::chrono::steady_clock::now();
-	//std::chrono::duration<float> dt1 = ct2 - ct;
-	//std::cout << deltaTime.count() << std::endl;
+	int cnt1 = collidedList.size();
+	auto ct2 = std::chrono::steady_clock::now();
+	std::chrono::duration<float> dt1 = ct2 - ct;
+	std::cout << dt1.count() << std::endl;
+
+	// Quadtree search -> 2.7e-5s for 20x20 in debug
+	// Quadtree search -> 3.54e-5s for 100x100 in debug
+	// Double for loop -> 0.0008s for 100x100 in debug
 
 	for (auto pOctreeNode : collidedList)
 	{
@@ -245,7 +249,7 @@ void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
 		{
 			continue;
 		}
-
+		
 		// Check collision with the sphere
 		const double distance = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[pOctreeNode->m_indexI][pOctreeNode->m_indexJ].m_previousPosition).norm();
 		const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
