@@ -246,6 +246,84 @@ void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
 
 
 /*
+* Create the collision tree for the cloth
+* Recursively climb down the tree to create the children
+* When it reach a leaf, create it's bounding box
+* Then climb back up to set the AABB of the currents nodes (fuse the AABB of the children)
+* 
+* @param pRoot The current node of the tree
+* @param iMin The minimum index in the X direction
+* @param iMax The maximum index in the X direction
+* @param jMin The minimum index in the Y direction
+* @param jMax The maximum index in the Y direction
+* @return std::shared_ptr<OctreeNode> The newly created node
+*/
+std::shared_ptr<OctreeNode> Cloth::createCollisionTree(
+	std::shared_ptr<OctreeNode> pRoot, 
+	const int iMin, 
+	const int iMax, 
+	const int jMin, 
+	const int jMax
+)
+{
+	if (!pRoot)
+	{
+		return nullptr;
+	}
+
+	// At this point, pRoot is not yet addes to the tree
+
+	// If is leaf
+	if (iMin == iMax && jMin == jMax)
+	{
+		// Set the AABB of the leaf to be the AABB of the particle
+		pRoot->setAabb(*m_particlesBottom[iMin][jMin].m_pAabb);
+
+		// Return the leaf
+		return pRoot;
+	}
+
+
+	// Compute the middle indexes
+	int iMiddle = (iMin + iMax) / 2;
+	int jMiddle = (jMin + jMax) / 2;
+
+	// Going down the tree, we create the children of the current node
+	// At this point pRoot can not be a leaf
+	std::shared_ptr<OctreeNode> pChild1 = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
+	pRoot->addChildren(createCollisionTree(pChild1, iMin, iMiddle, jMin, jMiddle));
+	if (jMin < jMax)
+	{
+		std::shared_ptr<OctreeNode> pChild2 = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
+		pRoot->addChildren(createCollisionTree(pChild2, iMin, iMiddle, jMiddle + 1, jMax));
+		
+	}
+	if (iMin < iMax)
+	{
+		std::shared_ptr<OctreeNode> pChild3 = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
+		pRoot->addChildren(createCollisionTree(pChild3, iMiddle + 1, iMax, jMin, jMiddle));
+		
+	}
+	if (jMin < jMax && iMin < iMax)
+	{
+		std::shared_ptr<OctreeNode> pChild4 = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
+		pRoot->addChildren(createCollisionTree(pChild4, iMiddle + 1, iMax, jMiddle + 1, jMax));
+	}
+
+	// Climbing back up the tree, we set the AABB of the current node
+	// Fuse the AABB of the children
+	std::vector<std::shared_ptr<AABB>> aabbs;
+	for (const auto& pChild : pRoot->m_pChildren)
+	{
+		aabbs.push_back(std::dynamic_pointer_cast<AABB>(pChild));
+	}
+	pRoot->setAabb(aabbs);
+
+	return pRoot;
+}
+
+
+/*
 * Initialize the mesh of the cloth
 * 
 * @return void

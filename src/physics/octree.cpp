@@ -16,7 +16,7 @@ bool OctreeNode::isLeaf() const
 
 
 /*
-* Add a child to the node
+* Create and add a child to the node
 * 
 * @param min The minimum point of the AABB of the child
 * @param max The maximum point of the AABB of the child
@@ -30,6 +30,23 @@ void OctreeNode::addChildren(const Vec3& min, const Vec3& max)
 		child->m_pParent = this;
 		m_pChildren.push_back(child);
 
+	}
+}
+
+
+/*
+* Add an existing node as a child to the node
+*
+* @param min The minimum point of the AABB of the child
+* @param max The maximum point of the AABB of the child
+* @return void
+*/
+void OctreeNode::addChildren(std::shared_ptr<OctreeNode> pChild)
+{
+	if (m_pChildren.size() < 8)
+	{
+		pChild->m_pParent = this;
+		m_pChildren.push_back(pChild);
 	}
 }
 

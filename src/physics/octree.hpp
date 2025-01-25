@@ -11,17 +11,21 @@
 
 class OctreeNode : public AABB
 {
-private:
+public:
 	std::vector<std::shared_ptr<OctreeNode>> m_pChildren;
+private:
 	OctreeNode* m_pParent = nullptr;
 	
 
 public:
-	OctreeNode(const Vec3& min, const Vec3& max) : AABB(min, max) {}
+	OctreeNode(const Vec3& min, const Vec3& max) : AABB(min, max) {};
+	OctreeNode(const AABB& other) : AABB(other) {};
+	OctreeNode(const std::vector<AABB>& others) : AABB(others) {};
 	~OctreeNode() {};
 
 	bool isLeaf() const;
 	void addChildren(const Vec3& min, const Vec3& max);
+	void addChildren(std::shared_ptr<OctreeNode> pChild);
 	std::vector<OctreeNode*> detectCollision(const Vec3& p0, const Vec3& p1) const;
 	std::vector<OctreeNode*> detectCollision(const AABB& other) const;
 

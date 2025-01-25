@@ -5,9 +5,81 @@
 #include <algorithm>
 
 
-AABB::AABB(const double halfSize) : m_halfSize(halfSize)
+/*
+* Construct an AABB which encapsulates a list of AABBs
+* 
+* @param others The list of AABBs
+* @return void
+*/
+AABB::AABB(const std::vector<AABB>& others)
 {
+	setAabb(others);
+}
 
+AABB::AABB(const std::vector<std::shared_ptr<AABB>>& others)
+{
+	setAabb(others);
+}
+
+
+/*
+* Set the AABB to encapsulates a list of AABBs
+*
+* @param others The list of AABBs
+* @return void
+*/
+void AABB::setAabb(const std::vector<AABB>& others)
+{
+	for (const auto& other : others)
+	{
+		m_min = Vec3(
+			std::min(m_min.x, other.m_min.x),
+			std::min(m_min.y, other.m_min.y),
+			std::min(m_min.z, other.m_min.z)
+		);
+		m_max = Vec3(
+			std::max(m_max.x, other.m_max.x),
+			std::max(m_max.y, other.m_max.y),
+			std::max(m_max.z, other.m_max.z)
+		);
+	}
+}
+
+/*
+* Set the AABB to encapsulates a list of AABBs
+*
+* @param others The list of AABBs
+* @return void
+*/
+void AABB::setAabb(const std::vector<std::shared_ptr<AABB>>& others)
+{
+	for (const auto& other : others)
+	{
+		m_min = Vec3(
+			std::min(m_min.x, other->m_min.x),
+			std::min(m_min.y, other->m_min.y),
+			std::min(m_min.z, other->m_min.z)
+		);
+		m_max = Vec3(
+			std::max(m_max.x, other->m_max.x),
+			std::max(m_max.y, other->m_max.y),
+			std::max(m_max.z, other->m_max.z)
+		);
+	}
+}
+
+
+/*
+* Set the AABB to the values of another AABB
+* 
+* @param other The other AABB
+* @return void
+*/
+void AABB::setAabb(const AABB& other)
+{
+	m_min = other.m_min;
+	m_max = other.m_max;
+	m_halfSize = other.m_halfSize;
 }
 
 
