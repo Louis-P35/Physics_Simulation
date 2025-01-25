@@ -13,6 +13,12 @@ class OctreeNode : public AABB
 {
 public:
 	std::vector<std::shared_ptr<OctreeNode>> m_pChildren;
+
+	// Dirty
+	int m_indexI = -1;
+	int m_indexJ = -1;
+
+
 private:
 	OctreeNode* m_pParent = nullptr;
 	

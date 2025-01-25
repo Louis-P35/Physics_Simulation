@@ -30,17 +30,24 @@ AABB::AABB(const std::vector<std::shared_ptr<AABB>>& others)
 */
 void AABB::setAabb(const std::vector<AABB>& others)
 {
-	for (const auto& other : others)
+	for (int i = 0; i < others.size(); ++i)
 	{
+		if (i == 0)
+		{
+			m_min = others[i].m_min;
+			m_max = others[i].m_max;
+			continue;
+		}
+
 		m_min = Vec3(
-			std::min(m_min.x, other.m_min.x),
-			std::min(m_min.y, other.m_min.y),
-			std::min(m_min.z, other.m_min.z)
+			std::min(m_min.x, others[i].m_min.x),
+			std::min(m_min.y, others[i].m_min.y),
+			std::min(m_min.z, others[i].m_min.z)
 		);
 		m_max = Vec3(
-			std::max(m_max.x, other.m_max.x),
-			std::max(m_max.y, other.m_max.y),
-			std::max(m_max.z, other.m_max.z)
+			std::max(m_max.x, others[i].m_max.x),
+			std::max(m_max.y, others[i].m_max.y),
+			std::max(m_max.z, others[i].m_max.z)
 		);
 	}
 }
@@ -53,17 +60,24 @@ void AABB::setAabb(const std::vector<AABB>& others)
 */
 void AABB::setAabb(const std::vector<std::shared_ptr<AABB>>& others)
 {
-	for (const auto& other : others)
+	for (int i = 0; i < others.size(); ++i)
 	{
+		if (i == 0)
+		{
+			m_min = others[i]->m_min;
+			m_max = others[i]->m_max;
+			continue;
+		}
+
 		m_min = Vec3(
-			std::min(m_min.x, other->m_min.x),
-			std::min(m_min.y, other->m_min.y),
-			std::min(m_min.z, other->m_min.z)
+			std::min(m_min.x, others[i]->m_min.x),
+			std::min(m_min.y, others[i]->m_min.y),
+			std::min(m_min.z, others[i]->m_min.z)
 		);
 		m_max = Vec3(
-			std::max(m_max.x, other->m_max.x),
-			std::max(m_max.y, other->m_max.y),
-			std::max(m_max.z, other->m_max.z)
+			std::max(m_max.x, others[i]->m_max.x),
+			std::max(m_max.y, others[i]->m_max.y),
+			std::max(m_max.z, others[i]->m_max.z)
 		);
 	}
 }

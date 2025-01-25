@@ -31,6 +31,8 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 			// Create the particles
 			Vec3 posBottom = Vec3(m_position.x + static_cast<double>(i) * m_width / m_resX, m_position.y, m_position.z + static_cast<double>(j) * m_height / m_resY);
 			Particle particleBottom = Particle(posBottom, particleMass);
+			particleBottom.m_indexI = i;
+			particleBottom.m_indexJ = j;
 			
 			Vec3 posTop = Vec3(m_position.x + static_cast<double>(i) * m_width / m_resX, m_position.y + thickness, m_position.z + static_cast<double>(j) * m_height / m_resY);
 			Particle particleTop = Particle(posTop, particleMass);
@@ -122,6 +124,16 @@ void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colli
 	// Convert deltaTime to seconds
 	float elapsedTimeInSeconds = deltaTime.count();
 
+	// Update the collision tree
+	//auto ct = std::chrono::steady_clock::now();
+	m_pCollisionTree = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
+	m_pCollisionTree = createCollisionTree(m_pCollisionTree, 0, m_resX - 1, 0, m_resY - 1);
+	//auto ct2 = std::chrono::steady_clock::now();
+	//std::chrono::duration<float> dt = ct2 - ct;
+	//std::cout << deltaTime.count() << std::endl;
+	// 0.008s for 20x20 in debug
+	// 0.07s for 40x40 in debug
+
 	// Update the simulation
 	updateParticles(elapsedTimeInSeconds, colliders);
 
@@ -153,6 +165,9 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 		{
 			// Update the particles
 			m_particlesBottom[i][j].update(dt, colliders);
+
+			// Update the AABB
+			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
 
 			// Handle collision with itself
 			handleCollisionWithItself(i, j);
@@ -203,43 +218,41 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 
 void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
 {
-	// Update the AABB
-	m_particlesBottom[currentI][currentJ].m_pAabb->constructCubicAABB(m_particlesBottom[currentI][currentJ].m_position);
-
-	// Check collision with the other particles (TODO: Optimize that with an octree)
-	for (int i = 0; i < m_resX; ++i)
+	if (!m_pCollisionTree)
 	{
-		for (int j = 0; j < m_resY; ++j)
-		{
-			// Skip the current particle and the neightbors
-			const bool isJneighbor = (j == (currentJ - 1) || j == (currentJ) || j == (currentJ + 1));
-			const bool isIneighbor = (i == (currentI - 1) || i == (currentI) || i == (currentI + 1));
-			if (isIneighbor && isJneighbor)
-			{
-				continue;
-			}
-			if (!m_particlesBottom[i][j].m_pAabb)
-			{
-				continue;
-			}
-			// Check collision with the AABB
-			if (m_particlesBottom[currentI][currentJ].m_pAabb->hasCollided(*m_particlesBottom[i][j].m_pAabb))
-			{
-				// Check collision with the sphere
-				const double distance = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[i][j].m_previousPosition).norm();
-				const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
-				if (distance < radius)
-				{
-					//Vec3 dir = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[i][j].m_previousPosition).getNormalized();
-					//m_particlesBottom[currentI][currentJ].m_externalForces += dir * 1000.0;
+		return;
+	}
 
-					// Move the particle to the surface of the sphere
-					//Vec3 dir = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[i][j].m_previousPosition).getNormalized();
-					//m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[i][j].m_previousPosition + dir * radius;
-					m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
-					m_particlesBottom[currentI][currentJ].m_velocity = Vec3(0.0, 0.0, 0.0);
-				}
-			}
+	//auto ct = std::chrono::steady_clock::now();
+	std::vector<OctreeNode*> collidedList;
+	collidedList = m_pCollisionTree->detectCollision(*m_particlesBottom[currentI][currentJ].m_pAabb);
+	//int cnt1 = collidedList.size();
+	//auto ct2 = std::chrono::steady_clock::now();
+	//std::chrono::duration<float> dt1 = ct2 - ct;
+	//std::cout << deltaTime.count() << std::endl;
+
+	for (auto pOctreeNode : collidedList)
+	{
+		if (!pOctreeNode)
+		{
+			continue;
+		}
+
+		// Skip the current particle and the neightbors
+		const bool isJneighbor = (pOctreeNode->m_indexJ == (currentJ - 1) || pOctreeNode->m_indexJ == (currentJ) || pOctreeNode->m_indexJ == (currentJ + 1));
+		const bool isIneighbor = (pOctreeNode->m_indexI == (currentI - 1) || pOctreeNode->m_indexI == (currentI) || pOctreeNode->m_indexI == (currentI + 1));
+		if (isIneighbor && isJneighbor)
+		{
+			continue;
+		}
+
+		// Check collision with the sphere
+		const double distance = (m_particlesBottom[currentI][currentJ].m_position - m_particlesBottom[pOctreeNode->m_indexI][pOctreeNode->m_indexJ].m_previousPosition).norm();
+		const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
+		if (distance < radius)
+		{
+			m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
+			m_particlesBottom[currentI][currentJ].m_velocity = Vec3(0.0, 0.0, 0.0);
 		}
 	}
 }
@@ -278,6 +291,10 @@ std::shared_ptr<OctreeNode> Cloth::createCollisionTree(
 	{
 		// Set the AABB of the leaf to be the AABB of the particle
 		pRoot->setAabb(*m_particlesBottom[iMin][jMin].m_pAabb);
+
+		// Store the indexes of the particle to avoid collision with itself or its neighbors
+		pRoot->m_indexI = iMin;
+		pRoot->m_indexJ = jMin;
 
 		// Return the leaf
 		return pRoot;

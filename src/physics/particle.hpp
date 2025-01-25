@@ -58,6 +58,9 @@ public:
 	double m_objectFriction = 1.25;
 	double m_groundFriction = 4.0;
 
+	int m_indexI = -1;
+	int m_indexJ = -1;
+
 	std::vector<Spring> m_springs;
 
 	std::shared_ptr<AABB> m_pAabb;
