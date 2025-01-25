@@ -8,6 +8,7 @@
 #include "../src/physics/collider.hpp"
 #include "../src/physics/octree.hpp"
 #include "physicsWorker.hpp"
+#include "../src/physics/gridCollider.hpp"
 
 // Includes from STL
 #include <vector>
@@ -40,14 +41,22 @@ public:
 	std::shared_ptr<OctreeNode> m_pCollisionTree;
 
 private:
-	int m_meshNbFacesOneSide = 0;
+	int m_meshFaceIndexTop = 0;
+	int m_meshFaceIndexSide1 = 0;
+	int m_meshFaceIndexSide2 = 0;
+	int m_meshFaceIndexSide3 = 0;
+	int m_meshFaceIndexSide4 = 0;
 	std::chrono::steady_clock::time_point m_lastUpdateTime;
+
+	// Cloth texture params
+	std::string m_textureFolderName = "3";
+	float m_uvScale = 1.0f;
 
 public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
 	virtual ~Cloth();
 
-	void updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders);
+	void updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider);
 	
 
 private:

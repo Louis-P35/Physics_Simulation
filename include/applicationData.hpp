@@ -7,6 +7,7 @@
 #include "../src/physics/cloth.hpp"
 #include "../src/physics/sphereCollider.hpp"
 #include "physicsWorker.hpp"
+#include "../src/physics/gridCollider.hpp"
 
 // Includes from 3rd party
 #include <QObject>
@@ -36,6 +37,7 @@ public:
 
 	std::vector<std::shared_ptr<Cloth>> m_pCloths;
 	std::vector<std::shared_ptr<Collider>> m_colliders;
+	std::shared_ptr<GridCollider> m_pGridCollider;
 
 public:
 	ApplicationData();

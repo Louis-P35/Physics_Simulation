@@ -54,7 +54,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		m_pCube3DRenderer,
 		pCollider,
 		pGl3dWidget,
-		Vec3(-2.5, 1.5, -2.5),
+		Vec3(-3.5, 3.0, -2.5),
 		1.0
 	);
 	m_colliders.push_back(pCollider);
@@ -67,10 +67,23 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		pSphere3DRenderer,
 		pCollider2,
 		pGl3dWidget,
-		Vec3(0.0, 1.5, -2.5),
+		Vec3(-1.0, 3.0, -2.5),
 		1.0
 	);
 	m_colliders.push_back(pCollider2);
+
+	Object3D sphere3D2;
+	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer2;
+	std::shared_ptr<Collider> pCollider3 = nullptr;
+	ObjectsFactory::createSphere(
+		sphere3D2,
+		pSphere3DRenderer2,
+		pCollider3,
+		pGl3dWidget,
+		Vec3(-2.20, 1.0, -2.5),
+		1.0
+	);
+	m_colliders.push_back(pCollider3);
 	
 
 	// Ground
@@ -103,10 +116,27 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
+	const int res = 30;
 	// Create a cloth
-	Vec3 position = Vec3(-4.0, 2.5, -4.0);
-	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(100, 100, 5.0, 5.0, 0.025, 300.0, position, m_pOpenGl3DWidget, m_colliders);
+	Vec3 position = Vec3(-4.0, 4.3, -4.0);
+	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
+		res, res, 
+		3.0, 3.0, 
+		0.025, 300.0, 
+		position, 
+		m_pOpenGl3DWidget, 
+		m_colliders,
+		m_pGridCollider
+	);
 	m_pCloths.push_back(pCloth);
+
+	/*Vec3 position2 = Vec3(-3.0, 4.3, -4.0);
+	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(res, res, 3.0, 3.0, 0.025, 300.0, position2, m_pOpenGl3DWidget, m_colliders);
+	m_pCloths.push_back(pCloth2);
+
+	Vec3 position3 = Vec3(-3.5, 4.5, -4.0);
+	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(res, res, 3.0, 3.0, 0.025, 300.0, position3, m_pOpenGl3DWidget, m_colliders);
+	m_pCloths.push_back(pCloth3);*/
 }
 
 

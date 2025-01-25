@@ -3,6 +3,10 @@
 
 // Includes from STL
 #include <iostream>
+#include <filesystem>
+
+
+namespace fs = std::filesystem;
 
 
 Cloth::~Cloth()
@@ -105,7 +109,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 * 
 * @return void
 */
-void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders)
+void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider)
 {
 	static bool firstUpdate = true;
 
@@ -126,11 +130,30 @@ void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colli
 
 	// Update the collision tree
 	//auto ct = std::chrono::steady_clock::now();
-	m_pCollisionTree = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
-	m_pCollisionTree = createCollisionTree(m_pCollisionTree, 0, m_resX - 1, 0, m_resY - 1);
+	
+	//m_pCollisionTree = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
+	//m_pCollisionTree = createCollisionTree(m_pCollisionTree, 0, m_resX - 1, 0, m_resY - 1);
+
+	// Init the grid collider
+	if (pGridCollider)
+	{
+		// Clear the grid
+		pGridCollider->clearGrid();
+
+		// Add the particles to the grid
+		for (int i = 0; i < m_resX; ++i)
+		{
+			for (int j = 0; j < m_resY; ++j)
+			{
+				pGridCollider->addParticleToCell(m_particlesBottom[i][j].m_position, ParticleCollider(m_particlesBottom[i][j].m_position, 0.1));
+			}
+		}
+	}
+	
 	//auto ct2 = std::chrono::steady_clock::now();
 	//std::chrono::duration<float> dt = ct2 - ct;
 	//std::cout << deltaTime.count() << std::endl;
+
 	// 0.008s for 20x20 in debug
 	// 0.07s for 40x40 in debug
 
@@ -170,7 +193,7 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
 
 			// Handle collision with itself
-			handleCollisionWithItself(i, j);
+			//handleCollisionWithItself(i, j);
 		}
 	}
 
@@ -223,17 +246,22 @@ void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
 		return;
 	}
 
-	auto ct = std::chrono::steady_clock::now();
+	//auto ct = std::chrono::steady_clock::now();
 	std::vector<OctreeNode*> collidedList;
 	collidedList = m_pCollisionTree->detectCollision(*m_particlesBottom[currentI][currentJ].m_pAabb);
-	int cnt1 = collidedList.size();
-	auto ct2 = std::chrono::steady_clock::now();
-	std::chrono::duration<float> dt1 = ct2 - ct;
-	std::cout << dt1.count() << std::endl;
+	//int cnt1 = collidedList.size();
+	//auto ct2 = std::chrono::steady_clock::now();
+	//std::chrono::duration<float> dt1 = ct2 - ct;
+	//std::cout << dt1.count() << std::endl;
 
-	// Quadtree search -> 2.7e-5s for 20x20 in debug
-	// Quadtree search -> 3.54e-5s for 100x100 in debug
-	// Double for loop -> 0.0008s for 100x100 in debug
+	// Quadtree search -> 3.8e-5s for 20x20 in debug
+	// Double for loop -> 2.7e-5s for 20x20 in debug
+	// 
+	// Quadtree search -> 9.3e-5s for 50x50 in debug
+	// Double for loop -> 0.00019s for 50x50 in debug
+	// 
+	// Quadtree search -> 3.59e-5s for 100x100 in debug
+	// Double for loop -> 0.00098s for 100x100 in debug
 
 	for (auto pOctreeNode : collidedList)
 	{
@@ -353,12 +381,13 @@ void Cloth::initMesh()
 {
 	// Create the vertices and normals for the bottom and top faces
 	initMeshOneFace(0, m_particlesBottom);
-	m_meshNbFacesOneSide = m_object3D.m_faces.size();
+	m_meshFaceIndexTop = m_object3D.m_faces.size();
 	initMeshOneFace(m_object3D.m_vertices.size(), m_particlesTop);
-	initMeshSides();
+	//initMeshSides();
 
 	// Load textures, Compute the tangent and bitangent vectors
-	m_object3D.postProcess("../models/fabrics_textures/1", true, true);
+	const fs::path texturePath = fs::path("../models/fabrics_textures/") / m_textureFolderName;
+	m_object3D.postProcess(texturePath.string(), true, true);
 }
 
 
@@ -371,12 +400,10 @@ void Cloth::initMesh()
 */
 void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace)
 {
-	constexpr float uvScale = 5.0f;
-
 	// Create the vertices, normals, UVs
 	for (int i = 0; i < m_resX; ++i)
 	{
-		const float u = (static_cast<float>(i) / static_cast<float>(m_resX - 1)) * uvScale;
+		const float u = (static_cast<float>(i) / static_cast<float>(m_resX - 1)) * m_uvScale;
 
 		for (int j = 0; j < m_resY; ++j)
 		{
@@ -385,7 +412,7 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 			// Normals
 			m_object3D.m_normals.push_back({ 0.0f, 1.0f, 0.0f }); // TODO
 			// UVs
-			const float v = (static_cast<float>(j) / static_cast<float>(m_resY - 1)) * uvScale;
+			const float v = (static_cast<float>(j) / static_cast<float>(m_resY - 1)) * m_uvScale;
 			m_object3D.m_uvs.push_back({ u, v });
 		}
 	}
@@ -492,9 +519,13 @@ void Cloth::initMeshSides()
 	};
 
 	// Create the sides
+	m_meshFaceIndexSide1 = m_object3D.m_faces.size();
 	createSide1Lambda(0);
+	m_meshFaceIndexSide2 = m_object3D.m_faces.size();
 	createSide1Lambda(m_resX - 1);
+	m_meshFaceIndexSide3 = m_object3D.m_faces.size();
 	createSide2Lambda(0);
+	m_meshFaceIndexSide4 = m_object3D.m_faces.size();
 	createSide2Lambda(m_resY - 1);
 }
 
@@ -521,10 +552,26 @@ void Cloth::updateMesh()
 
 		Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
 		// Invert the normal for the bottom face
-		if (i < m_meshNbFacesOneSide)
+		if (i < m_meshFaceIndexTop)
 		{
 			normal *= -1.0;
 		}
+		/*else if (i > m_meshFaceIndexSide1)
+		{
+			normal *= -1.0;
+		}
+		else if (i > m_meshFaceIndexSide2)
+		{
+			
+		}
+		else if (i > m_meshFaceIndexSide3)
+		{
+			
+		}
+		else if (i > m_meshFaceIndexSide4)
+		{
+			normal *= -1.0;
+		}*/
 
 		m_object3D.m_normals[m_object3D.m_faces[i][2]] = normal.toArray();
 		m_object3D.m_normals[m_object3D.m_faces[i][5]] = normal.toArray();

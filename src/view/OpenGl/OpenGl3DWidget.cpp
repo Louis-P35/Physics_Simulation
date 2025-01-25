@@ -108,7 +108,7 @@ void OpenGl3DWidget::paintGL()
     m_lightPosition = QVector3D(0.0f, 8.0f, 16.0f);
     m_cameraPosition = QVector3D(3.0f, 3.0f, 3.0f);
     //m_cameraPosition = QVector3D(0.0f, 15.0f, 1.0f);
-    QVector3D cameraLookAt(0.0f, 1.0f, 0.0f);
+    QVector3D cameraLookAt(0.0f, 3.0f, 0.0f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -168,7 +168,7 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
     m_pShader.m_shaderProgram.setUniformValue("viewPos", m_cameraPosition);
     // Bump
     m_pShader.m_shaderProgram.setUniformValue("displacementScale", 0.05f);
-    m_pShader.m_shaderProgram.setUniformValue("tessellationFactor", 20.0f);
+    m_pShader.m_shaderProgram.setUniformValue("tessellationFactor", 40.0f);
 
     // Set textures
     // Color (diffuse)

@@ -5,6 +5,7 @@
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/physics/collider.hpp"
+#include "../src/physics/gridCollider.hpp"
 
 // Includes from 3rd party
 
@@ -27,14 +28,15 @@ public:
 	~ClothFactory() = delete;
 
 	static std::shared_ptr<Cloth> createCloth(
-		int resX, 
-		int resY, 
-		double width, 
-		double height, 
-		double thickness, 
-		double clothMass, 
+		int resX,
+		int resY,
+		double width,
+		double height,
+		double thickness,
+		double clothMass,
 		Vec3 position,
 		OpenGl3DWidget* pOpenGl3DWidget,
-		std::vector<std::shared_ptr<Collider>>& colliders
+		std::vector<std::shared_ptr<Collider>>& colliders,
+		std::shared_ptr<GridCollider> pGridCollider
 	);
 };

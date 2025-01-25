@@ -30,7 +30,8 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	double clothMass,
 	Vec3 position,
 	OpenGl3DWidget* pOpenGl3DWidget,
-	std::vector<std::shared_ptr<Collider>>& colliders
+	std::vector<std::shared_ptr<Collider>>& colliders,
+	std::shared_ptr<GridCollider> pGridCollider
 )
 {
 	if (!pOpenGl3DWidget)
@@ -63,9 +64,9 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 
 	// Start the simulation in a separate thread
 	// Capture a copy of the pointer instead of a reference to avoid a dangling pointer
-	pCloth->startWorker([pCloth, pColliders = &colliders]() {
+	pCloth->startWorker([pCloth, pColliders = &colliders, pGridCollider = pGridCollider]() {
 		// Perform physics updates
-		pCloth->updateSimulation(*pColliders);
+		pCloth->updateSimulation(*pColliders, pGridCollider);
 		});
 
 	return pCloth;
