@@ -145,20 +145,20 @@ void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colli
 		{
 			for (int j = 0; j < m_resY; ++j)
 			{
-				pGridCollider->addParticleToCell(m_particlesBottom[i][j].m_position, ParticleCollider(m_particlesBottom[i][j].m_position, 0.1));
+				pGridCollider->addParticleToCell(m_particlesBottom[i][j].m_position, ParticleCollider(m_particlesBottom[i][j].m_position, 0.1, i, j));
 			}
 		}
 	}
 	
 	//auto ct2 = std::chrono::steady_clock::now();
 	//std::chrono::duration<float> dt = ct2 - ct;
-	//std::cout << deltaTime.count() << std::endl;
+	//std::cout << dt.count() << std::endl;
 
 	// 0.008s for 20x20 in debug
 	// 0.07s for 40x40 in debug
 
 	// Update the simulation
-	updateParticles(elapsedTimeInSeconds, colliders);
+	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider);
 
 	// Update the cloth's mesh
 	updateMesh();
@@ -171,7 +171,7 @@ void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colli
 * @param dt Time step
 * @return void
 */
-void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders)
+void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider)
 {
 	// Clamp the time step to avoid huge time steps
 	// This is a simple way to avoid instability in the simulation
@@ -193,7 +193,7 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
 
 			// Handle collision with itself
-			//handleCollisionWithItself(i, j);
+			handleCollisionWithItself(i, j, pGridCollider);
 		}
 	}
 
@@ -239,12 +239,61 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 }
 
 
-void Cloth::handleCollisionWithItself(const int currentI, const int currentJ)
+void Cloth::handleCollisionWithItself(const int currentI, const int currentJ, std::shared_ptr<GridCollider> pGridCollider)
 {
-	if (!m_pCollisionTree)
+	/*if (!m_pCollisionTree)
+	{
+		return;
+	}*/
+
+	if (!pGridCollider)
 	{
 		return;
 	}
+
+	int x;
+	int y;
+	int z;
+	// Get the cell coordinates
+	pGridCollider->getCellCoords(m_particlesBottom[currentI][currentJ].m_position, x, y, z);
+
+	// Loop over the neighbors cells
+	for (int xx = x - 1; xx <= x + 1; ++xx)
+	{
+		for (int yy = y - 1; yy <= y + 1; ++yy)
+		{
+			for (int zz = z - 1; zz <= z + 1; ++zz)
+			{
+				// Get the cell
+				GridCell* pCell = pGridCollider->getCell(x, y, z);
+				if (pCell) // If the cell exist (has particles)
+				{
+					for (auto& pc : pCell->m_particlesColliders)
+					{
+						// Skip the current particle and the neightbors
+						const bool isJneighbor = (pc.m_indexJ == (currentJ - 1) || pc.m_indexJ == (currentJ) || pc.m_indexJ == (currentJ + 1));
+						const bool isIneighbor = (pc.m_indexI == (currentI - 1) || pc.m_indexI == (currentI) || pc.m_indexI == (currentI + 1));
+						if (isIneighbor && isJneighbor)
+						{
+							continue;
+						}
+						// Check collision with the sphere
+						const double distance = (m_particlesBottom[currentI][currentJ].m_position - pc.m_position).norm();
+						const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
+						if (distance < radius)
+						{
+							m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
+							m_particlesBottom[currentI][currentJ].m_velocity *= 0.5;//Vec3(0.0, 0.0, 0.0);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+
+	return;
 
 	//auto ct = std::chrono::steady_clock::now();
 	std::vector<OctreeNode*> collidedList;

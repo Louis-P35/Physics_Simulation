@@ -12,10 +12,13 @@ class ParticleCollider
 {
 public:
 	Vec3 m_position;
-	double m_radius;
+	double m_radius; // TODO no need ?
 	//AABB m_aabb; // TODO later
+	int m_indexI = -1;
+	int m_indexJ = -1;
 
-	ParticleCollider(const Vec3& position, const double radius) : m_position(position), m_radius(radius) {};
+	ParticleCollider(const Vec3& position, const double radius,const int i, const int j) : 
+		m_position(position), m_radius(radius), m_indexI(i), m_indexJ(j) {};
 	~ParticleCollider() {};
 };
 

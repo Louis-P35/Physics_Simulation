@@ -116,7 +116,9 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
-	const int res = 30;
+	m_pGridCollider = std::make_shared<GridCollider>(0.2);
+
+	const int res = 20;
 	// Create a cloth
 	Vec3 position = Vec3(-4.0, 4.3, -4.0);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(

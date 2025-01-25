@@ -63,8 +63,8 @@ private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace);
 	void initMeshSides();
-	void handleCollisionWithItself(const int currentI, const int currentJ);
+	void handleCollisionWithItself(const int currentI, const int currentJ, std::shared_ptr<GridCollider> pGridCollider);
 	void updateMesh();
-	void updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders);
+	void updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider);
 	std::shared_ptr<OctreeNode> createCollisionTree(std::shared_ptr<OctreeNode> pRoot, const int iMin, const int iMax, const int jMin, const int jMax);
 };
