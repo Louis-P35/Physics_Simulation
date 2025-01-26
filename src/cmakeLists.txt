@@ -81,7 +81,7 @@ deploy_qt_for(${PROJECT_NAME})
 
 
 # Set compile options, features, or properties:
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 if (MSVC)
     # For Visual Studio, use /W4 to have high warnings
     target_compile_options(${PROJECT_NAME} PRIVATE /W4)
@@ -94,7 +94,7 @@ if (${BUILD_LIBRARY})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB_NAME})
 
     # Set compile options, features, or properties:
-    target_compile_features(LIB_NAME PUBLIC cxx_std_17)
+    target_compile_features(LIB_NAME PUBLIC cxx_std_20)
     if (MSVC)
         # For Visual Studio, use /W4 to have high warnings
         target_compile_options(LIB_NAME PRIVATE /W4)
