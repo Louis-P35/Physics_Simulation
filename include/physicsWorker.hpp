@@ -19,12 +19,13 @@ class PhysicsWorker
 private:
 	std::thread m_thread;
 	std::atomic<bool> m_running;
+	std::atomic<bool> m_killReady;
 
 public:
-	PhysicsWorker() : m_running(false) {};
+	PhysicsWorker() : m_running(false), m_killReady(true) {};
 	~PhysicsWorker();
 
 	void startWorker(std::function<void()> updateCallback);
-	void stopWorker();
-	void run();
+	void stopThread();
+	void stopRunning();
 };

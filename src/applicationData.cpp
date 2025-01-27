@@ -172,7 +172,10 @@ bool ApplicationData::resetSimulation()
 	// Clear the list of cloths
 	m_pCloths.clearClothes();
 
-	// Reset the barrier threshold for threads synchronization
+	// Dirty, TODO fix this: Wait for the threads to finish
+	_sleep(100);
+
+	// Ensure the barrier threshold for threads synchronization is zero
 	ClothFactory::s_barrier.setThreshold(0);
 
 	// Reset the and restart the simulation

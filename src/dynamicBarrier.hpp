@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <functional>
+#include <atomic>
 
 
 /*
@@ -54,11 +55,17 @@ public:
     void decreaseThreshold()
     {
         std::unique_lock<std::mutex> lock(m_mutex);
-        m_threshold--;
-        if (m_threshold < 0) // Should not happend
+        
+        if (m_threshold > 0)
         {
-			m_threshold = 0;
+            m_threshold--;
         }
+
+        if (m_count >= m_threshold)
+        {
+            m_count = 0;
+        }
+
         m_cv.notify_all();
     }
 

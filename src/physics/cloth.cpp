@@ -714,7 +714,7 @@ void ClothesList::stopSimulation()
 	{
 		if (pCloth)
 		{
-			pCloth->stopWorker();
+			pCloth->stopRunning();
 		}
 	}
 }

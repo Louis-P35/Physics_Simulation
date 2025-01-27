@@ -1,10 +1,14 @@
 // Includes from project
 #include "physicsWorker.hpp"
+#include "../src/clothfactory.hpp"
 
 
 PhysicsWorker::~PhysicsWorker()
 {
-    stopWorker();
+    // Kill the thread
+    stopThread();
+    
+	std::cout << "PhysicsWorker destroyed" << std::endl;
 }
 
 
@@ -29,15 +33,30 @@ void PhysicsWorker::startWorker(std::function<void()> updateCallback)
                 // Limit the loop rate (e.g., ~1ms updates)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
+
+            ClothFactory::s_barrier.decreaseThreshold();
+
+			// Wait for the kill signal
+            while (true)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
         });
 }
 
 /*
 * Stop the physics simulation
 */
-void PhysicsWorker::stopWorker()
+void PhysicsWorker::stopRunning()
 {
     m_running = false;
+}
+
+/*
+* Wait for the thread to finish
+*/
+void PhysicsWorker::stopThread()
+{
     if (m_thread.joinable())
     {
         m_thread.join();
