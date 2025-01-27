@@ -28,26 +28,50 @@ public:
 */
 class GridCollider
 {
-private:
+protected:
 	// Size of the cells
 	double m_step;
 	std::mutex m_mutex;
-	std::unordered_map<size_t, GridCell> m_grid[2];
-
-public:
-	int m_readGrid = 0;
-	int m_writeGrid = 1;
 
 public:
 	GridCollider(const double step) : m_step(step) {};
 	~GridCollider() {};
 
-	inline size_t hashKey(const int x, const int y, const int z) const;
 	inline void getCellCoords(const Vec3& position, int& x, int& y, int& z) const;
-	GridCell* getCell(const int x, const int y, const int z);
-	void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId);
-	void swap();
+	virtual void clearGrid() = 0;
+	virtual GridCell* getCell(const int x, const int y, const int z) = 0;
+	virtual void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId) = 0;
+};
 
+
+class StaticGridCollider : public GridCollider
+{
 private:
-	void clearGrid(const int index);
+	Vec3 m_min;
+	Vec3 m_max;
+	std::vector<std::vector<std::vector<GridCell>>> m_grid;
+
+public:
+	StaticGridCollider(const double step) : GridCollider(step) {};
+	~StaticGridCollider() {};
+
+	virtual GridCell* getCell(const int x, const int y, const int z) override;
+	virtual void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId) override;
+	virtual void clearGrid() override;
+};
+
+
+class HashGridCollider : public GridCollider
+{
+private:
+	std::unordered_map<size_t, GridCell> m_grid;
+
+public:
+	HashGridCollider(const double step) : GridCollider(step) {};
+	~HashGridCollider() {};
+
+	inline size_t hashKey(const int x, const int y, const int z) const;
+	virtual GridCell* getCell(const int x, const int y, const int z) override;
+	virtual void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId) override;
+	virtual void clearGrid() override;
 };

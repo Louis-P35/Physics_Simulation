@@ -191,13 +191,13 @@ void Cloth::updateParticles(
 			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
 
 			// Add the particle to the grid collider
-			if (pGridCollider)
+			/*if (pGridCollider)
 			{
 				pGridCollider->addParticleToCell(
 					m_particlesBottom[i][j].m_position, 
 					std::make_tuple(m_UID, i, j)
 				);
-			}
+			}*/
 
 			// Handle collision with itself
 			handleCollisionWithItselfAndOtherClothes(i, j, pGridCollider, pCloths);
@@ -317,7 +317,7 @@ void Cloth::handleCollisionWithItselfAndOtherClothes(
 
 	return;
 
-	if (!pGridCollider)
+	/*if (!pGridCollider)
 	{
 		return;
 	}
@@ -384,7 +384,7 @@ void Cloth::handleCollisionWithItselfAndOtherClothes(
 				}
 			}
 		}
-	}
+	}*/
 
 	// Quadtree search -> 3.8e-5s for 20x20 in debug
 	// Double for loop -> 2.7e-5s for 20x20 in debug

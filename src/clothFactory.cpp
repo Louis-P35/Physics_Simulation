@@ -81,7 +81,7 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	// Capture a copy of the pointer instead of a reference to avoid a dangling pointer
 	pCloth->startWorker([pCloth, pColliders = &colliders, pGridCollider = pGridCollider, syncBarrier = &s_barrier, &pCloths]() {
 		// Wait for the other threads to be ready
-		syncBarrier->arriveAndWait([&pGridCollider](){pGridCollider->swap();});
+		syncBarrier->arriveAndWait([&pGridCollider](){/*pGridCollider->swap();*/});
 
 		// Perform physics updates
 		pCloth->updateSimulation(*pColliders, pGridCollider, pCloths);

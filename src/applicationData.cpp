@@ -111,12 +111,12 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
-	const int res = 20;
+	const int res = 35;
 	const double sideSize = 1.5;
 	float scale = (static_cast<float>(sideSize) / static_cast<float>(res - 1)) / 8.0;
 
 	double cellSize = (sideSize / static_cast<double>(res - 1)) * 2.0; // Must be at least 2x bigger than the particle diameter
-	m_pGridCollider = std::make_shared<GridCollider>(cellSize);
+	m_pGridCollider = nullptr; //std::make_shared<HashGridCollider>(cellSize);
 
 	
 	// Create a cloth
@@ -182,7 +182,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	Vec3 position3 = Vec3(-1.0, 3.1, -1.0);
+	/*Vec3 position3 = Vec3(-1.0, 3.1, -1.0);
 	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -196,7 +196,7 @@ bool ApplicationData::initSimulation()
 	if (pCloth3)
 	{
 		m_pCloths.addCloth(pCloth3);
-	}
+	}*/
 }
 
 

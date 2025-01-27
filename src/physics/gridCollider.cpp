@@ -4,6 +4,25 @@
 // Includes from STL
 #include <functional>
 
+/*
+* Helper function to calculate grid cell coordinates
+*
+* @param position Position of the particle
+* @param x X coordinate of the cell
+* @param y Y coordinate of the cell
+* @param z Z coordinate of the cell
+* @return void
+*/
+inline void GridCollider::getCellCoords(const Vec3& position, int& x, int& y, int& z) const
+{
+	x = static_cast<int>(floor(position.x / m_step));
+	y = static_cast<int>(floor(position.y / m_step));
+	z = static_cast<int>(floor(position.z / m_step));
+}
+
+
+
+
 /* 
 * Helper function to compute a unique hash key from (x, y, z)
 * 
@@ -12,7 +31,7 @@
 * @param z Z coordinate
 * @return size_t Unique hash key
 */
-inline size_t GridCollider::hashKey(const int x, const int y, const int z) const
+inline size_t HashGridCollider::hashKey(const int x, const int y, const int z) const
 {
     size_t h1 = std::hash<int>()(x);
     size_t h2 = std::hash<int>()(y);
@@ -24,30 +43,13 @@ inline size_t GridCollider::hashKey(const int x, const int y, const int z) const
 
 
 /* 
-* Helper function to calculate grid cell coordinates
-* 
-* @param position Position of the particle
-* @param x X coordinate of the cell
-* @param y Y coordinate of the cell
-* @param z Z coordinate of the cell
-* @return void
-*/
-inline void GridCollider::getCellCoords(const Vec3& position, int& x, int& y, int& z) const
-{
-    x = static_cast<int>(floor(position.x / m_step));
-    y = static_cast<int>(floor(position.y / m_step));
-    z = static_cast<int>(floor(position.z / m_step));
-}
-
-
-/* 
 * Clear the grid
 * 
 * @return void
 */
-void GridCollider::clearGrid(const int index)
+void HashGridCollider::clearGrid()
 {
-    m_grid[index].clear();
+    m_grid.clear();
 }
 
 /* 
@@ -58,7 +60,7 @@ void GridCollider::clearGrid(const int index)
 * @param z Z coordinate of the cell
 * @return GridCell* Pointer to the cell
 */
-GridCell* GridCollider::getCell(const int x, const int y, const int z)
+GridCell* HashGridCollider::getCell(const int x, const int y, const int z)
 {
 	// No mutex for read operations (because reading and writing are done in two differents grids)
 	
@@ -66,8 +68,8 @@ GridCell* GridCollider::getCell(const int x, const int y, const int z)
 	size_t key = hashKey(x, y, z);
 
 	// Find the cell in the grid
-	auto it = m_grid[m_readGrid].find(key);
-	if (it != m_grid[m_readGrid].end())
+	auto it = m_grid.find(key);
+	if (it != m_grid.end())
 	{
 		return &it->second;
 	}
@@ -83,7 +85,7 @@ GridCell* GridCollider::getCell(const int x, const int y, const int z)
 * @param particleId Particle Id to add (cloth uid + index I + index J)
 * @return void
 */
-void GridCollider::addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId)
+void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId)
 {
 	int x;
 	int y;
@@ -99,24 +101,5 @@ void GridCollider::addParticleToCell(const Vec3& position, const std::tuple<std:
 	std::lock_guard<std::mutex> lock(m_mutex);
 
 	// Find the cell in the grid (or create it) and add the particle to it
-	m_grid[m_writeGrid][key].m_particlesId.push_back(particleId);
-}
-
-
-/*
-* Swap the reading and writing grid
-* Clear the write grid
-* 
-* @return void
-*/
-void GridCollider::swap()
-{
-	std::lock_guard<std::mutex> lock(m_mutex);
-
-	// Swap the read and write grid
-	m_readGrid = m_writeGrid;
-	m_writeGrid = 1 - m_readGrid;
-
-	// Clear the new write grid for the next iteration
-	clearGrid(m_writeGrid);
+	m_grid[key].m_particlesId.push_back(particleId);
 }
