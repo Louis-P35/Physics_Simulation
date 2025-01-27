@@ -15,6 +15,7 @@
 // Includes from STL
 #include <memory>
 #include <vector>
+#include <map>
 
 /*
 * ApplicationData class
@@ -35,8 +36,13 @@ public:
 	Object3D m_debugSphere3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
-	std::vector<std::shared_ptr<Cloth>> m_pCloths;
+	// Map of cloths, the key is the cloth's UID
+	ClothesList m_pCloths;
+
+	// List of colliders in the scene
 	std::vector<std::shared_ptr<Collider>> m_colliders;
+
+	// The hash grid collision optimization system
 	std::shared_ptr<GridCollider> m_pGridCollider;
 
 public:

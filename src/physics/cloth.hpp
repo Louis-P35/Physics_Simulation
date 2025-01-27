@@ -13,6 +13,10 @@
 // Includes from STL
 #include <vector>
 #include <chrono>
+#include <mutex>
+
+
+class ClothesList;
 
 
 /*
@@ -40,6 +44,8 @@ public:
 
 	std::shared_ptr<OctreeNode> m_pCollisionTree;
 
+	const std::string m_UID;
+
 private:
 	int m_meshFaceIndexTop = 0;
 	int m_meshFaceIndexSide1 = 0;
@@ -53,18 +59,51 @@ private:
 	float m_uvScale = 1.0f;
 
 public:
-	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position);
+	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position, std::string uid);
 	virtual ~Cloth();
 
-	void updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider);
+	void initGridCollider(std::shared_ptr<GridCollider> pGridCollider);
+	void updateSimulation(
+		const std::vector<std::shared_ptr<Collider>>& colliders, 
+		std::shared_ptr<GridCollider> pGridCollider,
+		ClothesList& pCloths
+	);
 	
 
 private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace);
 	void initMeshSides();
-	void handleCollisionWithItself(const int currentI, const int currentJ, std::shared_ptr<GridCollider> pGridCollider);
+	void handleCollisionWithItselfAndOtherClothes(
+		const int currentI, 
+		const int currentJ,
+		std::shared_ptr<GridCollider> pGridCollider,
+		ClothesList& pCloths
+	);
 	void updateMesh();
-	void updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider);
+	void updateParticles(
+		double dt, 
+		const std::vector<std::shared_ptr<Collider>>& colliders, 
+		std::shared_ptr<GridCollider> pGridCollider,
+		ClothesList& pCloths
+	);
 	std::shared_ptr<OctreeNode> createCollisionTree(std::shared_ptr<OctreeNode> pRoot, const int iMin, const int iMax, const int jMin, const int jMax);
+};
+
+
+
+class ClothesList
+{
+public:
+	std::map<std::string, std::shared_ptr<Cloth>> m_pClothsMap;
+	std::mutex m_mutex;
+
+public:
+	ClothesList() {};
+	~ClothesList() {};
+
+	void addCloth(std::shared_ptr<Cloth> pCloth);
+	std::shared_ptr<Cloth> getCloth(const std::string& uid);
+	void stopSimulation();
+	void clearClothes();
 };

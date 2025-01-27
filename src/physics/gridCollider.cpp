@@ -5,7 +5,7 @@
 #include <functional>
 
 /* 
-* Helper function to compute a unique hash key from(x, y, z)
+* Helper function to compute a unique hash key from (x, y, z)
 * 
 * @param x X coordinate
 * @param y Y coordinate
@@ -45,13 +45,13 @@ inline void GridCollider::getCellCoords(const Vec3& position, int& x, int& y, in
 * 
 * @return void
 */
-void GridCollider::clearGrid()
+void GridCollider::clearGrid(const int index)
 {
-    m_grid.clear();
+    m_grid[index].clear();
 }
 
 /* 
-* Get the cell at the specified coordinates
+* Get the cell (from the read grid) at the specified coordinates
 * 
 * @param x X coordinate of the cell
 * @param y Y coordinate of the cell
@@ -60,12 +60,14 @@ void GridCollider::clearGrid()
 */
 GridCell* GridCollider::getCell(const int x, const int y, const int z)
 {
+	// No mutex for read operations (because reading and writing are done in two differents grids)
+	
 	// Get the hash corresponding to the cell coordinates
 	size_t key = hashKey(x, y, z);
 
 	// Find the cell in the grid
-	auto it = m_grid.find(key);
-	if (it != m_grid.end())
+	auto it = m_grid[m_readGrid].find(key);
+	if (it != m_grid[m_readGrid].end())
 	{
 		return &it->second;
 	}
@@ -75,13 +77,13 @@ GridCell* GridCollider::getCell(const int x, const int y, const int z)
 
 
 /*
-* Add a particle to the cell corresponding to the specified position
+* Add a particle to the cell corresponding to the specified position (on the write grid)
 * 
 * @param position Position of the particle
-* @param particleCol ParticleCollider to add
+* @param particleId Particle Id to add (cloth uid + index I + index J)
 * @return void
 */
-void GridCollider::addParticleToCell(const Vec3& position, const ParticleCollider& particleCol)
+void GridCollider::addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId)
 {
 	int x;
 	int y;
@@ -93,6 +95,28 @@ void GridCollider::addParticleToCell(const Vec3& position, const ParticleCollide
 	// Get the hash corresponding to the cell coordinates
 	size_t key = hashKey(x, y, z);
 
+	// Lock the mutex to prevent concurrent access to the grid
+	std::lock_guard<std::mutex> lock(m_mutex);
+
 	// Find the cell in the grid (or create it) and add the particle to it
-	m_grid[key].m_particlesColliders.push_back(particleCol);
+	m_grid[m_writeGrid][key].m_particlesId.push_back(particleId);
+}
+
+
+/*
+* Swap the reading and writing grid
+* Clear the write grid
+* 
+* @return void
+*/
+void GridCollider::swap()
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+
+	// Swap the read and write grid
+	m_readGrid = m_writeGrid;
+	m_writeGrid = 1 - m_readGrid;
+
+	// Clear the new write grid for the next iteration
+	clearGrid(m_writeGrid);
 }

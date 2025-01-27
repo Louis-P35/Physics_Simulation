@@ -18,13 +18,8 @@ ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 ApplicationData::~ApplicationData()
 {
 	// Stop the physics simulation for all the cloths
-	for (auto& pCloth : m_pCloths)
-	{
-		if (pCloth)
-		{
-			pCloth->stopWorker();
-		}
-	}
+	m_pCloths.stopSimulation();
+
 }
 
 
@@ -128,17 +123,27 @@ bool ApplicationData::initSimulation()
 		position, 
 		m_pOpenGl3DWidget, 
 		m_colliders,
-		m_pGridCollider
+		m_pGridCollider,
+		m_pCloths
 	);
-	m_pCloths.push_back(pCloth);
+	if (pCloth)
+	{
+		m_pCloths.addCloth(pCloth);
+	}
 
-	/*Vec3 position2 = Vec3(-3.0, 4.3, -4.0);
-	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(res, res, 3.0, 3.0, 0.025, 300.0, position2, m_pOpenGl3DWidget, m_colliders);
-	m_pCloths.push_back(pCloth2);
+	Vec3 position2 = Vec3(-3.0, 4.3, -4.0);
+	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(res, res, 3.0, 3.0, 0.025, 300.0, position2, m_pOpenGl3DWidget, m_colliders, m_pGridCollider, m_pCloths);
+	if (pCloth2)
+	{
+		m_pCloths.addCloth(pCloth2);
+	}
 
 	Vec3 position3 = Vec3(-3.5, 4.5, -4.0);
-	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(res, res, 3.0, 3.0, 0.025, 300.0, position3, m_pOpenGl3DWidget, m_colliders);
-	m_pCloths.push_back(pCloth3);*/
+	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(res, res, 3.0, 3.0, 0.025, 300.0, position3, m_pOpenGl3DWidget, m_colliders, m_pGridCollider, m_pCloths);
+	if (pCloth3)
+	{
+		m_pCloths.addCloth(pCloth3);
+	}
 }
 
 
@@ -151,19 +156,24 @@ bool ApplicationData::initSimulation()
 bool ApplicationData::resetSimulation()
 {
 	// Stop the physics simulation for all the cloths
-	for (auto& pCloth : m_pCloths)
-	{
-		pCloth->stopWorker();
-	}
+	m_pCloths.stopSimulation();
 
+	// No need of mutex from here because threads are stopped
+	
 	// Remove all the cloths from the rendering widget
-	for (auto& pCloth : m_pCloths)
+	for (auto& [uid, pCloth] : m_pCloths.m_pClothsMap)
 	{
-		m_pOpenGl3DWidget->removeObject(pCloth->m_pRenderingInstance);
+		if (pCloth)
+		{
+			m_pOpenGl3DWidget->removeObject(pCloth->m_pRenderingInstance);
+		}
 	}
 
 	// Clear the list of cloths
-	m_pCloths.clear();
+	m_pCloths.clearClothes();
+
+	// Reset the barrier threshold for threads synchronization
+	ClothFactory::s_barrier.setThreshold(0);
 
 	// Reset the and restart the simulation
 	int res = initSimulation();

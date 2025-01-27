@@ -4,6 +4,7 @@
 // Includes from STL
 #include <iostream>
 #include <filesystem>
+#include <tuple>
 
 
 namespace fs = std::filesystem;
@@ -15,8 +16,8 @@ Cloth::~Cloth()
 }
 
 
-Cloth::Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position) :
-	m_resX(resX), m_resY(resY), m_width(width), m_height(height), m_thickness(thickness), m_clothMass(clothMass), m_position(position)
+Cloth::Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position, std::string uid) :
+	m_resX(resX), m_resY(resY), m_width(width), m_height(height), m_thickness(thickness), m_clothMass(clothMass), m_position(position), m_UID(uid)
 {
 	const int nbParticles = m_resX * m_resY;
 	const double particleMass = clothMass / static_cast<double>(nbParticles);
@@ -104,12 +105,45 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 }
 
 
+void Cloth::initGridCollider(std::shared_ptr<GridCollider> pGridCollider)
+{
+	//auto ct = std::chrono::steady_clock::now();
+
+	// Init the grid collider
+	/*if (pGridCollider)
+	{
+		// Clear the grid
+		//pGridCollider->clearGrid();
+
+		// Add the particles to the grid
+		for (int i = 0; i < m_resX; ++i)
+		{
+			for (int j = 0; j < m_resY; ++j)
+			{
+				pGridCollider->addParticleToCell(m_particlesBottom[i][j].m_position, ParticleCollider(m_particlesBottom[i][j].m_position, 0.1, i, j));
+			}
+		}
+	}*/
+
+	//auto ct2 = std::chrono::steady_clock::now();
+	//std::chrono::duration<float> dt = ct2 - ct;
+	//std::cout << dt.count() << std::endl;
+}
+
+
 /*
 * Update the cloth's physics (all particles) and mesh
 * 
+* @param colliders The list of colliders in the scene
+* @param pGridCollider The hash grid collider instance
+* @param pCloths The map of cloth in the scene
 * @return void
 */
-void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider)
+void Cloth::updateSimulation(
+	const std::vector<std::shared_ptr<Collider>>& colliders, 
+	std::shared_ptr<GridCollider> pGridCollider,
+	ClothesList& pCloths
+)
 {
 	static bool firstUpdate = true;
 
@@ -129,36 +163,15 @@ void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colli
 	float elapsedTimeInSeconds = deltaTime.count();
 
 	// Update the collision tree
-	//auto ct = std::chrono::steady_clock::now();
-	
 	//m_pCollisionTree = std::make_shared<OctreeNode>(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0));
 	//m_pCollisionTree = createCollisionTree(m_pCollisionTree, 0, m_resX - 1, 0, m_resY - 1);
 
-	// Init the grid collider
-	if (pGridCollider)
-	{
-		// Clear the grid
-		pGridCollider->clearGrid();
-
-		// Add the particles to the grid
-		for (int i = 0; i < m_resX; ++i)
-		{
-			for (int j = 0; j < m_resY; ++j)
-			{
-				pGridCollider->addParticleToCell(m_particlesBottom[i][j].m_position, ParticleCollider(m_particlesBottom[i][j].m_position, 0.1, i, j));
-			}
-		}
-	}
-	
-	//auto ct2 = std::chrono::steady_clock::now();
-	//std::chrono::duration<float> dt = ct2 - ct;
-	//std::cout << dt.count() << std::endl;
 
 	// 0.008s for 20x20 in debug
 	// 0.07s for 40x40 in debug
 
 	// Update the simulation
-	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider);
+	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider, pCloths);
 
 	// Update the cloth's mesh
 	updateMesh();
@@ -167,11 +180,19 @@ void Cloth::updateSimulation(const std::vector<std::shared_ptr<Collider>>& colli
 
 /*
 * Update the cloth by updating all the particles
-* 
+*
+* @param colliders The list of colliders in the scene
+* @param pGridCollider The hash grid collider instance
+* @param pCloths The map of cloth in the scene
 * @param dt Time step
 * @return void
 */
-void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collider>>& colliders, std::shared_ptr<GridCollider> pGridCollider)
+void Cloth::updateParticles(
+	double dt, 
+	const std::vector<std::shared_ptr<Collider>>& colliders, 
+	std::shared_ptr<GridCollider> pGridCollider,
+	ClothesList& pCloths
+)
 {
 	// Clamp the time step to avoid huge time steps
 	// This is a simple way to avoid instability in the simulation
@@ -192,8 +213,17 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 			// Update the AABB
 			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
 
+			// Add the particle to the grid collider
+			if (pGridCollider)
+			{
+				pGridCollider->addParticleToCell(
+					m_particlesBottom[i][j].m_position, 
+					std::make_tuple(m_UID, i, j)
+				);
+			}
+
 			// Handle collision with itself
-			handleCollisionWithItself(i, j, pGridCollider);
+			handleCollisionWithItselfAndOtherClothes(i, j, pGridCollider, pCloths);
 		}
 	}
 
@@ -239,13 +269,13 @@ void Cloth::updateParticles(double dt, const std::vector<std::shared_ptr<Collide
 }
 
 
-void Cloth::handleCollisionWithItself(const int currentI, const int currentJ, std::shared_ptr<GridCollider> pGridCollider)
+void Cloth::handleCollisionWithItselfAndOtherClothes(
+	const int currentI, 
+	const int currentJ, 
+	std::shared_ptr<GridCollider> pGridCollider,
+	ClothesList& pCloths
+	)
 {
-	/*if (!m_pCollisionTree)
-	{
-		return;
-	}*/
-
 	if (!pGridCollider)
 	{
 		return;
@@ -268,22 +298,33 @@ void Cloth::handleCollisionWithItself(const int currentI, const int currentJ, st
 				GridCell* pCell = pGridCollider->getCell(x, y, z);
 				if (pCell) // If the cell exist (has particles)
 				{
-					for (auto& pc : pCell->m_particlesColliders)
-					{
-						// Skip the current particle and the neightbors
-						const bool isJneighbor = (pc.m_indexJ == (currentJ - 1) || pc.m_indexJ == (currentJ) || pc.m_indexJ == (currentJ + 1));
-						const bool isIneighbor = (pc.m_indexI == (currentI - 1) || pc.m_indexI == (currentI) || pc.m_indexI == (currentI + 1));
-						if (isIneighbor && isJneighbor)
+					// Loop over the particles Id in the cell
+					for (auto& [otherClothUID, otherPartI, otherPartJ] : pCell->m_particlesId)
+					{						
+						// Skip the current particle and the neightbors if we collide to ourself
+						if (otherClothUID == m_UID)
 						{
-							continue;
+							const bool isJneighbor = (otherPartJ == (currentJ - 1) || otherPartJ == (currentJ) || otherPartJ == (currentJ + 1));
+							const bool isIneighbor = (otherPartI == (currentI - 1) || otherPartI == (currentI) || otherPartI == (currentI + 1));
+							if (isIneighbor && isJneighbor)
+							{
+								continue;
+							}
 						}
+
 						// Check collision with the sphere
-						const double distance = (m_particlesBottom[currentI][currentJ].m_position - pc.m_position).norm();
-						const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
-						if (distance < radius)
+						auto pOtherCloth = pCloths.getCloth(otherClothUID);
+						if (pOtherCloth)
 						{
-							m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
-							m_particlesBottom[currentI][currentJ].m_velocity *= 0.5;//Vec3(0.0, 0.0, 0.0);
+							Vec3& otherPartPos = pOtherCloth->m_particlesBottom[otherPartI][otherPartJ].m_position;
+							const double distance = (m_particlesBottom[currentI][currentJ].m_position - otherPartPos).norm();
+							// Assume radius is the same for all particles
+							const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
+							if (distance < (2.0 * radius))
+							{
+								m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
+								m_particlesBottom[currentI][currentJ].m_velocity *= 0.5;//Vec3(0.0, 0.0, 0.0);
+							}
 						}
 					}
 				}
@@ -634,4 +675,54 @@ void Cloth::updateMesh()
 	// Update the VBO vertices data
 	m_pRenderingInstance->m_verticesData.clear();
 	m_pRenderingInstance->m_verticesData = m_object3D.computeVBOVerticesData();
+}
+
+
+
+
+void ClothesList::addCloth(std::shared_ptr<Cloth> pCloth)
+{
+	if (!pCloth)
+	{
+		return;
+	}
+
+	std::lock_guard<std::mutex> lock(m_mutex);
+
+	m_pClothsMap[pCloth->m_UID] = pCloth;
+}
+
+
+std::shared_ptr<Cloth> ClothesList::getCloth(const std::string& uid)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+
+	auto it = m_pClothsMap.find(uid);
+	if (it != m_pClothsMap.end() && it->second)
+	{
+		return it->second;
+	}
+
+	return nullptr;
+}
+
+void ClothesList::stopSimulation()
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+
+	for (auto& [uid, pCloth] : m_pClothsMap)
+	{
+		if (pCloth)
+		{
+			pCloth->stopWorker();
+		}
+	}
+}
+
+
+void ClothesList::clearClothes()
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+
+	m_pClothsMap.clear();
 }

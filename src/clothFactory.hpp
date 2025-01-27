@@ -6,12 +6,14 @@
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/physics/collider.hpp"
 #include "../src/physics/gridCollider.hpp"
+#include "../src/dynamicBarrier.hpp"
 
 // Includes from 3rd party
 
 // Includes from STL
 #include <memory>
 #include <vector>
+#include <map>
 
 
 /*
@@ -23,6 +25,9 @@
 */
 class ClothFactory
 {
+public:
+	static DynamicBarrier s_barrier;
+
 public:
 	ClothFactory() = delete;
 	~ClothFactory() = delete;
@@ -37,6 +42,10 @@ public:
 		Vec3 position,
 		OpenGl3DWidget* pOpenGl3DWidget,
 		std::vector<std::shared_ptr<Collider>>& colliders,
-		std::shared_ptr<GridCollider> pGridCollider
+		std::shared_ptr<GridCollider> pGridCollider,
+		ClothesList& pCloths
 	);
+
+private:
+	static std::string generateUID();
 };

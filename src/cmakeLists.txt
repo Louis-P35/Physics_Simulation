@@ -49,6 +49,7 @@ set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/shader.hpp
     ${CMAKE_SOURCE_DIR}/src/view/Qt/clothWidget.hpp
+    ${CMAKE_SOURCE_DIR}/src/dynamicBarrier.hpp
 )
 
 # Enable AUTOMOC (and optionally AUTOUIC, AUTORCC) 

@@ -7,25 +7,15 @@
 // Includes from STL
 #include <vector>
 #include <unordered_map>
+#include <mutex>
+#include <tuple>
 
-class ParticleCollider
-{
-public:
-	Vec3 m_position;
-	double m_radius; // TODO no need ?
-	//AABB m_aabb; // TODO later
-	int m_indexI = -1;
-	int m_indexJ = -1;
-
-	ParticleCollider(const Vec3& position, const double radius,const int i, const int j) : 
-		m_position(position), m_radius(radius), m_indexI(i), m_indexJ(j) {};
-	~ParticleCollider() {};
-};
 
 class GridCell
 {
 public:
-	std::vector<ParticleCollider> m_particlesColliders;
+	// UID, index I, index J
+	std::vector<std::tuple<std::string, int, int>> m_particlesId;
 };
 
 
@@ -41,8 +31,12 @@ class GridCollider
 private:
 	// Size of the cells
 	double m_step;
+	std::mutex m_mutex;
+	std::unordered_map<size_t, GridCell> m_grid[2];
 
-	std::unordered_map<size_t, GridCell> m_grid;
+public:
+	int m_readGrid = 0;
+	int m_writeGrid = 1;
 
 public:
 	GridCollider(const double step) : m_step(step) {};
@@ -50,7 +44,10 @@ public:
 
 	inline size_t hashKey(const int x, const int y, const int z) const;
 	inline void getCellCoords(const Vec3& position, int& x, int& y, int& z) const;
-	void clearGrid();
 	GridCell* getCell(const int x, const int y, const int z);
-	void addParticleToCell(const Vec3& position, const ParticleCollider& particleCol);
+	void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId);
+	void swap();
+
+private:
+	void clearGrid(const int index);
 };

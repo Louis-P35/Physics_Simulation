@@ -2,9 +2,31 @@
 #include "clothFactory.hpp"
 
 // Includes from 3rd party
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 // Includes from STL
 #include <iostream>
+
+
+// Définition of the statique variable
+DynamicBarrier ClothFactory::s_barrier;
+
+
+
+/*
+* Generate a UID to identify a cloth instance
+* 
+* @return std::string UID
+*/
+std::string ClothFactory::generateUID()
+{
+	boost::uuids::random_generator generator;
+	boost::uuids::uuid uid = generator();
+
+	return to_string(uid);
+}
 
 
 /*
@@ -31,7 +53,8 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	Vec3 position,
 	OpenGl3DWidget* pOpenGl3DWidget,
 	std::vector<std::shared_ptr<Collider>>& colliders,
-	std::shared_ptr<GridCollider> pGridCollider
+	std::shared_ptr<GridCollider> pGridCollider,
+	ClothesList& pCloths
 )
 {
 	if (!pOpenGl3DWidget)
@@ -40,8 +63,12 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 		return nullptr;
 	}
 
+	// Generate a UID for the cloth
+	const std::string uid = generateUID();
+	std::cout << "UID: " << uid << std::endl;
+
 	// Create the cloth
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, thickness, clothMass, position);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, thickness, clothMass, position, uid);
 
 	// Add the mesh of the cloth to the rendering widget
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);
@@ -62,11 +89,17 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 		}
 	}*/
 
+	// Increase the barrier threshold to synchronize the threads
+	s_barrier.increaseThreshold();
+
 	// Start the simulation in a separate thread
 	// Capture a copy of the pointer instead of a reference to avoid a dangling pointer
-	pCloth->startWorker([pCloth, pColliders = &colliders, pGridCollider = pGridCollider]() {
+	pCloth->startWorker([pCloth, pColliders = &colliders, pGridCollider = pGridCollider, syncBarrier = &s_barrier, &pCloths]() {
+		// Wait for the other threads to be ready
+		syncBarrier->arriveAndWait([&pGridCollider](){pGridCollider->swap();});
+
 		// Perform physics updates
-		pCloth->updateSimulation(*pColliders, pGridCollider);
+		pCloth->updateSimulation(*pColliders, pGridCollider, pCloths);
 		});
 
 	return pCloth;
