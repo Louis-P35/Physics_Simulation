@@ -74,21 +74,6 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);
 	pCloth->m_pRenderingInstance->m_isStatic = false;
 
-	// Debug view of the particles
-	/*for (int i = 0; i < pCloth->m_resX; ++i)
-	{
-		for (int j = 0; j < pCloth->m_resY; ++j)
-		{
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = pOpenGl3DWidget->addObject(m_debugSphere3D);
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesBottom[i][j].m_position.toArray();
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = pOpenGl3DWidget->addObject(m_debugSphere3D);
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesTop[i][j].m_position.toArray();
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.05f, 0.05f, 0.05f };
-		}
-	}*/
-
 	// Increase the barrier threshold to synchronize the threads
 	s_barrier.increaseThreshold();
 

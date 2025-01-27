@@ -62,7 +62,6 @@ public:
 	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position, std::string uid);
 	virtual ~Cloth();
 
-	void initGridCollider(std::shared_ptr<GridCollider> pGridCollider);
 	void updateSimulation(
 		const std::vector<std::shared_ptr<Collider>>& colliders, 
 		std::shared_ptr<GridCollider> pGridCollider,

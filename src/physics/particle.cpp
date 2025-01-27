@@ -97,9 +97,9 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 	computePFD(forces, dt);
 
 	// Handle collision with the ground
-	if (m_position.y < 0.0)
+	if (m_position.y < m_pAabb->m_halfSize)
 	{
-		m_position.y = 0.0;
+		m_position.y = m_pAabb->m_halfSize;
 		m_velocity.y = -m_velocity.y;
 		if (m_groundFriction > 0.0)
 		{
