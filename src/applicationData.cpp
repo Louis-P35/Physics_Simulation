@@ -49,7 +49,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		m_pCube3DRenderer,
 		pCollider,
 		pGl3dWidget,
-		Vec3(-1.0, 1.0, -1.0),
+		Vec3(3.0, 1.0, 3.0),
 		1.0
 	);
 	m_colliders.push_back(pCollider);
@@ -89,6 +89,8 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 
 	// Debug sphere
 	m_debugSphere3D.loadFromObjFile("../models/sphere_highRes/", "sphere.obj");
+	m_debugSphere3D2.loadFromObjFile("../models/sphere_highRes2/", "sphere.obj");
+	m_debugSphere3D3.loadFromObjFile("../models/sphere_highRes3/", "sphere.obj");
 	//m_pDebugSphere3DRenderer = pGl3dWidget->addObject(m_debugSphere3D);
 	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
 	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
@@ -111,19 +113,50 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
-	const int res = 35;
-	const double sideSize = 1.5;
-	float scale = (static_cast<float>(sideSize) / static_cast<float>(res - 1)) / 8.0;
+	const double particleRadius = 0.025;
+	const int res = 15;
 
-	double cellSize = (sideSize / static_cast<double>(res - 1)) * 2.0; // Must be at least 2x bigger than the particle diameter
-	m_pGridCollider = nullptr; //std::make_shared<HashGridCollider>(cellSize);
+	const double particleColliderRadius = particleRadius * 2.0;
+	double cellSize = particleColliderRadius; // Must be at least equal to the particle collider diameter
+	const double sideSize = particleRadius * 2.0 * static_cast<double>(res - 1);
+
+	float scale = static_cast<float>(particleColliderRadius); // Sphere obj is 2.0 in diameter
+
+	// Create the grid collider (10x10x10)
+	size_t gridWith = static_cast<size_t>(6.0 / cellSize);
+	size_t gridHeight = static_cast<size_t>(5.0 / cellSize);
+	m_pGridCollider = std::make_shared<StaticGridCollider>(cellSize, gridWith, gridHeight, Vec3(0.0, 0.0, 0.0));
+	/*std::vector<Vec3> debugSpheres;
+	Vec3 pos1 = Vec3(0.0, 0.0, 0.0);
+	debugSpheres.push_back(pos1);
+	debugSpheres.push_back(pos1 + Vec3(static_cast<double>(gridWith) * cellSize, 0.0, 0.0));
+	debugSpheres.push_back(pos1 + Vec3(0.0, 0.0, static_cast<double>(gridWith) * cellSize));
+	debugSpheres.push_back(pos1 + Vec3(static_cast<double>(gridWith) * cellSize, 0.0, static_cast<double>(gridWith) * cellSize));
+	debugSpheres.push_back(pos1 + Vec3(0.0, static_cast<double>(gridHeight) * cellSize, 0.0));
+	debugSpheres.push_back(pos1 + Vec3(static_cast<double>(gridWith) * cellSize, static_cast<double>(gridHeight) * cellSize, 0.0));
+	debugSpheres.push_back(pos1 + Vec3(0.0, static_cast<double>(gridHeight) * cellSize, static_cast<double>(gridWith) * cellSize));
+	debugSpheres.push_back(pos1 + Vec3(static_cast<double>(gridWith) * cellSize, static_cast<double>(gridHeight) * cellSize, static_cast<double>(gridWith) * cellSize));
+	for (const auto& pos : debugSpheres)
+	{
+		std::shared_ptr<Collider> pCollider = nullptr;
+		ObjectsFactory::createSphere(
+			m_debugSphere3D,
+			m_pDebugSphere3DRenderer,
+			pCollider,
+			m_pOpenGl3DWidget,
+			pos,
+			0.1
+		);
+		m_colliders.push_back(pCollider);
+	}*/
 
 	
 	// Create a cloth
-	Vec3 position = Vec3(-1.0, 2.1, -1.0);
+	Vec3 position = Vec3(3.0, 3.0, 3.0);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
+		particleColliderRadius,
 		0.025, 300.0, 
 		position, 
 		m_pOpenGl3DWidget, 
@@ -137,24 +170,25 @@ bool ApplicationData::initSimulation()
 	}
 
 	// Debug view of the particles
-	/*for (int i = 0; i < pCloth->m_resX; ++i)
+	for (int i = 0; i < pCloth->m_resX; ++i)
 	{
 		for (int j = 0; j < pCloth->m_resY; ++j)
 		{
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D3);
 			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesBottom[i][j].m_position.toArray();
 			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D3);
 			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesTop[i][j].m_position.toArray();
 			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 		}
-	}*/
+	}
 
-	Vec3 position2 = Vec3(-1.0, 2.6, -1.0);//Vec3(-3.0, 4.3, -4.0);
+	Vec3 position2 = Vec3(3.0, 3.6, 3.0);
 	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
+		particleColliderRadius,
 		0.025, 300.0, 
 		position2, 
 		m_pOpenGl3DWidget, 
@@ -168,19 +202,19 @@ bool ApplicationData::initSimulation()
 	}
 
 	// Debug view of the particles
-	/*for (int i = 0; i < pCloth2->m_resX; ++i)
+	for (int i = 0; i < pCloth2->m_resX; ++i)
 	{
 		for (int j = 0; j < pCloth2->m_resY; ++j)
 		{
-			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
 			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth2->m_particlesBottom[i][j].m_position.toArray();
 			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 
-			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D);
+			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
 			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth2->m_particlesTop[i][j].m_position.toArray();
 			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 		}
-	}*/
+	}
 
 	/*Vec3 position3 = Vec3(-1.0, 3.1, -1.0);
 	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(

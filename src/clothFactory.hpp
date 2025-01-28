@@ -37,6 +37,7 @@ public:
 		int resY,
 		double width,
 		double height,
+		double colliderRadius,
 		double thickness,
 		double clothMass,
 		Vec3 position,

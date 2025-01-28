@@ -59,7 +59,7 @@ private:
 	float m_uvScale = 1.0f;
 
 public:
-	Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position, std::string uid);
+	Cloth(int resX, int resY, double width, double height, double colliderRadius, double thickness, double clothMass, Vec3 position, std::string uid);
 	virtual ~Cloth();
 
 	void updateSimulation(
@@ -73,11 +73,27 @@ private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace);
 	void initMeshSides();
-	void handleCollisionWithItselfAndOtherClothes(
+	void handleCollisionWithItselfAndOtherClothes_slow(
 		const int currentI, 
 		const int currentJ,
+		ClothesList& pCloths,
+		std::vector< std::tuple<std::string, int, int>>& debug
+	);
+	void handleCollisionWithItselfAndOtherClothes_fast(
+		const int currentI,
+		const int currentJ,
 		std::shared_ptr<GridCollider> pGridCollider,
-		ClothesList& pCloths
+		ClothesList& pCloths,
+		std::vector< std::tuple<std::string, int, int>>& debug
+	);
+	void handleCollisionWithParticle(
+		const int currentI,
+		const int currentJ,
+		const int otherI,
+		const int otherJ,
+		const std::string& otherClothUID,
+		ClothesList& pCloths,
+		std::vector< std::tuple<std::string, int, int>>& debug
 	);
 	void updateMesh();
 	void updateParticles(

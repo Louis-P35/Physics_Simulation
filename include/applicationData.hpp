@@ -34,6 +34,8 @@ public:
 	Object3D m_ground3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pGround3DRenderer;
 	Object3D m_debugSphere3D;
+	Object3D m_debugSphere3D2;
+	Object3D m_debugSphere3D3;
 	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
 	// Map of cloths, the key is the cloth's UID
@@ -43,7 +45,7 @@ public:
 	std::vector<std::shared_ptr<Collider>> m_colliders;
 
 	// The hash grid collision optimization system
-	std::shared_ptr<HashGridCollider> m_pGridCollider;
+	std::shared_ptr<GridCollider> m_pGridCollider;
 
 public:
 	ApplicationData();

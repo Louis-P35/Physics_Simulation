@@ -26,12 +26,12 @@ SphereCollider::~SphereCollider()
 * @param p1 End of the line segment
 * @return bool True if the sphere has collided with the line segment, false otherwise
 */
-bool SphereCollider::hasCollided(Vec3& collPosition, Vec3& collNormal, Vec3& bounceVect, const Vec3& p0, const Vec3& p1) const
+bool SphereCollider::hasCollided(Vec3& collPosition, Vec3& collNormal, Vec3& bounceVect, const Vec3& p0, const Vec3& p1, const double partRadius) const
 {
 	// Compute the distance between the sphere center and the p1 point
 	const double d = (m_position - p1).norm();
 
-	if (d <= m_radius)
+	if (d <= (m_radius + partRadius))
 	{
 		// The sphere has collided with the line segment
 		collNormal = (p1 - m_position).getNormalized();

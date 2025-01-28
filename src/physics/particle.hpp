@@ -76,6 +76,7 @@ public:
 
 	void update(const double dt, const std::vector<std::shared_ptr<Collider>>& colliders);
 	void setFixed(const bool fixState) { isFixed = fixState; };
+	void bounceOnCollision(const Vec3& normal, const double restitution);
 
 private:
 	Vec3 computeForces(const Vec3& gravity);

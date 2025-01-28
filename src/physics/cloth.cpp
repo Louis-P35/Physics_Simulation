@@ -16,14 +16,13 @@ Cloth::~Cloth()
 }
 
 
-Cloth::Cloth(int resX, int resY, double width, double height, double thickness, double clothMass, Vec3 position, std::string uid) :
+Cloth::Cloth(int resX, int resY, double width, double height, double colliderRadius, double thickness, double clothMass, Vec3 position, std::string uid) :
 	m_resX(resX), m_resY(resY), m_width(width), m_height(height), m_thickness(thickness), m_clothMass(clothMass), m_position(position), m_UID(uid)
 {
 	const int nbParticles = m_resX * m_resY;
 	const double particleMass = clothMass / static_cast<double>(nbParticles);
 	const double distBetweenParticlesX = m_width / static_cast<double>(m_resX - 1);
 	const double distBetweenParticlesY = m_height / static_cast<double>(m_resY - 1);
-	const double halfDistBetweenParticles = std::max(distBetweenParticlesX, distBetweenParticlesY) / 2.0;
 
 	m_position -= Vec3(m_width / 2.0, 0.0, m_height / 2.0);
 
@@ -45,7 +44,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 			Particle particleTop = Particle(posTop, particleMass);
 			
 			// Create the AABB for the particle (only for the bottom side)
-			particleBottom.m_pAabb = std::make_shared<AABB>(halfDistBetweenParticles);
+			particleBottom.m_pAabb = std::make_shared<AABB>(colliderRadius);
 			particleBottom.m_pAabb->constructCubicAABB(posBottom);
 
 			// Add the particles to the lists
@@ -58,7 +57,7 @@ Cloth::Cloth(int resX, int resY, double width, double height, double thickness, 
 	}
 
 	// Define the spring parameters
-	const double springStrengh = 1000.0;
+	const double springStrengh = 3000.0;
 	const double springDamping = 0.0;
 
 	// Create the springs
@@ -173,11 +172,10 @@ void Cloth::updateParticles(
 {
 	// Clamp the time step to avoid huge time steps
 	// This is a simple way to avoid instability in the simulation
-	if (dt > 0.01)
+	if (dt > 0.005)
 	{
-		dt = 0.01;
+		dt = 0.005;
 	}
-
 
 	// Update the particles
 	for (int i = 0; i < m_resX; ++i)
@@ -190,17 +188,72 @@ void Cloth::updateParticles(
 			// Update the AABB
 			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
 
-			// Add the particle to the grid collider
-			/*if (pGridCollider)
+			// Add the particle's new position to the grid collider
+			if (pGridCollider)
 			{
 				pGridCollider->addParticleToCell(
 					m_particlesBottom[i][j].m_position, 
 					std::make_tuple(m_UID, i, j)
 				);
-			}*/
+			}
+		}
+	}
 
-			// Handle collision with itself
-			handleCollisionWithItselfAndOtherClothes(i, j, pGridCollider, pCloths);
+	// Handle collisions
+	for (int i = 0; i < m_resX; ++i)
+	{
+		for (int j = 0; j < m_resY; ++j)
+		{
+			// Handle collision with itself and other clothes first
+			std::vector<std::tuple<std::string, int, int>> debugSlow;
+			std::vector<std::tuple<std::string, int, int>> debugFast;
+
+			auto ct1 = std::chrono::steady_clock::now();
+			handleCollisionWithItselfAndOtherClothes_slow(i, j, pCloths, debugSlow);
+			auto ct2 = std::chrono::steady_clock::now();
+			std::chrono::duration<float> dt1 = ct2 - ct1;
+			float et1 = dt1.count();
+
+			//auto ct3 = std::chrono::steady_clock::now();
+			//handleCollisionWithItselfAndOtherClothes_fast(i, j, pGridCollider, pCloths, debugFast);
+			//auto ct4 = std::chrono::steady_clock::now();
+			//std::chrono::duration<float> dt2 = ct4 - ct3;
+			//float et2 = dt2.count();
+
+			//double howMuch = et1 / et2;
+			//howMuch = howMuch;
+
+			// Handle collision with the ground
+			if (m_particlesBottom[i][j].m_position.y < m_particlesBottom[i][j].m_pAabb->m_halfSize)
+			{
+				m_particlesBottom[i][j].m_position.y = m_particlesBottom[i][j].m_pAabb->m_halfSize;
+
+				m_particlesBottom[i][j].bounceOnCollision(Vec3(0.0, 1.0, 0.0), 1.0 / m_particlesBottom[i][j].m_groundFriction);
+			}
+
+			// Handle collision with the colliders
+			for (const auto& pCollider : colliders)
+			{
+				if (!pCollider)
+				{
+					continue;
+				}
+
+				Vec3 collPosition;
+				Vec3 collNormal;
+				Vec3 bounceVect;
+				if (pCollider->hasCollided(collPosition, collNormal, bounceVect, m_particlesBottom[i][j].m_previousPosition, m_particlesBottom[i][j].m_position, m_particlesBottom[i][j].m_pAabb->m_halfSize))
+				{
+					// Compute the new position
+					m_particlesBottom[i][j].m_position = collPosition + collNormal * m_particlesBottom[i][j].m_pAabb->m_halfSize;
+					// Compute the new velocity
+					m_particlesBottom[i][j].m_velocity = bounceVect * m_particlesBottom[i][j].m_velocity.norm();
+					if (m_particlesBottom[i][j].m_objectFriction > 0.0)
+					{
+						m_particlesBottom[i][j].m_velocity *= 1.0 / m_particlesBottom[i][j].m_objectFriction;
+					}
+				}
+			}
 		}
 	}
 
@@ -246,6 +299,107 @@ void Cloth::updateParticles(
 }
 
 
+void Cloth::handleCollisionWithParticle(
+	const int currentI,
+	const int currentJ,
+	const int otherI,
+	const int otherJ,
+	const std::string& otherClothUID,
+	ClothesList& pCloths,
+	std::vector<std::tuple<std::string, int, int>>& debug
+	)
+{
+	auto pOtherCloth = pCloths.getCloth(otherClothUID);
+
+	// Skip the current particle and the neightbors if we collide to ourself
+	if (otherClothUID == m_UID)
+	{
+		int distNoEffect = 2;
+		bool isJneighbor = (otherJ == currentJ);
+		bool isIneighbor = (otherI == currentI);
+
+		for (int k = 1; k < (distNoEffect + 1); ++k)
+		{
+			isJneighbor |= (otherJ == (currentJ - k) || otherJ == (currentJ + k));
+			isIneighbor |= (otherI == (currentI - k) || otherI == (currentI + k));
+		}
+
+		if (isIneighbor && isJneighbor)
+		{
+			return;
+		}
+	}
+
+	// Check collision with the sphere
+	if (pOtherCloth)
+	{
+		Vec3& otherPartPos = pOtherCloth->m_particlesBottom[otherI][otherJ].m_position;
+		const double distance = (m_particlesBottom[currentI][currentJ].m_position - otherPartPos).norm();
+		// Assume radius is the same for all particles
+		const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
+		if (distance < (2.0 * radius))
+		{
+			//Vec3 dir = (m_particlesBottom[currentI][currentJ].m_previousPosition - m_particlesBottom[currentI][currentJ].m_position).getNormalized();
+			Vec3 dir = (m_particlesBottom[currentI][currentJ].m_position - otherPartPos).getNormalized();
+			double displace = (2.0 * radius) - distance;
+
+			debug.push_back(std::make_tuple(otherClothUID, otherI, otherJ));
+
+			// Replace the particle
+			m_particlesBottom[currentI][currentJ].m_position += dir * displace;
+			// Bounce the velocity
+			m_particlesBottom[currentI][currentJ].bounceOnCollision(dir, 0.3);
+
+			//pOtherCloth->m_particlesBottom[otherI][otherJ].m_position -= dir * displace;
+			//pOtherCloth->m_particlesBottom[otherI][otherJ].m_velocity *= -0.3;
+		}
+	}
+}
+
+
+void Cloth::handleCollisionWithItselfAndOtherClothes_fast(
+	const int currentI,
+	const int currentJ,
+	std::shared_ptr<GridCollider> pGridCollider,
+	ClothesList& pCloths,
+	std::vector<std::tuple<std::string, int, int>>& debug
+)
+{
+	if (!pGridCollider)
+	{
+		return;
+	}
+
+	int x;
+	int y;
+	int z;
+
+	// Get the cell coordinates
+	pGridCollider->getCellCoords(m_particlesBottom[currentI][currentJ].m_position, x, y, z);
+
+	// Loop over the neighbors cells
+	for (int xx = x - 1; xx <= x + 1; ++xx)
+	{
+		for (int yy = y - 1; yy <= y + 1; ++yy)
+		{
+			for (int zz = z - 1; zz <= z + 1; ++zz)
+			{
+				// Get the cell
+				GridCell* pCell = pGridCollider->getCell(xx, yy, zz);
+				if (pCell) // If the cell exist (has particles)
+				{
+					// Loop over the particles Id in the cell
+					for (auto& [otherClothUID, otherPartI, otherPartJ] : pCell->m_particlesId)
+					{
+						handleCollisionWithParticle(currentI, currentJ, otherPartI, otherPartJ, otherClothUID, pCloths, debug);
+					}
+				}
+			}
+		}
+	}
+}
+
+
 /*
 * Detect and handle collision with itself and other clothes
 * 
@@ -255,11 +409,11 @@ void Cloth::updateParticles(
 * @param pCloths The map of cloth in the scene
 * @return void
 */
-void Cloth::handleCollisionWithItselfAndOtherClothes(
+void Cloth::handleCollisionWithItselfAndOtherClothes_slow(
 	const int currentI, 
 	const int currentJ, 
-	std::shared_ptr<GridCollider> pGridCollider,
-	ClothesList& pCloths
+	ClothesList& pCloths,
+	std::vector<std::tuple<std::string, int, int>>& debug
 	)
 {
 
@@ -269,43 +423,7 @@ void Cloth::handleCollisionWithItselfAndOtherClothes(
 		{
 			for (int j = 0; j < pCloth.second->m_resY; ++j)
 			{
-				// Skip the current particle and the neightbors if we collide to ourself
-				if (pCloth.first == m_UID)
-				{
-					int distNoEffect = 1;
-					bool isJneighbor = (j == currentJ);
-					bool isIneighbor = (i == currentI);
-
-					for (int k = 1; k < (distNoEffect + 1); ++k)
-					{
-						isJneighbor |= (j == (currentJ - k) || j == (currentJ + k));
-						isIneighbor |= (i == (currentI - k) || i == (currentI + k));
-					}
-
-					if (isIneighbor && isJneighbor)
-					{
-						continue;
-					}
-				}
-
-				// Check collision with the sphere
-				auto pOtherCloth = pCloths.getCloth(pCloth.first);
-				if (pOtherCloth)
-				{
-					Vec3& otherPartPos = pOtherCloth->m_particlesBottom[i][j].m_position;
-					const double distance = (m_particlesBottom[currentI][currentJ].m_position - otherPartPos).norm();
-					// Assume radius is the same for all particles
-					const double radius = m_particlesBottom[currentI][currentJ].m_pAabb->m_halfSize;
-					if (distance < (2.0 * radius))
-					{
-						Vec3 dir = (m_particlesBottom[currentI][currentJ].m_previousPosition - m_particlesBottom[currentI][currentJ].m_position).getNormalized();
-						double displace = (2.0 * radius) - distance;
-
-						m_particlesBottom[currentI][currentJ].m_position += dir * displace;
-						//m_particlesBottom[currentI][currentJ].m_position = m_particlesBottom[currentI][currentJ].m_previousPosition;
-						m_particlesBottom[currentI][currentJ].m_velocity *= 0.0; //-0.3;
-					}
-				}
+				handleCollisionWithParticle(currentI, currentJ, i, j, pCloth.first, pCloths, debug);
 			}
 		}
 	}

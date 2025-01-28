@@ -47,7 +47,8 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	int resX,
 	int resY,
 	double width,
-	double height,
+	double height, 
+	double colliderRadius,
 	double thickness,
 	double clothMass,
 	Vec3 position,
@@ -68,7 +69,7 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	std::cout << "UID: " << uid << std::endl;
 
 	// Create the cloth
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, thickness, clothMass, position, uid);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, colliderRadius, thickness, clothMass, position, uid);
 
 	// Add the mesh of the cloth to the rendering widget
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);
@@ -80,8 +81,9 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	// Start the simulation in a separate thread
 	// Capture a copy of the pointer instead of a reference to avoid a dangling pointer
 	pCloth->startWorker([pCloth, pColliders = &colliders, pGridCollider = pGridCollider, syncBarrier = &s_barrier, &pCloths]() {
-		// Wait for the other threads to be ready
-		syncBarrier->arriveAndWait([&pGridCollider](){/*pGridCollider->swap();*/});
+		// Wait for all the threads to be ready
+		// The last one will clear the collision grid
+		syncBarrier->arriveAndWait([&pGridCollider](){pGridCollider->swap();});
 
 		// Perform physics updates
 		pCloth->updateSimulation(*pColliders, pGridCollider, pCloths);

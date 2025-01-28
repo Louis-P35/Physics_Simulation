@@ -23,6 +23,7 @@ public:
 		Vec3& collNormal,
 		Vec3& bounceVect,
 		const Vec3& p0, 
-		const Vec3& p1
+		const Vec3& p1,
+		const double partRadius
 	) const override;
 };

@@ -16,8 +16,6 @@
 * Synchronize threads at a barrier
 * C++20 implement this class with std::barrier, but we need a dynamic m_threshold
 * which is not possible with std::barrier
-*
-* @return void
 */
 class DynamicBarrier
 {

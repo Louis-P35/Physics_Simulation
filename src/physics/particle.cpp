@@ -46,6 +46,7 @@ Particle::~Particle()
 {
 }
 
+
 Vec3 Particle::computeForces(const Vec3& gravity)
 {
 	// Gravity force
@@ -54,8 +55,6 @@ Vec3 Particle::computeForces(const Vec3& gravity)
 	// Air friction
 	double velNorm = m_previousVelocity.norm();
 	forces -= m_previousVelocity.getNormalized() * m_airFriction * velNorm * velNorm;
-
-	// Object friction TODO
 
 	forces += m_externalForces;
 	m_externalForces = Vec3(0.0, 0.0, 0.0);
@@ -76,6 +75,11 @@ void Particle::computePFD(const Vec3& forces, const double dt)
 
 	// Update velocity using the new acceleration
 	m_velocity += m_acceleration * dt;
+	double normVel = m_velocity.norm();
+	if (normVel > 5.0)
+	{
+		m_velocity *= 5.0 / normVel;
+	}
 
 	// Update position using the old velocity and acceleration. Verlet Integration (more accurate)
 	m_position += m_velocity * dt;
@@ -96,46 +100,24 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 	// Compute the position, velocity and acceleration
 	computePFD(forces, dt);
 
-	// Handle collision with the ground
-	if (m_position.y < m_pAabb->m_halfSize)
-	{
-		m_position.y = m_pAabb->m_halfSize;
-		m_velocity.y = -m_velocity.y;
-		if (m_groundFriction > 0.0)
-		{
-			m_velocity *= 1.0 / m_groundFriction;
-		}
-	}
-
-	// Handle collision with the colliders
-	for (const auto& pCollider : colliders)
-	{
-		if (!pCollider)
-		{
-			continue;
-		}
-
-		Vec3 collPosition;
-		Vec3 collNormal;
-		Vec3 bounceVect;
-		if (pCollider->hasCollided(collPosition, collNormal, bounceVect, m_previousPosition, m_position))
-		{
-			// Compute the new position
-			m_position = collPosition;
-			// Compute the new velocity
-			m_velocity = bounceVect * m_velocity.norm();
-			if (m_objectFriction > 0.0)
-			{
-				m_velocity *= 1.0 / m_objectFriction;
-			}
-		}
-	}
-
-
 	// Update the debug sphere position
 	if (m_debugSphere3DRenderer)
 	{
 		// TODO: Outch, need mutex...
 		m_debugSphere3DRenderer->m_pPosRotScale->m_position = m_position.toArray();
 	}
+}
+
+
+/*
+* Bounce the particle on a collision
+* 
+* @param normal Normal of the collision
+* @param restitution Coefficient of restitution
+* @return void
+*/
+void Particle::bounceOnCollision(const Vec3& normal, const double restitution)
+{
+	m_velocity = m_velocity - normal * m_velocity.dot(normal) * 2.0;
+	m_velocity *= restitution;
 }
