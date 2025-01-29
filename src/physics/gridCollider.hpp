@@ -16,6 +16,9 @@ class GridCell
 public:
 	// UID, index I, index J
 	std::vector<std::tuple<std::string, int, int>> m_particlesId;
+	int x;
+	int y;
+	int z;
 };
 
 
@@ -74,7 +77,7 @@ private:
 
 class HashGridCollider : public GridCollider
 {
-private:
+public:
 	std::unordered_map<size_t, GridCell> m_gridWrite;
 	std::unordered_map<size_t, GridCell> m_gridRead;
 

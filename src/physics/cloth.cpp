@@ -116,8 +116,8 @@ Cloth::Cloth(int resX, int resY, double width, double height, double colliderRad
 */
 void Cloth::updateSimulation(
 	const std::vector<std::shared_ptr<Collider>>& colliders, 
-	std::shared_ptr<GridCollider> pGridCollider,
-	ClothesList& pCloths
+	std::shared_ptr<GridCollider> pGridCollider//,
+	//ClothesList& pCloths
 )
 {
 	static bool firstUpdate = true;
@@ -138,7 +138,7 @@ void Cloth::updateSimulation(
 	float elapsedTimeInSeconds = deltaTime.count();
 
 	// Update the simulation
-	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider, pCloths);
+	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider/*, pCloths */);
 
 	// Update the cloth's mesh
 	updateMesh();
@@ -157,8 +157,8 @@ void Cloth::updateSimulation(
 void Cloth::updateParticles(
 	double dt, 
 	const std::vector<std::shared_ptr<Collider>>& colliders, 
-	std::shared_ptr<GridCollider> pGridCollider,
-	ClothesList& pCloths
+	std::shared_ptr<GridCollider> pGridCollider//,
+	//ClothesList& pCloths
 )
 {
 	// Clamp the time step to avoid huge time steps
@@ -177,47 +177,6 @@ void Cloth::updateParticles(
 		{
 			// Update the particles
 			m_particlesBottom[i][j].update(dt, colliders);
-
-			// Update the AABB
-			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
-
-			// Add the particle's new position to the grid collider
-			if (pGridCollider)
-			{
-				pGridCollider->addParticleToCell(
-					m_particlesBottom[i][j].m_position, 
-					std::make_tuple(m_UID, i, j)
-				);
-			}
-		}
-	}
-
-	auto t2 = std::chrono::steady_clock::now();
-
-	// Handle collisions
-	for (int i = 0; i < m_resX; ++i)
-	{
-		for (int j = 0; j < m_resY; ++j)
-		{
-			//Vec3 replacementPos = m_particlesBottom[i][j].m_position;
-			//Vec3 newVelocity = m_particlesBottom[i][j].m_velocity;
-
-			// Handle collision with itself and other clothes first
-
-			auto ct1 = std::chrono::steady_clock::now();
-			//handleCollisionWithItselfAndOtherClothes_slow(i, j, pCloths, debugSlow);
-			auto ct2 = std::chrono::steady_clock::now();
-			std::chrono::duration<float> dt1 = ct2 - ct1;
-			float et1 = dt1.count();
-
-			//auto ct3 = std::chrono::steady_clock::now();
-			handleCollisionWithItselfAndOtherClothes_fast(i, j, pGridCollider, pCloths);
-			//auto ct4 = std::chrono::steady_clock::now();
-			//std::chrono::duration<float> dt2 = ct4 - ct3;
-			//float et2 = dt2.count();
-
-			//double howMuch = et1 / et2;
-			//howMuch = howMuch;
 
 			// Handle collision with the ground
 			if (m_particlesBottom[i][j].m_position.y < m_particlesBottom[i][j].m_pAabb->m_halfSize)
@@ -250,8 +209,49 @@ void Cloth::updateParticles(
 					}
 				}
 			}
+
+			// Update the AABB
+			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
+
+			// Add the particle's new position to the grid collider
+			if (pGridCollider)
+			{
+				pGridCollider->addParticleToCell(
+					m_particlesBottom[i][j].m_position, 
+					std::make_tuple(m_UID, i, j)
+				);
+			}
 		}
 	}
+
+	auto t2 = std::chrono::steady_clock::now();
+
+	// Handle collisions
+	/*for (int i = 0; i < m_resX; ++i)
+	{
+		for (int j = 0; j < m_resY; ++j)
+		{
+			//Vec3 replacementPos = m_particlesBottom[i][j].m_position;
+			//Vec3 newVelocity = m_particlesBottom[i][j].m_velocity;
+
+			// Handle collision with itself and other clothes first
+
+			auto ct1 = std::chrono::steady_clock::now();
+			//handleCollisionWithItselfAndOtherClothes_slow(i, j, pCloths, debugSlow);
+			auto ct2 = std::chrono::steady_clock::now();
+			std::chrono::duration<float> dt1 = ct2 - ct1;
+			float et1 = dt1.count();
+
+			//auto ct3 = std::chrono::steady_clock::now();
+			//handleCollisionWithItselfAndOtherClothes_fast(i, j, pGridCollider, pCloths);
+			//auto ct4 = std::chrono::steady_clock::now();
+			//std::chrono::duration<float> dt2 = ct4 - ct3;
+			//float et2 = dt2.count();
+
+			//double howMuch = et1 / et2;
+			//howMuch = howMuch;
+		}
+	}*/
 
 	auto t3 = std::chrono::steady_clock::now();
 	std::chrono::duration<float> coold = t3 - t2;
@@ -312,7 +312,7 @@ bool Cloth::handleCollisionWithParticle(
 	Vec3& newVelocity
 	)
 {
-	auto pOtherCloth = pCloths.getCloth(otherClothUID);
+	/*auto pOtherCloth = pCloths.getCloth(otherClothUID);
 
 	// Skip the current particle and the neightbors if we collide to ourself
 	if (otherClothUID == m_UID)
@@ -357,7 +357,7 @@ bool Cloth::handleCollisionWithParticle(
 
 			return true;
 		}
-	}
+	}*/
 
 	return false;
 }
@@ -427,6 +427,43 @@ bool Cloth::handleCollisionWithItselfAndOtherClothes_fast(
 	}
 
 	return (nbCollisions > 0);
+}
+
+
+/*
+* Check if two particles are neighbors
+* 
+* @param uid1 The first particle's cloth UID
+* @param uid2 The second particle's cloth UID
+* @param i1 The first particle's i index
+* @param j1 The first particle's j index
+* @param i2 The second particle's i index
+* @param j2 The second particle's j index
+* 
+* @return bool True if the particles are neighbors, false otherwise
+*/
+bool Cloth::areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2)
+{
+	if (uid1 == uid2)
+	{
+		int distNoEffect = 2;
+
+		bool isJneighbor = (j1 == j2);
+		bool isIneighbor = (i1 == i2);
+
+		for (int k = 1; k < (distNoEffect + 1); ++k)
+		{
+			isJneighbor |= (j2 == (j1 - k) || j2 == (j1 + k));
+			isIneighbor |= (i2 == (i1 - k) || i2 == (i1 + k));
+		}
+
+		if (isIneighbor && isJneighbor)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -825,26 +862,6 @@ std::shared_ptr<Cloth> ClothesList::getCloth(const std::string& uid)
 	}
 
 	return nullptr;
-}
-
-
-/*
-* Stop the simulation for all the cloths. 
-* This does not stops the thread, it only stops the simulation loop
-* 
-* @return void
-*/
-void ClothesList::stopSimulation()
-{
-	std::lock_guard<std::mutex> lock(m_mutex);
-
-	for (auto& [uid, pCloth] : m_pClothsMap)
-	{
-		if (pCloth)
-		{
-			pCloth->stopRunning();
-		}
-	}
 }
 
 

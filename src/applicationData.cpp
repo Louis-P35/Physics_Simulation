@@ -3,9 +3,13 @@
 #include "../src/physics/sphereCollider.hpp"
 #include "clothFactory.hpp"
 #include "objectsFactory.hpp"
+#include "../src/threading/orchestrator.hpp"
 
 // Includes from STL
 #include <iostream>
+#include <vector>
+#include <tuple>
+#include <unordered_set>
 
 
 
@@ -18,8 +22,7 @@ ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 ApplicationData::~ApplicationData()
 {
 	// Stop the physics simulation for all the cloths
-	m_pCloths.stopSimulation();
-
+	// TODO
 }
 
 
@@ -113,11 +116,13 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
+	//return true;
+
 	const double particleRadius = 0.035;
 	const int res = 10;
 
 	const double particleColliderRadius = particleRadius * 2.0;
-	double cellSize = particleColliderRadius; // Must be at least equal to the particle collider diameter
+	double cellSize = particleColliderRadius * 2.0; // Must be at least equal to the particle collider diameter
 	const double sideSize = particleRadius * 2.0 * static_cast<double>(res - 1);
 
 	float scale = static_cast<float>(particleColliderRadius); // Sphere obj is 2.0 in diameter
@@ -232,6 +237,10 @@ bool ApplicationData::initSimulation()
 	{
 		m_pCloths.addCloth(pCloth3);
 	}*/
+
+
+	// Start the physics simulation by starting the orchestrator (main simulation thread)
+	Orchestrator::getInstance().start(*this);
 }
 
 
@@ -244,7 +253,7 @@ bool ApplicationData::initSimulation()
 bool ApplicationData::resetSimulation()
 {
 	// Stop the physics simulation for all the cloths
-	m_pCloths.stopSimulation();
+	// TODO
 
 	// No need of mutex from here because threads are stopped
 	
@@ -264,10 +273,178 @@ bool ApplicationData::resetSimulation()
 	_sleep(100);
 
 	// Ensure the barrier threshold for threads synchronization is zero
-	ClothFactory::s_barrier.setThreshold(0);
+	//ClothFactory::s_barrier.setThreshold(0);
 
 	// Reset the and restart the simulation
 	int res = initSimulation();
 
 	return res;
+}
+
+
+/* 
+* Hash function for unique particle pairs
+* Cantor’s Pairing Function, which uniquely encodes two natural numbers into a single integer
+* 
+* @param id1 The first particle Id
+* @param id2 The second particle Id
+* @return size_t The unique hash
+*/
+size_t getUniquePairHash(size_t id1, size_t id2)
+{
+	//return std::min(id1, id2) * 1000000 + std::max(id1, id2);
+
+	size_t a = std::min(id1, id2);
+	size_t b = std::max(id1, id2);
+
+	return ((a + b) * (a + b + 1)) / 2 + b;
+}
+
+
+void ApplicationData::updateSimulation()
+{
+	// First, update all the cloths' particles and the collisions with static colliders
+	// Add the particles to the hash grid collider
+	for (auto& [uid, pCloth] : m_pCloths.m_pClothsMap)
+	{
+		if (pCloth)
+		{
+			pCloth->updateSimulation(m_colliders, m_pGridCollider);
+		}
+	}
+
+	// From here, all particles' position and previousPosition are the same
+	// So we can resolve the collisions between the particles using the particles' previousPosition
+
+	// Then, resolve the collisions between the cloths
+	if (m_pGridCollider)
+	{
+		std::unordered_set<size_t> checkedPairs;  // To avoid duplicate checks
+
+		// Loop over all the non-empty (existing) grid cells
+		for (auto& cell : m_pGridCollider->m_gridRead)
+		{
+			std::vector<std::tuple<Particle*, Particle*>> pairs;
+
+			// Loop over all the pair of particles in that cell
+			for (int i = 0; i < cell.second.m_particlesId.size(); ++i)
+			{
+				// Get the particles Id
+				auto& [clothUID1, partI1, partJ1] = cell.second.m_particlesId[i];
+				// Get the cloths
+				auto pCloth1 = m_pCloths.getCloth(clothUID1);
+
+				for (int j = i + 1; j < cell.second.m_particlesId.size(); ++j)
+				{
+					// Get the particles Id
+					auto& [clothUID2, partI2, partJ2] = cell.second.m_particlesId[j];
+
+					// Skip the current particle and the neightbors if we collide to ourself
+					if (Cloth::areParticlesNeighbors(clothUID1, clothUID2, partI1, partJ1, partI2, partJ2))
+					{
+						// TODO add to pair hash map ?
+						continue;
+					}
+
+					// Get the cloths
+					auto pCloth2 = m_pCloths.getCloth(clothUID2);
+
+					// Add the pair of particles to the list
+					if (pCloth1 && pCloth2)
+					{
+						size_t uniqueHash = getUniquePairHash(
+							pCloth1->m_particlesBottom[partI1][partJ1].m_id, 
+							pCloth2->m_particlesBottom[partI2][partJ2].m_id
+						);
+
+						if (checkedPairs.find(uniqueHash) == checkedPairs.end())
+						{
+							checkedPairs.insert(uniqueHash); // Mark this pair as processed
+
+							pairs.push_back(std::make_tuple(
+								&pCloth1->m_particlesBottom[partI1][partJ1],
+								&pCloth2->m_particlesBottom[partI2][partJ2]
+							));
+						}
+					}
+				}
+
+				// Loop over the adjacent cells
+				for (int xx = cell.second.x - 1; xx <= cell.second.x + 1; ++xx)
+				{
+					for (int yy = cell.second.y - 1; yy <= cell.second.y + 1; ++yy)
+					{
+						for (int zz = cell.second.z - 1; zz <= cell.second.z + 1; ++zz)
+						{
+							// Get the adjacent cell
+							GridCell* pAdjCell = m_pGridCollider->getCell(xx, yy, zz);
+							if (pAdjCell) // If the adjacent cell exist (has particles)
+							{
+								// Loop over the particles Id in that cell
+								for (auto& [clothUID2, partI2, partJ2] : pAdjCell->m_particlesId)
+								{
+									// Skip the current particle and the neightbors if we collide to ourself
+									if (Cloth::areParticlesNeighbors(clothUID1, clothUID2, partI1, partJ1, partI2, partJ2))
+									{
+										// TODO add to pair hash map ?
+										continue;
+									}
+
+									// Get the cloths
+									auto pCloth2 = m_pCloths.getCloth(clothUID2);
+
+									// Add the pair of particles to the list
+									if (pCloth1 && pCloth2)
+									{
+										size_t uniqueHash = getUniquePairHash(
+											pCloth1->m_particlesBottom[partI1][partJ1].m_id,
+											pCloth2->m_particlesBottom[partI2][partJ2].m_id
+										);
+
+										if (checkedPairs.find(uniqueHash) == checkedPairs.end())
+										{
+											checkedPairs.insert(uniqueHash); // Mark this pair as processed
+
+											pairs.push_back(std::make_tuple(
+												&pCloth1->m_particlesBottom[partI1][partJ1],
+												&pCloth2->m_particlesBottom[partI2][partJ2]
+											));
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// Loop over the pairs of particles and resolve the collisions
+			for (auto& [pPart1, pPart2] : pairs)
+			{
+				if (pPart1 && pPart2)
+				{
+					Particle::detectCollision(*pPart1, *pPart2);
+				}
+			}
+		}
+
+		// Update previosPositions
+		for (auto& [uid, pCloth] : m_pCloths.m_pClothsMap)
+		{
+			if (pCloth)
+			{
+				// Loop through all the particles
+				for (int i = 0; i < pCloth->m_resX; ++i)
+				{
+					for (int j = 0; j < pCloth->m_resY; ++j)
+					{
+						pCloth->m_particlesBottom[i][j].m_previousPosition = pCloth->m_particlesBottom[i][j].m_position;
+					}
+				}
+			}
+		}
+
+		// Swap the read and write grids
+		m_pGridCollider->swap();
+	}
 }

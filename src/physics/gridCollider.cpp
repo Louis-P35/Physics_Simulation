@@ -264,4 +264,12 @@ void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<
 
 	// Find the cell in the grid (or create it) and add the particle to it
 	m_gridWrite[key].m_particlesId.push_back(particleId);
+
+	// If the cell is just created, store it's coordinates
+	if (m_gridWrite[key].m_particlesId.size() == 1)
+	{
+		m_gridWrite[key].x = x;
+		m_gridWrite[key].y = y;
+		m_gridWrite[key].z = z;
+	}
 }

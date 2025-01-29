@@ -45,7 +45,7 @@ public:
 	std::vector<std::shared_ptr<Collider>> m_colliders;
 
 	// The hash grid collision optimization system
-	std::shared_ptr<GridCollider> m_pGridCollider;
+	std::shared_ptr<HashGridCollider> m_pGridCollider;
 
 public:
 	ApplicationData();
@@ -54,4 +54,5 @@ public:
 	bool initSimulation();
 	bool resetSimulation();
 	bool initAfterOpenGl(OpenGl3DWidget* pGl3dWidget);
+	void updateSimulation();
 };

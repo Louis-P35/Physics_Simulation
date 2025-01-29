@@ -123,7 +123,7 @@ public:
 		z /= len;
 	}
 
-	Vec3 reflect(const Vec3& normal) const
+	Vec3 getReflected(const Vec3& normal) const
 	{
 		return *this - normal * 2.0 * dot(normal);
 	}

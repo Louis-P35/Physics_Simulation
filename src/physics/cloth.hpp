@@ -24,7 +24,7 @@ class ClothesList;
 * The cloth is made of particles, each particle is connected to its neighbors by springs
 * The cloth is one or two grid of particles (depending on its thickness)
 */
-class Cloth : public PhysicsWorker
+class Cloth //: public PhysicsWorker
 {
 public:
 	int m_resX;
@@ -62,9 +62,11 @@ public:
 
 	void updateSimulation(
 		const std::vector<std::shared_ptr<Collider>>& colliders, 
-		std::shared_ptr<GridCollider> pGridCollider,
-		ClothesList& pCloths
+		std::shared_ptr<GridCollider> pGridCollider//,
+		//ClothesList& pCloths
 	);
+
+	static bool areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2);
 	
 
 private:
@@ -96,8 +98,8 @@ private:
 	void updateParticles(
 		double dt, 
 		const std::vector<std::shared_ptr<Collider>>& colliders, 
-		std::shared_ptr<GridCollider> pGridCollider,
-		ClothesList& pCloths
+		std::shared_ptr<GridCollider> pGridCollider//,
+		//ClothesList& pCloths
 	);
 	std::shared_ptr<OctreeNode> createCollisionTree(std::shared_ptr<OctreeNode> pRoot, const int iMin, const int iMax, const int jMin, const int jMax);
 };
@@ -116,6 +118,5 @@ public:
 
 	void addCloth(std::shared_ptr<Cloth> pCloth);
 	std::shared_ptr<Cloth> getCloth(const std::string& uid);
-	void stopSimulation();
 	void clearClothes();
 };

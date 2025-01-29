@@ -40,6 +40,11 @@ Particle::Particle(Vec3 position, double mass) : m_position(position), m_previou
 	m_previousVelocity = Vec3(0.0, 0.0, 0.0);
 	m_acceleration = Vec3(0.0, 0.0, 0.0);
 	m_externalForces = Vec3(0.0, 0.0, 0.0);
+
+	// Assign a unique ID to the particle
+	static size_t id = 0;
+	m_id = id;
+	id++;
 }
 
 Particle::~Particle()
@@ -118,6 +123,43 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 */
 void Particle::bounceOnCollision(const Vec3& normal, const double restitution)
 {
-	m_velocity.reflect(normal);
+	m_velocity = m_velocity.getReflected(normal);
 	m_velocity *= restitution;
+}
+
+
+bool Particle::detectCollision(Particle& p1, Particle& p2)
+{
+	// TODO: Use aabb first
+
+	const double distance = (p1.m_previousPosition - p2.m_previousPosition).norm();
+
+	// Assume radius is the same for all particles
+	const double radius = p1.m_pAabb->m_halfSize;
+
+	if (distance < (2.0 * radius))
+	{
+		Vec3 dir = (p1.m_previousPosition - p2.m_previousPosition).getNormalized();
+		double displace = ((2.0 * radius) - distance) / 2.0; // Displace both particles by half the distance
+
+		// Replace the particles
+		p1.m_position += dir * displace;
+		p2.m_position -= dir * displace;
+
+		// Bounce the velocity
+		p1.m_velocity = p1.m_velocity.getReflected(dir);
+		p1.m_velocity *= 0.3;
+		p2.m_velocity = p2.m_velocity.getReflected(dir);
+		p2.m_velocity *= 0.3;
+
+		return true;
+	}
+
+	return false;
+}
+
+
+void Particle::resolveElasticCollision(Particle& p1, Particle& p2, const double restitution)
+{
+
 }

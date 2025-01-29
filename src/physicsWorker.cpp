@@ -22,7 +22,7 @@ PhysicsWorker::~PhysicsWorker()
 */
 void PhysicsWorker::startWorker(std::function<void()> updateCallback)
 {
-    m_running = true;
+    /*m_running = true;
     m_thread = std::thread([this, updateCallback]()
         {
             while (m_running)
@@ -41,7 +41,7 @@ void PhysicsWorker::startWorker(std::function<void()> updateCallback)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-        });
+        });*/
 }
 
 /*

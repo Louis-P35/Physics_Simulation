@@ -67,6 +67,8 @@ public:
 
 	std::shared_ptr<ObjectRenderingInstance> m_debugSphere3DRenderer;
 
+	size_t m_id;
+
 private:
 	bool isFixed = false;
 
@@ -77,6 +79,8 @@ public:
 	void update(const double dt, const std::vector<std::shared_ptr<Collider>>& colliders);
 	void setFixed(const bool fixState) { isFixed = fixState; };
 	void bounceOnCollision(const Vec3& normal, const double restitution);
+	static bool detectCollision(Particle& p1, Particle& p2);
+	static void resolveElasticCollision(Particle& p1, Particle& p2, const double restitution);
 
 private:
 	Vec3 computeForces(const Vec3& gravity);
