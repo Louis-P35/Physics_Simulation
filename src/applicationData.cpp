@@ -119,7 +119,7 @@ bool ApplicationData::initSimulation()
 	//return true;
 
 	const double particleRadius = 0.035;
-	const int res = 10;
+	const int res = 30;
 
 	const double particleColliderRadius = particleRadius * 2.0;
 	double cellSize = particleColliderRadius * 2.0; // Must be at least equal to the particle collider diameter
@@ -158,7 +158,7 @@ bool ApplicationData::initSimulation()
 
 	
 	// Create a cloth
-	Vec3 position = Vec3(3.0, 3.0, 3.0);
+	Vec3 position = Vec3(2.75, 3.0, 2.75);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -176,7 +176,7 @@ bool ApplicationData::initSimulation()
 	}
 
 	// Debug view of the particles
-	for (int i = 0; i < pCloth->m_resX; ++i)
+	/*for (int i = 0; i < pCloth->m_resX; ++i)
 	{
 		for (int j = 0; j < pCloth->m_resY; ++j)
 		{
@@ -188,7 +188,7 @@ bool ApplicationData::initSimulation()
 			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesTop[i][j].m_position.toArray();
 			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 		}
-	}
+	}*/
 
 	Vec3 position2 = Vec3(3.0, 3.6, 3.0);
 	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(
@@ -208,7 +208,7 @@ bool ApplicationData::initSimulation()
 	}
 
 	// Debug view of the particles
-	for (int i = 0; i < pCloth2->m_resX; ++i)
+	/*for (int i = 0; i < pCloth2->m_resX; ++i)
 	{
 		for (int j = 0; j < pCloth2->m_resY; ++j)
 		{
@@ -220,7 +220,7 @@ bool ApplicationData::initSimulation()
 			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth2->m_particlesTop[i][j].m_position.toArray();
 			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 		}
-	}
+	}*/
 
 	/*Vec3 position3 = Vec3(-1.0, 3.1, -1.0);
 	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
@@ -284,7 +284,7 @@ bool ApplicationData::resetSimulation()
 
 /* 
 * Hash function for unique particle pairs
-* Cantor’s Pairing Function, which uniquely encodes two natural numbers into a single integer
+* Cantor’s Pairing Function, uniquely encodes two natural numbers into a single integer
 * 
 * @param id1 The first particle Id
 * @param id2 The second particle Id
@@ -292,8 +292,6 @@ bool ApplicationData::resetSimulation()
 */
 size_t getUniquePairHash(size_t id1, size_t id2)
 {
-	//return std::min(id1, id2) * 1000000 + std::max(id1, id2);
-
 	size_t a = std::min(id1, id2);
 	size_t b = std::max(id1, id2);
 

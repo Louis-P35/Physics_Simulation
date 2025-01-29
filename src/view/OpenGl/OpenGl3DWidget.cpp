@@ -108,7 +108,7 @@ void OpenGl3DWidget::paintGL()
     //m_cameraPosition = QVector3D(1.0f, 3.0f, 1.0f);
     m_cameraPosition = QVector3D(-3.0f, 3.0f, -3.0f);
     //QVector3D cameraLookAt(1.5f, 2.75f, 1.5f);
-    QVector3D cameraLookAt(1.5f, 2.75f, 1.5f);
+    QVector3D cameraLookAt(1.5f, 2.0f, 1.5f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

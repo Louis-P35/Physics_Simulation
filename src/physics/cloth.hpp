@@ -71,35 +71,13 @@ public:
 
 private:
 	void initMesh();
-	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace);
+	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace, const bool isTop);
 	void initMeshSides();
-	void handleCollisionWithItselfAndOtherClothes_slow(
-		const int currentI, 
-		const int currentJ,
-		ClothesList& pCloths
-	);
-	bool handleCollisionWithItselfAndOtherClothes_fast(
-		const int currentI,
-		const int currentJ,
-		std::shared_ptr<GridCollider> pGridCollider,
-		ClothesList& pCloths
-	);
-	bool handleCollisionWithParticle(
-		const int currentI,
-		const int currentJ,
-		const int otherI,
-		const int otherJ,
-		const std::string& otherClothUID,
-		ClothesList& pCloths,
-		Vec3& newPosition,
-		Vec3& newVelocity
-	);
 	void updateMesh();
 	void updateParticles(
 		double dt, 
 		const std::vector<std::shared_ptr<Collider>>& colliders, 
-		std::shared_ptr<GridCollider> pGridCollider//,
-		//ClothesList& pCloths
+		std::shared_ptr<GridCollider> pGridCollider
 	);
 	std::shared_ptr<OctreeNode> createCollisionTree(std::shared_ptr<OctreeNode> pRoot, const int iMin, const int iMax, const int jMin, const int jMax);
 };
