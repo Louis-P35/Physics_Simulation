@@ -34,8 +34,7 @@ public:
 	double m_thickness;
 	double m_clothMass;
 
-	std::vector<std::vector<Particle>> m_particlesBottom;
-	std::vector<std::vector<Particle>> m_particlesTop;
+	std::vector<std::vector<Particle>> m_particles;
 
 	Object3D m_object3D;
 	std::shared_ptr<ObjectRenderingInstance> m_pRenderingInstance;
@@ -46,10 +45,6 @@ public:
 
 private:
 	int m_meshFaceIndexTop = 0;
-	int m_meshFaceIndexSide1 = 0;
-	int m_meshFaceIndexSide2 = 0;
-	int m_meshFaceIndexSide3 = 0;
-	int m_meshFaceIndexSide4 = 0;
 	std::chrono::steady_clock::time_point m_lastUpdateTime;
 
 	// Cloth texture params
@@ -62,8 +57,7 @@ public:
 
 	void updateSimulation(
 		const std::vector<std::shared_ptr<Collider>>& colliders, 
-		std::shared_ptr<GridCollider> pGridCollider//,
-		//ClothesList& pCloths
+		std::shared_ptr<GridCollider> pGridCollider
 	);
 
 	static bool areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2);
@@ -72,7 +66,6 @@ public:
 private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace, const bool isTop);
-	void initMeshSides();
 	void updateMesh();
 	void updateParticles(
 		double dt, 

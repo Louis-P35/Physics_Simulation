@@ -351,8 +351,8 @@ void ApplicationData::updateSimulation()
 					if (pCloth1 && pCloth2)
 					{
 						size_t uniqueHash = getUniquePairHash(
-							pCloth1->m_particlesBottom[partI1][partJ1].m_id, 
-							pCloth2->m_particlesBottom[partI2][partJ2].m_id
+							pCloth1->m_particles[partI1][partJ1].m_id,
+							pCloth2->m_particles[partI2][partJ2].m_id
 						);
 
 						if (checkedPairs.find(uniqueHash) == checkedPairs.end())
@@ -360,8 +360,8 @@ void ApplicationData::updateSimulation()
 							checkedPairs.insert(uniqueHash); // Mark this pair as processed
 
 							pairs.push_back(std::make_tuple(
-								&pCloth1->m_particlesBottom[partI1][partJ1],
-								&pCloth2->m_particlesBottom[partI2][partJ2]
+								&pCloth1->m_particles[partI1][partJ1],
+								&pCloth2->m_particles[partI2][partJ2]
 							));
 						}
 					}
@@ -395,8 +395,8 @@ void ApplicationData::updateSimulation()
 									if (pCloth1 && pCloth2)
 									{
 										size_t uniqueHash = getUniquePairHash(
-											pCloth1->m_particlesBottom[partI1][partJ1].m_id,
-											pCloth2->m_particlesBottom[partI2][partJ2].m_id
+											pCloth1->m_particles[partI1][partJ1].m_id,
+											pCloth2->m_particles[partI2][partJ2].m_id
 										);
 
 										if (checkedPairs.find(uniqueHash) == checkedPairs.end())
@@ -404,8 +404,8 @@ void ApplicationData::updateSimulation()
 											checkedPairs.insert(uniqueHash); // Mark this pair as processed
 
 											pairs.push_back(std::make_tuple(
-												&pCloth1->m_particlesBottom[partI1][partJ1],
-												&pCloth2->m_particlesBottom[partI2][partJ2]
+												&pCloth1->m_particles[partI1][partJ1],
+												&pCloth2->m_particles[partI2][partJ2]
 											));
 										}
 									}
@@ -436,7 +436,7 @@ void ApplicationData::updateSimulation()
 				{
 					for (int j = 0; j < pCloth->m_resY; ++j)
 					{
-						pCloth->m_particlesBottom[i][j].m_previousPosition = pCloth->m_particlesBottom[i][j].m_position;
+						pCloth->m_particles[i][j].m_previousPosition = pCloth->m_particles[i][j].m_position;
 					}
 				}
 			}

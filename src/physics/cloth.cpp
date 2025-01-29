@@ -40,20 +40,15 @@ Cloth::Cloth(int resX, int resY, double width, double height, double colliderRad
 			particleBottom.m_indexI = i;
 			particleBottom.m_indexJ = j;
 			
-			Vec3 posTop = Vec3(pos.x + static_cast<double>(i) * distBetweenParticlesX, pos.y + thickness, pos.z + static_cast<double>(j) * distBetweenParticlesY);
-			Particle particleTop = Particle(posTop, particleMass);
-			
 			// Create the AABB for the particle (only for the bottom side)
 			particleBottom.m_pAabb = std::make_shared<AABB>(colliderRadius);
 			particleBottom.m_pAabb->constructCubicAABB(posBottom);
 
 			// Add the particles to the lists
 			rowBottom.push_back(particleBottom);
-			rowTop.push_back(particleTop);
 		}
 
-		m_particlesBottom.push_back(rowBottom);
-		m_particlesTop.push_back(rowTop); // Still needed for creating the mesh
+		m_particles.push_back(rowBottom);
 	}
 
 	// Define the spring parameters
@@ -82,10 +77,10 @@ Cloth::Cloth(int resX, int resY, double width, double height, double colliderRad
 					const double springStrenghLocal = springStrengh / (static_cast<double>(dist) * strenghDecreaseFactor);
 
 					// Compute the distance between the particles, it is the same for top and bottom
-					const double distanceSameLayer = (m_particlesBottom[i][j].m_position - m_particlesBottom[ii][jj].m_position).norm();
+					const double distanceSameLayer = (m_particles[i][j].m_position - m_particles[ii][jj].m_position).norm();
 
 					// Add the neighbor
-					m_particlesBottom[i][j].m_springs.push_back(Spring(&m_particlesBottom[ii][jj], distanceSameLayer, springStrenghLocal, springDamping));
+					m_particles[i][j].m_springs.push_back(Spring(&m_particles[ii][jj], distanceSameLayer, springStrenghLocal, springDamping));
 				}
 			}
 
@@ -93,7 +88,6 @@ Cloth::Cloth(int resX, int resY, double width, double height, double colliderRad
 			if (j == (m_resY - 1) || j == 0 || i == 0 || i == (m_resX - 1))
 			{
 				//m_particlesBottom[i][j].setFixed(true);
-				//m_particlesTop[i][j].setFixed(true);
 			}
 		}
 	}
@@ -175,14 +169,14 @@ void Cloth::updateParticles(
 		for (int j = 0; j < m_resY; ++j)
 		{
 			// Update the particles
-			m_particlesBottom[i][j].update(dt, colliders);
+			m_particles[i][j].update(dt, colliders);
 
 			// Handle collision with the ground
-			if (m_particlesBottom[i][j].m_position.y < m_particlesBottom[i][j].m_pAabb->m_halfSize)
+			if (m_particles[i][j].m_position.y < m_particles[i][j].m_pAabb->m_halfSize)
 			{
-				m_particlesBottom[i][j].m_position.y = m_particlesBottom[i][j].m_pAabb->m_halfSize;
+				m_particles[i][j].m_position.y = m_particles[i][j].m_pAabb->m_halfSize;
 
-				m_particlesBottom[i][j].bounceOnCollision(Vec3(0.0, 1.0, 0.0), 1.0 / m_particlesBottom[i][j].m_groundFriction);
+				m_particles[i][j].bounceOnCollision(Vec3(0.0, 1.0, 0.0), 1.0 / m_particles[i][j].m_groundFriction);
 			}
 
 			// Handle collision with the colliders
@@ -196,27 +190,27 @@ void Cloth::updateParticles(
 				Vec3 collPosition;
 				Vec3 collNormal;
 				Vec3 bounceVect;
-				if (pCollider->hasCollided(collPosition, collNormal, bounceVect, m_particlesBottom[i][j].m_previousPosition, m_particlesBottom[i][j].m_position, m_particlesBottom[i][j].m_pAabb->m_halfSize))
+				if (pCollider->hasCollided(collPosition, collNormal, bounceVect, m_particles[i][j].m_previousPosition, m_particles[i][j].m_position, m_particles[i][j].m_pAabb->m_halfSize))
 				{
 					// Compute the new position
-					m_particlesBottom[i][j].m_position = collPosition + collNormal * m_particlesBottom[i][j].m_pAabb->m_halfSize;
+					m_particles[i][j].m_position = collPosition + collNormal * m_particles[i][j].m_pAabb->m_halfSize;
 					// Compute the new velocity
-					m_particlesBottom[i][j].m_velocity = bounceVect * m_particlesBottom[i][j].m_velocity.norm();
-					if (m_particlesBottom[i][j].m_objectFriction > 0.0)
+					m_particles[i][j].m_velocity = bounceVect * m_particles[i][j].m_velocity.norm();
+					if (m_particles[i][j].m_objectFriction > 0.0)
 					{
-						m_particlesBottom[i][j].m_velocity *= 1.0 / m_particlesBottom[i][j].m_objectFriction;
+						m_particles[i][j].m_velocity *= 1.0 / m_particles[i][j].m_objectFriction;
 					}
 				}
 			}
 
 			// Update the AABB
-			m_particlesBottom[i][j].m_pAabb->constructCubicAABB(m_particlesBottom[i][j].m_position);
+			m_particles[i][j].m_pAabb->constructCubicAABB(m_particles[i][j].m_position);
 
 			// Add the particle's new position to the grid collider
 			if (pGridCollider)
 			{
 				pGridCollider->addParticleToCell(
-					m_particlesBottom[i][j].m_position, 
+					m_particles[i][j].m_position,
 					std::make_tuple(m_UID, i, j)
 				);
 			}
@@ -229,8 +223,8 @@ void Cloth::updateParticles(
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
-			m_particlesBottom[i][j].m_previousPosition = m_particlesBottom[i][j].m_position;
-			m_particlesBottom[i][j].m_previousVelocity = m_particlesBottom[i][j].m_velocity;
+			m_particles[i][j].m_previousPosition = m_particles[i][j].m_position;
+			m_particles[i][j].m_previousVelocity = m_particles[i][j].m_velocity;
 		}
 	}
 }
@@ -306,7 +300,7 @@ std::shared_ptr<OctreeNode> Cloth::createCollisionTree(
 	if (iMin == iMax && jMin == jMax)
 	{
 		// Set the AABB of the leaf to be the AABB of the particle
-		pRoot->setAabb(*m_particlesBottom[iMin][jMin].m_pAabb);
+		pRoot->setAabb(*m_particles[iMin][jMin].m_pAabb);
 
 		// Store the indexes of the particle to avoid collision with itself or its neighbors
 		pRoot->m_indexI = iMin;
@@ -364,10 +358,9 @@ std::shared_ptr<OctreeNode> Cloth::createCollisionTree(
 void Cloth::initMesh()
 {
 	// Create the vertices and normals for the bottom and top faces
-	initMeshOneFace(0, m_particlesBottom, false);
+	initMeshOneFace(0, m_particles, false);
 	m_meshFaceIndexTop = m_object3D.m_faces.size();
-	initMeshOneFace(m_object3D.m_vertices.size(), /*m_particlesTop*/m_particlesBottom, true);
-	//initMeshSides();
+	initMeshOneFace(m_object3D.m_vertices.size(), m_particles, true);
 
 	// Load textures, Compute the tangent and bitangent vectors
 	const fs::path texturePath = fs::path("../models/fabrics_textures/") / m_textureFolderName;
@@ -411,6 +404,7 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 			int vertexIndexTop = offset + (i + 1) * m_resY + j;
 			int vertexIndexTopRight = offset + (i + 1) * m_resY + j + 1;
 
+			// Handle the edges of the top face (the vertices at the edge of the bottom face and top face are the same)
 			if (isTop && i == 0)
 			{
 				vertexIndexCurrent = i * m_resY + j;
@@ -459,81 +453,6 @@ void Cloth::initMeshOneFace(const int offset, const std::vector<std::vector<Part
 
 
 /*
-* Initialize the 4 sides of the mesh of the cloth
-* 
-* @return void
-*/
-void Cloth::initMeshSides()
-{
-	// Lambda to create 2 sides
-	auto createSide1Lambda = [this](const int i) {
-		const int nbVerticesPerFace = m_resX * m_resY;
-
-		for (int j = 0; j < m_resY - 1; ++j)
-		{
-			const int vertexIndexCurrent = i * m_resY + j;
-			const int vertexIndexRight = i * m_resY + (j + 1);
-			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
-
-			// XXX: UVs are not correct ?
-			m_object3D.m_faces.push_back(
-				{ vertexIndexCurrent, vertexIndexCurrent, vertexIndexCurrent,
-				vertexIndexRight, vertexIndexRight, vertexIndexRight,
-				vertexIndexTop, vertexIndexTop, vertexIndexTop }
-			);
-
-			const int vertexIndexTopRight = nbVerticesPerFace + i * m_resY + (j + 1);
-
-			// XXX: UVs are not correct ?
-			m_object3D.m_faces.push_back(
-				{ vertexIndexTop, vertexIndexTop, vertexIndexTop,
-				vertexIndexRight, vertexIndexRight, vertexIndexRight,
-				vertexIndexTopRight, vertexIndexTopRight, vertexIndexTopRight }
-			);
-		}
-	};
-
-	// Lambda to create the 2 others sides on the other axis
-	auto createSide2Lambda = [this](const int j) {
-		const int nbVerticesPerFace = m_resX * m_resY;
-
-		for (int i = 0; i < m_resX - 1; ++i)
-		{
-			const int vertexIndexCurrent = i * m_resY + j;
-			const int vertexIndexRight = (i + 1) * m_resY + j;
-			const int vertexIndexTop = nbVerticesPerFace + i * m_resY + j;
-
-			// XXX: UVs are not correct ?
-			m_object3D.m_faces.push_back(
-				{ vertexIndexCurrent, vertexIndexCurrent, vertexIndexCurrent,
-				vertexIndexRight, vertexIndexRight, vertexIndexRight,
-				vertexIndexTop, vertexIndexTop, vertexIndexTop }
-			);
-
-			const int vertexIndexTopRight = nbVerticesPerFace + (i + 1) * m_resY + j;
-
-			// XXX: UVs are not correct ?
-			m_object3D.m_faces.push_back(
-				{ vertexIndexTop, vertexIndexTop, vertexIndexTop,
-				vertexIndexRight, vertexIndexRight, vertexIndexRight,
-				vertexIndexTopRight, vertexIndexTopRight, vertexIndexTopRight }
-			);
-		}
-	};
-
-	// Create the sides
-	m_meshFaceIndexSide1 = m_object3D.m_faces.size();
-	createSide1Lambda(0);
-	m_meshFaceIndexSide2 = m_object3D.m_faces.size();
-	createSide1Lambda(m_resX - 1);
-	m_meshFaceIndexSide3 = m_object3D.m_faces.size();
-	createSide2Lambda(0);
-	m_meshFaceIndexSide4 = m_object3D.m_faces.size();
-	createSide2Lambda(m_resY - 1);
-}
-
-
-/*
 * Update the mesh vertices
 * Need to be called after the update of the particles and before the rendering
 * 
@@ -552,7 +471,7 @@ void Cloth::updateMesh()
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
-			Vec3 p0 = m_particlesBottom[i][j].m_position;
+			Vec3 p0 = m_particles[i][j].m_position;
 			int nextI = i + 1;
 			int nextJ = j + 1;
 			bool isInverted = false;
@@ -566,31 +485,22 @@ void Cloth::updateMesh()
 				nextJ = j - 1;
 				isInverted = !isInverted; // XOR
 			}
-			Vec3 p1 = m_particlesBottom[nextI][j].m_position;
-			Vec3 p2 = m_particlesBottom[i][nextJ].m_position;
+			Vec3 p1 = m_particles[nextI][j].m_position;
+			Vec3 p2 = m_particles[i][nextJ].m_position;
 			Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
 			if (!isInverted)
 			{
 				normal = normal * -1.0;
 			}
 
-			//const bool isSide = (i == 0 || i == (m_resX - 1) || j == 0 || j == (m_resY - 1));
 			const double halfThickness = m_thickness / 2.0;
 
 			// Top side is updated on top of the particlesBottom's positions
-			Vec3 posTop = m_particlesBottom[i][j].m_position + normal * halfThickness;
-			/*if (isSide)
-			{
-				posTop = m_particlesBottom[i][j].m_position;
-			}*/
+			Vec3 posTop = m_particles[i][j].m_position + normal * halfThickness;
 			m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = posTop.toArray(); // Top side
 
 			// Bottom side is updated below the particlesBottom's positions
-			Vec3 posBottom = m_particlesBottom[i][j].m_position - normal * halfThickness;
-			/*if (isSide)
-			{
-				posBottom = m_particlesBottom[i][j].m_position;
-			}*/
+			Vec3 posBottom = m_particles[i][j].m_position - normal * halfThickness;
 			m_object3D.m_vertices[i * m_resY + j] = posBottom.toArray();
 		}
 	}
@@ -608,26 +518,6 @@ void Cloth::updateMesh()
 		{
 			normal *= -1.0;
 		}
-		
-		/*if (i >= m_meshFaceIndexSide1 && i < m_meshFaceIndexSide2)
-		{
-			
-		}
-
-		if (i >= m_meshFaceIndexSide2 && i < m_meshFaceIndexSide3)
-		{
-			normal *= -1.0;
-		}
-
-		if (i >= m_meshFaceIndexSide3 && i < m_meshFaceIndexSide4)
-		{
-			normal *= -1.0;
-		}
-
-		if (i >= m_meshFaceIndexSide4)
-		{
-			normal *= -1.0;
-		}*/
 
 		m_object3D.m_normals[m_object3D.m_faces[i][2]] = normal.toArray();
 		m_object3D.m_normals[m_object3D.m_faces[i][5]] = normal.toArray();
