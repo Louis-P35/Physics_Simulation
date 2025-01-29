@@ -118,6 +118,6 @@ void Particle::update(const double dt, const std::vector<std::shared_ptr<Collide
 */
 void Particle::bounceOnCollision(const Vec3& normal, const double restitution)
 {
-	m_velocity = m_velocity - normal * m_velocity.dot(normal) * 2.0;
+	m_velocity.reflect(normal);
 	m_velocity *= restitution;
 }

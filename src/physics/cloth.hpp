@@ -34,8 +34,6 @@ public:
 	double m_thickness;
 	double m_clothMass;
 
-	Vec3 m_position;
-
 	std::vector<std::vector<Particle>> m_particlesBottom;
 	std::vector<std::vector<Particle>> m_particlesTop;
 
@@ -76,24 +74,23 @@ private:
 	void handleCollisionWithItselfAndOtherClothes_slow(
 		const int currentI, 
 		const int currentJ,
-		ClothesList& pCloths,
-		std::vector< std::tuple<std::string, int, int>>& debug
+		ClothesList& pCloths
 	);
-	void handleCollisionWithItselfAndOtherClothes_fast(
+	bool handleCollisionWithItselfAndOtherClothes_fast(
 		const int currentI,
 		const int currentJ,
 		std::shared_ptr<GridCollider> pGridCollider,
-		ClothesList& pCloths,
-		std::vector< std::tuple<std::string, int, int>>& debug
+		ClothesList& pCloths
 	);
-	void handleCollisionWithParticle(
+	bool handleCollisionWithParticle(
 		const int currentI,
 		const int currentJ,
 		const int otherI,
 		const int otherJ,
 		const std::string& otherClothUID,
 		ClothesList& pCloths,
-		std::vector< std::tuple<std::string, int, int>>& debug
+		Vec3& newPosition,
+		Vec3& newVelocity
 	);
 	void updateMesh();
 	void updateParticles(

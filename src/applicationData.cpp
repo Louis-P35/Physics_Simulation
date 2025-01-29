@@ -113,8 +113,8 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
-	const double particleRadius = 0.025;
-	const int res = 15;
+	const double particleRadius = 0.035;
+	const int res = 10;
 
 	const double particleColliderRadius = particleRadius * 2.0;
 	double cellSize = particleColliderRadius; // Must be at least equal to the particle collider diameter
@@ -125,7 +125,8 @@ bool ApplicationData::initSimulation()
 	// Create the grid collider (10x10x10)
 	size_t gridWith = static_cast<size_t>(6.0 / cellSize);
 	size_t gridHeight = static_cast<size_t>(5.0 / cellSize);
-	m_pGridCollider = std::make_shared<StaticGridCollider>(cellSize, gridWith, gridHeight, Vec3(0.0, 0.0, 0.0));
+	//m_pGridCollider = std::make_shared<HashGridCollider>(cellSize, gridWith, gridHeight, Vec3(0.0, 0.0, 0.0));
+	m_pGridCollider = std::make_shared<HashGridCollider>(cellSize);
 	/*std::vector<Vec3> debugSpheres;
 	Vec3 pos1 = Vec3(0.0, 0.0, 0.0);
 	debugSpheres.push_back(pos1);

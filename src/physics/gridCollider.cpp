@@ -15,9 +15,9 @@
 */
 inline void GridCollider::getCellCoords(const Vec3& position, int& x, int& y, int& z) const
 {
-	x = static_cast<int>(floor(position.x / m_step));
-	y = static_cast<int>(floor(position.y / m_step));
-	z = static_cast<int>(floor(position.z / m_step));
+	x = static_cast<int>(round(position.x / m_step));
+	y = static_cast<int>(round(position.y / m_step));
+	z = static_cast<int>(round(position.z / m_step));
 }
 
 
