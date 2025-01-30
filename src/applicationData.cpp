@@ -180,13 +180,9 @@ bool ApplicationData::initSimulation()
 	{
 		for (int j = 0; j < pCloth->m_resY; ++j)
 		{
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D3);
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesBottom[i][j].m_position.toArray();
-			pCloth->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
-
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D3);
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particlesTop[i][j].m_position.toArray();
-			pCloth->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
+			pCloth->m_particles[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D3);
+			pCloth->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth->m_particles[i][j].m_position.toArray();
+			pCloth->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 		}
 	}*/
 
@@ -212,13 +208,9 @@ bool ApplicationData::initSimulation()
 	{
 		for (int j = 0; j < pCloth2->m_resY; ++j)
 		{
-			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
-			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth2->m_particlesBottom[i][j].m_position.toArray();
-			pCloth2->m_particlesBottom[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
-
-			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
-			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth2->m_particlesTop[i][j].m_position.toArray();
-			pCloth2->m_particlesTop[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
+			pCloth2->m_particles[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
+			pCloth2->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth2->m_particles[i][j].m_position.toArray();
+			pCloth2->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
 		}
 	}*/
 
@@ -314,11 +306,11 @@ void ApplicationData::updateSimulation()
 	// From here, all particles' position and previousPosition are the same
 	// So we can resolve the collisions between the particles using the particles' previousPosition
 
+	auto t1 = std::chrono::steady_clock::now();
+
 	// Then, resolve the collisions between the cloths
 	if (m_pGridCollider)
 	{
-		std::unordered_set<size_t> checkedPairs;  // To avoid duplicate checks
-
 		// Loop over all the non-empty (existing) grid cells
 		for (auto& cell : m_pGridCollider->m_gridRead)
 		{
@@ -340,7 +332,6 @@ void ApplicationData::updateSimulation()
 					// Skip the current particle and the neightbors if we collide to ourself
 					if (Cloth::areParticlesNeighbors(clothUID1, clothUID2, partI1, partJ1, partI2, partJ2))
 					{
-						// TODO add to pair hash map ?
 						continue;
 					}
 
@@ -350,30 +341,52 @@ void ApplicationData::updateSimulation()
 					// Add the pair of particles to the list
 					if (pCloth1 && pCloth2)
 					{
-						size_t uniqueHash = getUniquePairHash(
-							pCloth1->m_particles[partI1][partJ1].m_id,
-							pCloth2->m_particles[partI2][partJ2].m_id
-						);
-
-						if (checkedPairs.find(uniqueHash) == checkedPairs.end())
-						{
-							checkedPairs.insert(uniqueHash); // Mark this pair as processed
-
-							pairs.push_back(std::make_tuple(
-								&pCloth1->m_particles[partI1][partJ1],
-								&pCloth2->m_particles[partI2][partJ2]
-							));
-						}
+						pairs.push_back(std::make_tuple(
+							&pCloth1->m_particles[partI1][partJ1],
+							&pCloth2->m_particles[partI2][partJ2]
+						));
 					}
 				}
 
 				// Loop over the adjacent cells
+				// But not all, to avoid checking twice two particles that are in two differents cells
+				// Like so:
+				//  Top     Middle   Bottom   : Z axis
+				// 0 0 0    0 0 0    1 1 1
+				// 0 0 0    0 0 1    1 1 1
+				// 0 0 0    1 1 1    1 1 1
 				for (int xx = cell.second.x - 1; xx <= cell.second.x + 1; ++xx)
 				{
 					for (int yy = cell.second.y - 1; yy <= cell.second.y + 1; ++yy)
 					{
-						for (int zz = cell.second.z - 1; zz <= cell.second.z + 1; ++zz)
+						for (int zz = cell.second.z - 1; zz <= cell.second.z; ++zz)
 						{
+							// Skip the current cell
+							if (xx == cell.second.x && yy == cell.second.y && zz == cell.second.z)
+							{
+								continue;
+							}
+
+							// Skip the 'x' cell:
+							// Y
+							// 0 0 0
+							// x 0 1
+							// 1 1 1  X
+							if (zz == cell.second.z && xx == cell.second.x - 1 && yy == cell.second.y)
+							{
+								continue;
+							}
+
+							// Skip the 'x' cell:
+							// Y
+							// x x x
+							// 0 0 1
+							// 1 1 1  X
+							if (zz == cell.second.z && yy == cell.second.y + 1)
+							{
+								continue;
+							}
+
 							// Get the adjacent cell
 							GridCell* pAdjCell = m_pGridCollider->getCell(xx, yy, zz);
 							if (pAdjCell) // If the adjacent cell exist (has particles)
@@ -384,7 +397,6 @@ void ApplicationData::updateSimulation()
 									// Skip the current particle and the neightbors if we collide to ourself
 									if (Cloth::areParticlesNeighbors(clothUID1, clothUID2, partI1, partJ1, partI2, partJ2))
 									{
-										// TODO add to pair hash map ?
 										continue;
 									}
 
@@ -394,20 +406,10 @@ void ApplicationData::updateSimulation()
 									// Add the pair of particles to the list
 									if (pCloth1 && pCloth2)
 									{
-										size_t uniqueHash = getUniquePairHash(
-											pCloth1->m_particles[partI1][partJ1].m_id,
-											pCloth2->m_particles[partI2][partJ2].m_id
-										);
-
-										if (checkedPairs.find(uniqueHash) == checkedPairs.end())
-										{
-											checkedPairs.insert(uniqueHash); // Mark this pair as processed
-
-											pairs.push_back(std::make_tuple(
-												&pCloth1->m_particles[partI1][partJ1],
-												&pCloth2->m_particles[partI2][partJ2]
-											));
-										}
+										pairs.push_back(std::make_tuple(
+											&pCloth1->m_particles[partI1][partJ1],
+											&pCloth2->m_particles[partI2][partJ2]
+										));
 									}
 								}
 							}
@@ -425,6 +427,22 @@ void ApplicationData::updateSimulation()
 				}
 			}
 		}
+
+		static bool start = false;
+		auto t2 = std::chrono::steady_clock::now();
+		std::chrono::duration<float> deltaTime = t2 - t1;
+		float elapsedTimeInSeconds = deltaTime.count();
+		static std::vector<float> times;
+		if (start)
+		{
+			times.push_back(elapsedTimeInSeconds);
+		}
+		float average = 0.0;
+		for (const auto& t : times)
+		{
+			average += t;
+		}
+		average /= static_cast<float>(times.size());
 
 		// Update previosPositions
 		for (auto& [uid, pCloth] : m_pCloths.m_pClothsMap)

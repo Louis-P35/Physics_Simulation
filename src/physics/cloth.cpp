@@ -161,8 +161,6 @@ void Cloth::updateParticles(
 		dt = 0.005;
 	}
 
-	auto t1 = std::chrono::steady_clock::now();
-
 	// Update the particles
 	for (int i = 0; i < m_resX; ++i)
 	{
