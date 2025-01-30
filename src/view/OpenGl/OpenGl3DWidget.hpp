@@ -17,6 +17,7 @@
 #include <memory>
 #include <mutex>
 #include <iostream>
+#include <functional>
 
 
 /*
@@ -35,9 +36,10 @@ public:
     QMatrix4x4 m_projection;
     QVector3D m_lightPosition;
     QVector3D m_cameraPosition;
+    std::function<void()> m_UpdateClothesMeshCallback;
 
 public:
-    explicit OpenGl3DWidget(QWidget* pParent = nullptr);
+    explicit OpenGl3DWidget(std::function<void()> updateMeshCallback, QWidget* pParent = nullptr);
     ~OpenGl3DWidget();
 
     void loadShaders();

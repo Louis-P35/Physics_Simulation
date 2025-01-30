@@ -4,7 +4,6 @@
 #include "particle.hpp"
 #include "../src/math/vec3.hpp"
 #include "../src/view/OpenGl/object3D.hpp"
-#include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/physics/collider.hpp"
 #include "../src/physics/octree.hpp"
 #include "physicsWorker.hpp"
@@ -34,6 +33,7 @@ public:
 	double m_thickness;
 	double m_clothMass;
 
+	mutable std::mutex m_mutex;
 	std::vector<std::vector<Particle>> m_particles;
 
 	Object3D m_object3D;
@@ -61,12 +61,11 @@ public:
 	);
 
 	static bool areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2);
-	
+	void updateMesh();
 
 private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace, const bool isTop);
-	void updateMesh();
 	void updateParticles(
 		double dt, 
 		const std::vector<std::shared_ptr<Collider>>& colliders, 

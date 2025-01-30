@@ -428,22 +428,6 @@ void ApplicationData::updateSimulation()
 			}
 		}
 
-		static bool start = false;
-		auto t2 = std::chrono::steady_clock::now();
-		std::chrono::duration<float> deltaTime = t2 - t1;
-		float elapsedTimeInSeconds = deltaTime.count();
-		static std::vector<float> times;
-		if (start)
-		{
-			times.push_back(elapsedTimeInSeconds);
-		}
-		float average = 0.0;
-		for (const auto& t : times)
-		{
-			average += t;
-		}
-		average /= static_cast<float>(times.size());
-
 		// Update previosPositions
 		for (auto& [uid, pCloth] : m_pCloths.m_pClothsMap)
 		{

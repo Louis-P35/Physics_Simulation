@@ -132,10 +132,7 @@ void Cloth::updateSimulation(
 	float elapsedTimeInSeconds = deltaTime.count();
 
 	// Update the simulation
-	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider/*, pCloths */);
-
-	// Update the cloth's mesh
-	updateMesh();
+	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider);
 }
 
 
@@ -463,43 +460,48 @@ void Cloth::updateMesh()
 		return;
 	}
 
-	// Update mesh vertices
-	const int offsetTopBottom = m_resX * m_resY;
-	for (int i = 0; i < m_resX; ++i)
 	{
-		for (int j = 0; j < m_resY; ++j)
+		// Lock the mutex to prevent the simulation threads to mess with the data while the rendering is updating it
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		// Update mesh vertices
+		const int offsetTopBottom = m_resX * m_resY;
+		for (int i = 0; i < m_resX; ++i)
 		{
-			Vec3 p0 = m_particles[i][j].m_position;
-			int nextI = i + 1;
-			int nextJ = j + 1;
-			bool isInverted = false;
-			if (nextI >= m_resX)
+			for (int j = 0; j < m_resY; ++j)
 			{
-				nextI = i - 1;
-				isInverted = true;
-			}
-			if (nextJ >= m_resY)
-			{
-				nextJ = j - 1;
-				isInverted = !isInverted; // XOR
-			}
-			Vec3 p1 = m_particles[nextI][j].m_position;
-			Vec3 p2 = m_particles[i][nextJ].m_position;
-			Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
-			if (!isInverted)
-			{
-				normal = normal * -1.0;
-			}
+				Vec3 p0 = m_particles[i][j].m_position;
+				int nextI = i + 1;
+				int nextJ = j + 1;
+				bool isInverted = false;
+				if (nextI >= m_resX)
+				{
+					nextI = i - 1;
+					isInverted = true;
+				}
+				if (nextJ >= m_resY)
+				{
+					nextJ = j - 1;
+					isInverted = !isInverted;
+				}
+				Vec3 p1 = m_particles[nextI][j].m_position;
+				Vec3 p2 = m_particles[i][nextJ].m_position;
+				Vec3 normal = (p1 - p0).cross(p2 - p0).getNormalized();
+				if (!isInverted)
+				{
+					normal = normal * -1.0;
+				}
 
-			const double halfThickness = m_thickness / 2.0;
+				const double halfThickness = m_thickness / 2.0;
 
-			// Top side is updated on top of the particlesBottom's positions
-			Vec3 posTop = m_particles[i][j].m_position + normal * halfThickness;
-			m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = posTop.toArray(); // Top side
+				// Top side is updated on top of the particlesBottom's positions
+				Vec3 posTop = m_particles[i][j].m_position + normal * halfThickness;
+				m_object3D.m_vertices[offsetTopBottom + i * m_resY + j] = posTop.toArray(); // Top side
 
-			// Bottom side is updated below the particlesBottom's positions
-			Vec3 posBottom = m_particles[i][j].m_position - normal * halfThickness;
-			m_object3D.m_vertices[i * m_resY + j] = posBottom.toArray();
+				// Bottom side is updated below the particlesBottom's positions
+				Vec3 posBottom = m_particles[i][j].m_position - normal * halfThickness;
+				m_object3D.m_vertices[i * m_resY + j] = posBottom.toArray();
+			}
 		}
 	}
 
@@ -522,7 +524,6 @@ void Cloth::updateMesh()
 		m_object3D.m_normals[m_object3D.m_faces[i][8]] = normal.toArray();
 	}
 
-	// Lock the mutex to prevent the rendering thread to access the vertices data
 	std::lock_guard<std::mutex> lock(m_pRenderingInstance->m_mutex);
 
 	// TODO: Optize that! Do not realloc

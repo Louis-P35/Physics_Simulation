@@ -35,8 +35,16 @@ MainWindow::MainWindow(ApplicationData& appData, QWidget* pParent) : QMainWindow
     // Create a QTabWidget
     QTabWidget* pTabWidget = new QTabWidget(this);
 
+	auto lambdaUpdateMesh = [&appData]()
+        { 
+			for (auto& cloth : appData.m_pCloths.m_pClothsMap)
+			{
+				cloth.second->updateMesh();
+			}
+        };
+
 	// Create a tab for Cloth simulation
-    m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(this);
+    m_pOpenGl3DWidgetClothSimulation = new OpenGl3DWidget(lambdaUpdateMesh, this);
     m_pClothWidget = new ClothWidget(this);
 	this->createTab("Cloth simulation", m_pOpenGl3DWidgetClothSimulation, m_pClothWidget, pTabWidget);
     appData.m_pOpenGl3DWidget = m_pOpenGl3DWidgetClothSimulation;
