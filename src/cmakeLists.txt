@@ -29,6 +29,7 @@ set(SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/shader.cpp
     ${CMAKE_SOURCE_DIR}/src/view/Qt/clothWidget.cpp
     ${CMAKE_SOURCE_DIR}/src/threading/orchestrator.cpp
+    ${CMAKE_SOURCE_DIR}/src/threading/taskQueue.cpp
 )
 
 set(HEADER_FILES
@@ -52,6 +53,7 @@ set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/view/Qt/clothWidget.hpp
     ${CMAKE_SOURCE_DIR}/src/dynamicBarrier.hpp
     ${CMAKE_SOURCE_DIR}/src/threading/orchestrator.hpp
+    ${CMAKE_SOURCE_DIR}/src/threading/taskQueue.hpp
 )
 
 # Enable AUTOMOC (and optionally AUTOUIC, AUTORCC) 

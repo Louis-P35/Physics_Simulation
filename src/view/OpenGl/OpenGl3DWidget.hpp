@@ -36,10 +36,10 @@ public:
     QMatrix4x4 m_projection;
     QVector3D m_lightPosition;
     QVector3D m_cameraPosition;
-    std::function<void()> m_UpdateClothesMeshCallback;
+    std::function<void()> m_InitDrawCallback;
 
 public:
-    explicit OpenGl3DWidget(std::function<void()> updateMeshCallback, QWidget* pParent = nullptr);
+    explicit OpenGl3DWidget(std::function<void()> initDrawCallback, QWidget* pParent = nullptr);
     ~OpenGl3DWidget();
 
     void loadShaders();

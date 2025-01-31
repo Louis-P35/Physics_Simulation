@@ -2,6 +2,7 @@
 
 // Includes from project
 #include "applicationData.hpp"
+#include "../src/threading/taskQueue.hpp"
 
 // Includes from STL
 #include <thread>
@@ -20,11 +21,12 @@ class Orchestrator
 {
 private:
 	std::thread m_orchestratorThread;
+	std::vector<std::thread> m_workerThreads;
 	ApplicationData* m_pAppData;
-
+	TaskQueue m_taskQueue;
 
 public:
-	Orchestrator();
+	Orchestrator(const size_t numberOfThreads);
 	~Orchestrator() {};
 
 	static Orchestrator& getInstance();

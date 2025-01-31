@@ -16,7 +16,7 @@
 /*
 * OpenGl3DWidget constructor
 */
-OpenGl3DWidget::OpenGl3DWidget(std::function<void()> updateMeshCallback, QWidget* pParent) : m_UpdateClothesMeshCallback(updateMeshCallback), QOpenGLWidget(pParent)
+OpenGl3DWidget::OpenGl3DWidget(std::function<void()> initDrawCallback, QWidget* pParent) : m_InitDrawCallback(initDrawCallback), QOpenGLWidget(pParent)
 {
     // Request a compatibility profile for fixed-function pipeline support
     QSurfaceFormat format;
@@ -123,7 +123,7 @@ void OpenGl3DWidget::paintGL()
     m_projection.perspective(45.0f, float(width()) / height(), 0.1f, 100.0f);
 
     // Update all cloths meshs
-    m_UpdateClothesMeshCallback();
+    m_InitDrawCallback();
     
 	// draw all 3d objects
 	for (auto& renderer : m_objectsToRenderList)
