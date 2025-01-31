@@ -1,6 +1,9 @@
 // Includes from project
 #include "../src/threading/taskQueue.hpp"
 
+// Includes from STL
+#include <iostream>
+
 
 /*
 * Add a task to the queue
@@ -31,8 +34,10 @@ void TaskQueue::getTask(std::function<void()>& taskCallback)
 {
 	std::unique_lock<std::mutex> lock(m_mutex);
 
+	//std::cout << "Task count: " << m_taskCount << " " << m_tasks.size() << std::endl;
+
 	// If there is tasks in the queue already, do not wait
-	if (m_tasks.empty())
+	while (m_tasks.empty())
 	{
 		// wait() unlock the mutex and wait until the condition variable is notified
 		// The lambda function is used to check if the task queue is empty
@@ -71,8 +76,10 @@ void TaskQueue::markTaskAsDone()
 * 
 * @return void
 */
-void TaskQueue::waitUntilEmpty() const
+void TaskQueue::waitUntilEmpty()
 {
+	//std::unique_lock<std::mutex> lock(m_mutex);
+	//m_cv.wait(lock, [this]() { return m_taskCount == 0; });  // Sleep until all tasks are done
 	// Atomic operation so no mutex needed here
 	while (m_taskCount > 0)
 	{

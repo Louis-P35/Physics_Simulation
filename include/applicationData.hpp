@@ -6,7 +6,6 @@
 #include "../src/physics/particle.hpp"
 #include "../src/physics/cloth.hpp"
 #include "../src/physics/sphereCollider.hpp"
-#include "physicsWorker.hpp"
 #include "../src/physics/gridCollider.hpp"
 
 // Includes from 3rd party
@@ -54,5 +53,7 @@ public:
 	bool initSimulation();
 	bool resetSimulation();
 	bool initAfterOpenGl(OpenGl3DWidget* pGl3dWidget);
-	void updateSimulation();
+
+	// Simulation functions
+	void updateCollisions(const std::vector<GridCell*>& CellsFromReadGrid);
 };

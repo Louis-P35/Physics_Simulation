@@ -8,6 +8,7 @@
 #include <thread>
 #include <atomic>
 #include <memory>
+#include <chrono>
 
 
 
@@ -24,10 +25,11 @@ private:
 	std::vector<std::thread> m_workerThreads;
 	ApplicationData* m_pAppData;
 	TaskQueue m_taskQueue;
+	std::chrono::steady_clock::time_point m_lastUpdateTime;
 
 public:
 	Orchestrator(const size_t numberOfThreads);
-	~Orchestrator() {};
+	~Orchestrator();
 
 	static Orchestrator& getInstance();
 

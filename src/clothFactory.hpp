@@ -6,7 +6,6 @@
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/physics/collider.hpp"
 #include "../src/physics/gridCollider.hpp"
-#include "../src/dynamicBarrier.hpp"
 
 // Includes from 3rd party
 
@@ -25,9 +24,6 @@
 */
 class ClothFactory
 {
-public:
-	static DynamicBarrier s_barrier;
-
 public:
 	ClothFactory() = delete;
 	~ClothFactory() = delete;

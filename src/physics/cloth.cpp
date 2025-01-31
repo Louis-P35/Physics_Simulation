@@ -94,72 +94,30 @@ Cloth::Cloth(int resX, int resY, double width, double height, double colliderRad
 
 	// Initialize the mesh
 	initMesh();
-
-	// Initialize the last update time
-	m_lastUpdateTime = std::chrono::steady_clock::now();
-}
-
-
-/*
-* Update the cloth's physics (all particles) and mesh
-* 
-* @param colliders The list of colliders in the scene
-* @param pGridCollider The hash grid collider instance
-* @param pCloths The map of cloth in the scene
-* @return void
-*/
-void Cloth::updateSimulation(
-	const std::vector<std::shared_ptr<Collider>>& colliders, 
-	std::shared_ptr<GridCollider> pGridCollider//,
-	//ClothesList& pCloths
-)
-{
-	static bool firstUpdate = true;
-
-	// Calculate the time elapsed since the last update
-	auto currentTime = std::chrono::steady_clock::now();
-	std::chrono::duration<float> deltaTime = currentTime - m_lastUpdateTime;
-	m_lastUpdateTime = currentTime;
-
-	// Skip the first update to avoid a huge time step
-	if (firstUpdate)
-	{
-		firstUpdate = false;
-		return;
-	}
-
-	// Convert deltaTime to seconds
-	float elapsedTimeInSeconds = deltaTime.count();
-
-	// Update the simulation
-	updateParticles(elapsedTimeInSeconds, colliders, pGridCollider);
 }
 
 
 /*
 * Update the cloth by updating all the particles
+* Only update the particles in the range [resxFrom, resxTo], this way we can parallelize the update
 *
+* @param dt Time step
+* @param resxFrom The starting index in the X direction
+* @param resxTo The ending index in the X direction
 * @param colliders The list of colliders in the scene
 * @param pGridCollider The hash grid collider instance
-* @param pCloths The map of cloth in the scene
-* @param dt Time step
 * @return void
 */
 void Cloth::updateParticles(
-	double dt, 
+	const double dt, 
+	const int resxFrom,
+	const int resxTo,
 	const std::vector<std::shared_ptr<Collider>>& colliders, 
 	std::shared_ptr<GridCollider> pGridCollider
 )
 {
-	// Clamp the time step to avoid huge time steps
-	// This is a simple way to avoid instability in the simulation
-	if (dt > 0.005)
-	{
-		dt = 0.005;
-	}
-
 	// Update the particles
-	for (int i = 0; i < m_resX; ++i)
+	for (int i = resxFrom; i < resxTo; ++i)
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{
@@ -211,10 +169,20 @@ void Cloth::updateParticles(
 			}
 		}
 	}
+}
 
-	// Update the previous position and velocity
-	const int offsetTopBottom = m_resX * m_resY;
-	for (int i = 0; i < m_resX; ++i)
+
+/*
+* Initialize previous position and velocity of the particles to their current position and velocity
+* Only update the particles in the range [resxFrom, resxTo], this way we can parallelize the update
+* 
+* @param resxFrom The starting index in the X direction
+* @param resxTo The ending index in the X direction
+* @return void
+*/
+void Cloth::updatePreviousPositionAndVelocity(const int resxFrom, const int resxTo)
+{
+	for (int i = resxFrom; i < resxTo; ++i)
 	{
 		for (int j = 0; j < m_resY; ++j)
 		{

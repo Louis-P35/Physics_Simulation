@@ -27,9 +27,8 @@ public:
 	TaskQueue() = default;
 	~TaskQueue() = default;
 
-	// Add a task to the queue
 	void addTask(std::function<void()>&& taskCallback);
 	void getTask(std::function<void()>& taskCallback);
 	void markTaskAsDone();
-	void waitUntilEmpty() const;
+	void waitUntilEmpty();
 };

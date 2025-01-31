@@ -1,7 +1,6 @@
 // Includes from project
 #include "main.hpp"
 #include "applicationData.hpp"
-#include "physicsWorker.hpp"
 
 // Includes from 3rd party
 #include <QApplication>

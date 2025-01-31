@@ -6,12 +6,10 @@
 #include "../src/view/OpenGl/object3D.hpp"
 #include "../src/physics/collider.hpp"
 #include "../src/physics/octree.hpp"
-#include "physicsWorker.hpp"
 #include "../src/physics/gridCollider.hpp"
 
 // Includes from STL
 #include <vector>
-#include <chrono>
 #include <mutex>
 
 
@@ -45,7 +43,6 @@ public:
 
 private:
 	int m_meshFaceIndexTop = 0;
-	std::chrono::steady_clock::time_point m_lastUpdateTime;
 
 	// Cloth texture params
 	std::string m_textureFolderName = "3";
@@ -55,22 +52,22 @@ public:
 	Cloth(int resX, int resY, double width, double height, double colliderRadius, double thickness, double clothMass, Vec3 position, std::string uid);
 	virtual ~Cloth();
 
-	void updateSimulation(
-		const std::vector<std::shared_ptr<Collider>>& colliders, 
-		std::shared_ptr<GridCollider> pGridCollider
-	);
+	void updatePreviousPositionAndVelocity(const int resxFrom, const int resxTo);
 
 	static bool areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2);
 	void updateMesh();
 
+	void updateParticles(
+		const double dt,
+		const int resxFrom,
+		const int resxTo,
+		const std::vector<std::shared_ptr<Collider>>& colliders,
+		std::shared_ptr<GridCollider> pGridCollider
+	);
+
 private:
 	void initMesh();
 	void initMeshOneFace(const int offset, const std::vector<std::vector<Particle>>& topBottomFace, const bool isTop);
-	void updateParticles(
-		double dt, 
-		const std::vector<std::shared_ptr<Collider>>& colliders, 
-		std::shared_ptr<GridCollider> pGridCollider
-	);
 	std::shared_ptr<OctreeNode> createCollisionTree(std::shared_ptr<OctreeNode> pRoot, const int iMin, const int iMax, const int jMin, const int jMax);
 };
 
