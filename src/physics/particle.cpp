@@ -128,6 +128,13 @@ void Particle::bounceOnCollision(const Vec3& normal, const double restitution)
 }
 
 
+/*
+* Detect a collision between two particles and resolve it
+* 
+* @param p1 The first particle
+* @param p2 The second particle
+* @return bool True if a collision has been detected and resolved, false otherwise
+*/
 bool Particle::detectCollision(Particle& p1, Particle& p2)
 {
 	// TODO: Use aabb first
@@ -148,9 +155,9 @@ bool Particle::detectCollision(Particle& p1, Particle& p2)
 
 		// Bounce the velocity
 		p1.m_velocity = p1.m_velocity.getReflected(dir);
-		p1.m_velocity *= 0.3;
+		p1.m_velocity *= 0.9;
 		p2.m_velocity = p2.m_velocity.getReflected(dir);
-		p2.m_velocity *= 0.3;
+		p2.m_velocity *= 0.9;
 
 		return true;
 	}

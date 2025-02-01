@@ -193,7 +193,6 @@ void Orchestrator::runOrchestrator()
 							// Update the previous position and velocity
 							pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
 						});
-					//pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
 
 					// Add the particle's new position to the grid collider
 					m_taskQueue.addTask(
@@ -201,7 +200,6 @@ void Orchestrator::runOrchestrator()
 							// Update the previous position and velocity
 							pCloth->updateGridCollider(m_pAppData->m_pGridCollider, startResX, endResX);
 						});
-					//pCloth->updateGridCollider(m_pAppData->m_pGridCollider, 0, pCloth->m_resX);
 				}
 			}
 		}
@@ -245,10 +243,9 @@ void Orchestrator::runOrchestrator()
 			for (auto& cellsBatch : CellsFromReadGrid)
 			{
 				m_taskQueue.addTask(
-					[this, cellsBatch]() { // TODO : cellsBatch can be a shared_ptr to avoid copying ? (can not be a ref)
+					[this, cellsBatch]() {
 						m_pAppData->updateCollisions(cellsBatch);
 					});
-				//m_pAppData->updateCollisions(cellsBatch);
 			}
 		}
 
@@ -277,7 +274,6 @@ void Orchestrator::runOrchestrator()
 							// Update the previous position and velocity
 							pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
 						});
-					//pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
 				}
 			}
 		}
@@ -291,7 +287,6 @@ void Orchestrator::runOrchestrator()
 				[this, start, end]() {
 					m_pAppData->m_pGridCollider->clearGridParallelized(start, end);
 				});
-			//m_pAppData->m_pGridCollider->clearGridParallelized(start, end);
 		}
 
 		// Wait until all clothes' to be ready for the next update
@@ -304,7 +299,6 @@ void Orchestrator::runOrchestrator()
 		m_pAppData->m_pGridCollider->m_listOfPointerToNonEmptyCellsRead.clear();
 		// Swap the read and write grids (fast if m_listOfPointerToNonEmptyCellsRead is already cleared)
 		m_pAppData->m_pGridCollider->swap();
-		// Cost 0.0019s in monothread debug
 
 		// Calculate the average time step for debugging performance
 		auto t5 = std::chrono::steady_clock::now();

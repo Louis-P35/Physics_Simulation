@@ -55,7 +55,7 @@ public:
 
 	double m_mass = 1.0;
 	double m_airFriction = 1.5;
-	double m_objectFriction = 2.0;
+	double m_objectFriction = 1.0;
 	double m_groundFriction = 4.0;
 
 	int m_indexI = -1;
