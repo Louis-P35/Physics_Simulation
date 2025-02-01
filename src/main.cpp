@@ -29,7 +29,6 @@
 
 int main(int argc, char** argv)
 {
-    // Init. TODO: Do the 3d object loading in a thread
 	ApplicationData appData;
 
     QApplication app(argc, argv);

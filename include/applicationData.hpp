@@ -54,6 +54,8 @@ public:
 	bool resetSimulation();
 	bool initAfterOpenGl(OpenGl3DWidget* pGl3dWidget);
 
+	void onApplicationExit();
+
 	// Simulation functions
 	void updateCollisions(const std::vector<std::shared_ptr<GridCell>>& CellsFromReadGrid);
 };

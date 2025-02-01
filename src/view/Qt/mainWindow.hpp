@@ -29,6 +29,7 @@ public:
 
 private:
 	QWidget* createTab(const std::string& tabName, OpenGl3DWidget* pGlWidget, QWidget* pLeftPannel, QTabWidget* pTabWidget);
+	void closeEvent(QCloseEvent* event);
 
 private slots:
 	void onResetClicked();

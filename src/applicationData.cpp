@@ -451,3 +451,15 @@ void ApplicationData::updateCollisions(const std::vector<std::shared_ptr<GridCel
 		}
 	}
 }
+
+
+/*
+* Stop the simulation and all the threads for a clean exit
+* 
+* @return void
+*/
+void ApplicationData::onApplicationExit()
+{
+	// Stop the physics simulation for all the cloths
+	Orchestrator::getInstance().stop();
+}

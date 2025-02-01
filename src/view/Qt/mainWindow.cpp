@@ -13,9 +13,29 @@
 #include <QMessageBox>
 #include <QTabWidget>
 #include <QSplitter>
+#include <QCloseEvent>
 
 // Includes from STL
 #include <iostream>
+
+
+/*
+* Overrided method called when the main window is closed
+* 
+* @param event Close event
+* @return void
+*/
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    std::cout << "Close event" << std::endl;
+
+    // Cleanup
+    m_appData.onApplicationExit();
+
+    // Accept the close event
+    event->accept();
+}
+
 
 MainWindow::MainWindow(ApplicationData& appData, QWidget* pParent) : QMainWindow(pParent), m_appData(appData)
 {
