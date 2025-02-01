@@ -5,29 +5,9 @@
 #include <iostream>
 
 
-Orchestrator::Orchestrator(const size_t  numberOfThreads)
+Orchestrator::Orchestrator(const size_t  numberOfThreads) : m_numberOfThreads(numberOfThreads)
 {
-	// Worker thread lambda function
-	// This just endlessley loops to gets and execute tasks from the task queue
-	auto workerThreadLambda = [this]()
-		{
-			while (true)
-			{
-				std::function<void()> task;
-				m_taskQueue.getTask(task);
-				if (task)
-				{
-					task();
-					m_taskQueue.markTaskAsDone();
-				}
-			}
-		};
-
-	// Create the worker threads
-	for (size_t  i = 0; i < numberOfThreads; ++i)
-	{
-		m_workerThreads.push_back(std::thread(workerThreadLambda));
-	}
+	
 }
 
 
@@ -63,17 +43,46 @@ Orchestrator& Orchestrator::getInstance()
 /*
 * Start the orchestrator by launching the orchestrator thread (main simulation thread)
 * only if it is not running yet. It can have only one instance running.
+* Create and run the worker threads to execute the tasks from the task queue.
 * 
 * @return void
 */
 void Orchestrator::start(ApplicationData& appData)
 {
+	m_workerRunning = true;
+
+	if (m_workerThreads.size() == 0)
+	{
+		// Worker thread lambda function
+		// This just endlessley loops to gets and execute tasks from the task queue
+		auto workerThreadLambda = [this]()
+			{
+				while (m_workerRunning)
+				{
+					std::function<void()> task;
+					m_taskQueue.getTask(task);
+					if (task)
+					{
+						task();
+						m_taskQueue.markTaskAsDone();
+					}
+				}
+			};
+
+		// Create the worker threads
+		for (size_t i = 0; i < m_numberOfThreads; ++i)
+		{
+			m_workerThreads.push_back(std::thread(workerThreadLambda));
+		}
+	}
+
 	// Initialize the last update time
 	m_lastUpdateTime = std::chrono::steady_clock::now();
 
 	// Launch the orchestrator thread if it is not running yet
 	if (!m_orchestratorThread.joinable())
 	{
+		m_orchestratorRunning = true;
 		m_pAppData = &appData; // m_pAppData will be valid 
 		m_orchestratorThread = std::thread(&Orchestrator::runOrchestrator, this);
 	}
@@ -90,11 +99,29 @@ void Orchestrator::start(ApplicationData& appData)
 */
 void Orchestrator::stop()
 {
-	// Stop the orchestrator thread
+	m_orchestratorRunning = false;
+
+	// Stop the orchestrator thread first so it stop feeding the task queue
 	if (m_orchestratorThread.joinable())
 	{
 		m_orchestratorThread.join();
 	}
+
+	// Tell the workier threads to stop and release all the tasks by clearing the task queue
+	m_workerRunning = false;
+
+	// Stop the worker threads
+	for (auto& workerThread : m_workerThreads)
+	{
+		if (workerThread.joinable())
+		{
+			m_taskQueue.releaseAll(m_numberOfThreads);
+			workerThread.join();
+		}
+	}
+	m_workerThreads.clear();
+
+	m_taskQueue.clearTaskQueue();
 }
 
 
@@ -117,7 +144,7 @@ void Orchestrator::runOrchestrator()
 	std::cout << "Orchestrator running" << std::endl;
 
 	// Main simulation loop
-	while (true)
+	while (m_orchestratorRunning)
 	{
 		// Calculate the time elapsed since the last update
 		auto currentTime = std::chrono::steady_clock::now();

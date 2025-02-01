@@ -284,7 +284,7 @@ bool ApplicationData::initSimulation()
 bool ApplicationData::resetSimulation()
 {
 	// Stop the physics simulation for all the cloths
-	// TODO
+	Orchestrator::getInstance().stop();
 
 	// No need of mutex from here because threads are stopped
 	

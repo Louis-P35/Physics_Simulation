@@ -6,6 +6,37 @@
 
 
 /*
+* Release all tasks from the queue
+* 
+* @return void
+*/
+void TaskQueue::releaseAll(const size_t numberOfThreads)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_tasks.clear();
+
+	for (size_t i = 0; i < numberOfThreads; ++i)
+	{
+		m_tasks.push_back([]() {}); // Add dummy tasks to wake up all worker threads
+	}
+
+	m_cv.notify_all();
+}
+
+
+/*
+* Clear the task queue
+* 
+* @return void
+*/
+void TaskQueue::clearTaskQueue()
+{
+	m_tasks.clear();
+	m_taskCount = 0;
+}
+
+
+/*
 * Add a task to the queue
 * 
 * @param taskCallback The task to add to the queue

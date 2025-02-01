@@ -31,4 +31,6 @@ public:
 	void getTask(std::function<void()>& taskCallback);
 	void markTaskAsDone();
 	void waitUntilEmpty();
+	void releaseAll(const size_t numberOfThreads);
+	void clearTaskQueue();
 };

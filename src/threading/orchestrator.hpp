@@ -26,6 +26,9 @@ private:
 	ApplicationData* m_pAppData;
 	TaskQueue m_taskQueue;
 	std::chrono::steady_clock::time_point m_lastUpdateTime;
+	size_t m_numberOfThreads;
+	std::atomic<bool> m_workerRunning = false;
+	std::atomic<bool> m_orchestratorRunning = false;
 
 public:
 	Orchestrator(const size_t numberOfThreads);
