@@ -15,7 +15,7 @@ class GridCell
 {
 public:
 	// UID, index I, index J
-	std::vector<std::tuple<std::string, int, int>> m_particlesId;
+	std::vector<std::tuple<size_t, int, int>> m_particlesId;
 	int x;
 	int y;
 	int z;
@@ -42,9 +42,11 @@ public:
 
 	inline void getCellCoords(const Vec3& position, int& x, int& y, int& z) const;
 	virtual void clearGrid() = 0;
+	virtual void clearGridParallelized(const size_t indexFrom, const size_t indexTo) = 0;
 	virtual GridCell* getCell(const int x, const int y, const int z) = 0;
-	virtual void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId) = 0;
+	virtual void addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId) = 0;
 	virtual void swap() = 0;
+	virtual size_t getMemorySize() = 0;
 };
 
 
@@ -59,6 +61,8 @@ private:
 public:
 	std::vector<GridCell> m_gridWrite;
 	std::vector<GridCell> m_gridRead;
+	std::vector<GridCell*> m_listOfPointerToNonEmptyCellsWrite;
+	std::vector<GridCell*> m_listOfPointerToNonEmptyCellsRead;
 
 public:
 	StaticGridCollider(const double step, const size_t with, const size_t height, const Vec3& orig);
@@ -67,8 +71,10 @@ public:
 	inline bool isCoordValid(const int x, const int y, const int z) const;
 	inline size_t getCellIndex(const int x, const int y, const int z) const;
 	virtual GridCell* getCell(const int x, const int y, const int z) override;
-	virtual void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId) override;
+	virtual void addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId) override;
 	virtual void swap() override;
+	virtual size_t getMemorySize() override;
+	virtual void clearGridParallelized(const size_t indexFrom, const size_t indexTo) override;
 
 private:
 	virtual void clearGrid() override;
@@ -87,8 +93,10 @@ public:
 
 	inline size_t hashKey(const int x, const int y, const int z) const;
 	virtual GridCell* getCell(const int x, const int y, const int z) override;
-	virtual void addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId) override;
+	virtual void addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId) override;
 	virtual void swap() override;
+	virtual size_t getMemorySize() override;
+	virtual void clearGridParallelized(const size_t indexFrom, const size_t indexTo) override;
 
 private:
 	virtual void clearGrid() override;

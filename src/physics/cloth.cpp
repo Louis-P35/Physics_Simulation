@@ -16,8 +16,17 @@ Cloth::~Cloth()
 }
 
 
-Cloth::Cloth(int resX, int resY, double width, double height, double colliderRadius, double thickness, double clothMass, Vec3 position, std::string uid) :
-	m_resX(resX), m_resY(resY), m_width(width), m_height(height), m_thickness(thickness), m_clothMass(clothMass), m_UID(uid)
+Cloth::Cloth(
+	int resX, int resY, 
+	double width, double height,
+	double colliderRadius, 
+	double thickness, 
+	double clothMass, 
+	Vec3 position
+) : m_resX(resX), m_resY(resY), 
+m_width(width), m_height(height), 
+m_thickness(thickness), 
+m_clothMass(clothMass)
 {
 	const int nbParticles = m_resX * m_resY;
 	const double particleMass = clothMass / static_cast<double>(nbParticles);
@@ -124,6 +133,7 @@ void Cloth::updateParticles(
 			// Update the particles
 			m_particles[i][j].update(dt, colliders);
 
+
 			// Handle collision with the ground
 			if (m_particles[i][j].m_position.y < m_particles[i][j].m_pAabb->m_halfSize)
 			{
@@ -158,13 +168,23 @@ void Cloth::updateParticles(
 
 			// Update the AABB
 			m_particles[i][j].m_pAabb->constructCubicAABB(m_particles[i][j].m_position);
+		}
+	}
+}
 
-			// Add the particle's new position to the grid collider
-			if (pGridCollider)
+
+void Cloth::updateGridCollider(std::shared_ptr<GridCollider> pGridCollider)
+{
+	if (pGridCollider)
+	{
+		for (int i = 0; i < m_resX; ++i)
+		{
+			for (int j = 0; j < m_resY; ++j)
 			{
+				// Add the particle's new position to the grid collider
 				pGridCollider->addParticleToCell(
 					m_particles[i][j].m_position,
-					std::make_tuple(m_UID, i, j)
+					std::make_tuple(m_uidIndex, i, j)
 				);
 			}
 		}
@@ -197,8 +217,8 @@ void Cloth::updatePreviousPositionAndVelocity(const int resxFrom, const int resx
 /*
 * Check if two particles are neighbors
 * 
-* @param uid1 The first particle's cloth UID
-* @param uid2 The second particle's cloth UID
+* @param uidIndex1 The first particle's cloth uidIndex
+* @param uidIndex2 The second particle's cloth uidIndex
 * @param i1 The first particle's i index
 * @param j1 The first particle's j index
 * @param i2 The second particle's i index
@@ -206,9 +226,13 @@ void Cloth::updatePreviousPositionAndVelocity(const int resxFrom, const int resx
 * 
 * @return bool True if the particles are neighbors, false otherwise
 */
-bool Cloth::areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2)
+bool Cloth::areParticlesNeighbors(
+	const size_t uidIndex1, const size_t uidIndex2, 
+	const int i1, const int j1, 
+	const int i2, const int j2
+)
 {
-	if (uid1 == uid2)
+	if (uidIndex1 == uidIndex2)
 	{
 		int distNoEffect = 2;
 
@@ -503,7 +527,7 @@ void Cloth::updateMesh()
 
 
 /*
-* Add a cloth to the map
+* Add a cloth to the list
 * 
 * @param pCloth The cloth to add
 * @return void
@@ -515,26 +539,30 @@ void ClothesList::addCloth(std::shared_ptr<Cloth> pCloth)
 		return;
 	}
 
-	std::lock_guard<std::mutex> lock(m_mutex);
+	// Lock for writing excluively
+	std::unique_lock<std::shared_mutex> lock(m_addClothMutex);
 
-	m_pClothsMap[pCloth->m_UID] = pCloth;
+	m_pCloths.push_back(pCloth);
+	pCloth->m_uidIndex = m_pCloths.size() - 1;
 }
 
 
 /*
-* Get a cloth by its UID
+* Get a cloth by its uidIndex
+* Need to be carrefully called, no concurency is allowed when writing.
 * 
-* @param uid The UID of the cloth
+* @param uidIndex The UID (index) of the cloth
 * @return std::shared_ptr<Cloth> The cloth
 */
-std::shared_ptr<Cloth> ClothesList::getCloth(const std::string& uid)
+std::shared_ptr<Cloth> ClothesList::getCloth(const size_t uidIndex)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	// Locked only when writing, concurency is allowed for reading
+	//std::shared_lock<std::shared_mutex> lock(m_addClothMutex); // Too slow
 
-	auto it = m_pClothsMap.find(uid);
-	if (it != m_pClothsMap.end() && it->second)
+	if (uidIndex < m_pCloths.size())
 	{
-		return it->second;
+		// Can be nullptr if the cloth 'uidIndex' is destroyed
+		return m_pCloths[uidIndex];
 	}
 
 	return nullptr;
@@ -548,7 +576,8 @@ std::shared_ptr<Cloth> ClothesList::getCloth(const std::string& uid)
 */
 void ClothesList::clearClothes()
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	// Lock for writing excluively
+	std::unique_lock<std::shared_mutex> lock(m_addClothMutex);
 
-	m_pClothsMap.clear();
+	m_pCloths.clear();
 }

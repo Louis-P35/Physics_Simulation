@@ -11,6 +11,7 @@
 // Includes from STL
 #include <vector>
 #include <mutex>
+#include <shared_mutex>
 
 
 class ClothesList;
@@ -39,7 +40,7 @@ public:
 
 	std::shared_ptr<OctreeNode> m_pCollisionTree;
 
-	const std::string m_UID;
+	size_t m_uidIndex = -1;
 
 private:
 	int m_meshFaceIndexTop = 0;
@@ -49,12 +50,24 @@ private:
 	float m_uvScale = 1.0f;
 
 public:
-	Cloth(int resX, int resY, double width, double height, double colliderRadius, double thickness, double clothMass, Vec3 position, std::string uid);
+	Cloth(
+		int resX, int resY, 
+		double width, double height, 
+		double colliderRadius, 
+		double thickness, 
+		double clothMass, 
+		Vec3 position
+	);
 	virtual ~Cloth();
 
 	void updatePreviousPositionAndVelocity(const int resxFrom, const int resxTo);
 
-	static bool areParticlesNeighbors(const std::string& uid1, const std::string& uid2, const int i1, const int j1, const int i2, const int j2);
+	static bool areParticlesNeighbors(
+		const size_t uidIndex1, 
+		const size_t uidIndex2,
+		const int i1, const int j1, 
+		const int i2, const int j2
+	);
 	void updateMesh();
 
 	void updateParticles(
@@ -64,6 +77,8 @@ public:
 		const std::vector<std::shared_ptr<Collider>>& colliders,
 		std::shared_ptr<GridCollider> pGridCollider
 	);
+
+	void updateGridCollider(std::shared_ptr<GridCollider> pGridCollider);
 
 private:
 	void initMesh();
@@ -76,14 +91,14 @@ private:
 class ClothesList
 {
 public:
-	std::map<std::string, std::shared_ptr<Cloth>> m_pClothsMap;
-	std::mutex m_mutex;
+	std::vector<std::shared_ptr<Cloth>> m_pCloths;
+	mutable std::shared_mutex m_addClothMutex;
 
 public:
 	ClothesList() {};
 	~ClothesList() {};
 
 	void addCloth(std::shared_ptr<Cloth> pCloth);
-	std::shared_ptr<Cloth> getCloth(const std::string& uid);
+	std::shared_ptr<Cloth> getCloth(const size_t uidIndex);
 	void clearClothes();
 };

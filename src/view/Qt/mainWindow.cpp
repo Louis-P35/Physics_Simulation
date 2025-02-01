@@ -37,9 +37,12 @@ MainWindow::MainWindow(ApplicationData& appData, QWidget* pParent) : QMainWindow
 
 	auto lambdaUpdateMesh = [&appData]()
         { 
-			for (auto& cloth : appData.m_pCloths.m_pClothsMap)
+			for (auto& pCloth : appData.m_pCloths.m_pCloths)
 			{
-				cloth.second->updateMesh();
+				if (pCloth)
+				{
+					pCloth->updateMesh();
+				}
 			}
         };
 

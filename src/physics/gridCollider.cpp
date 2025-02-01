@@ -66,14 +66,12 @@ inline bool StaticGridCollider::isCoordValid(const int x, const int y, const int
 * @param particleId Particle Id to add (cloth uid + index I + index J)
 * @return void
 */
-void StaticGridCollider::addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId)
+void StaticGridCollider::addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId)
 {
-	// Lock the mutex to prevent concurrent access when writing to the grid
-	std::lock_guard<std::mutex> lock(m_mutex);
-
 	int x;
 	int y;
 	int z;
+
 	// Get the cell coordinates
 	getCellCoords(position, x, y, z);
 
@@ -83,10 +81,24 @@ void StaticGridCollider::addParticleToCell(const Vec3& position, const std::tupl
 		// Get the index of the cell in the grid
 		int index = getCellIndex(x, y, z);
 
+		// Lock the mutex to prevent concurrent access when writing to the grid
+		std::lock_guard<std::mutex> lock(m_mutex);
+
 		// Insert it into the grid
 		if (index < m_gridWrite.size())
 		{
 			m_gridWrite[index].m_particlesId.push_back(particleId);
+
+			// If the cell is just created, store it's pointer to the list of non-empty cells of the write grid
+			// Also if the cell is just created, store it's coordinates
+			if (m_gridWrite[index].m_particlesId.size() == 1)
+			{
+				m_listOfPointerToNonEmptyCellsWrite.push_back(&m_gridWrite[index]);
+
+				m_gridWrite[index].x = x;
+				m_gridWrite[index].y = y;
+				m_gridWrite[index].z = z;
+			}
 		}
 	}
 }
@@ -138,8 +150,29 @@ void StaticGridCollider::swap()
 	// Swap the read & write grids
 	m_gridWrite.swap(m_gridRead);
 
+	// Swap the list of pointers to non-empty cells of the read grid
+	m_listOfPointerToNonEmptyCellsWrite.swap(m_listOfPointerToNonEmptyCellsRead);
+
 	// From that point, the write grid is empty and can be used to write new data,
 	// while the read grid is full with the previous data and can be used to read data
+}
+
+
+/*
+* Clear each cell of the read grid without deallocating the grid memory.
+* This function is called in parallel to clear the grid faster.
+*
+* @return void
+*/
+void StaticGridCollider::clearGridParallelized(const size_t indexFrom, const size_t indexTo)
+{
+	// Clear only the non-empty cells of the read grid to avoid iterating over all the cells
+	for (size_t i = indexFrom; i < indexTo; ++i)
+	{
+		m_listOfPointerToNonEmptyCellsRead[i]->m_particlesId.clear();
+	}
+
+	// m_listOfPointerToNonEmptyCellsRead need to be cleared after to clear the list of pointers to non-empty cells
 }
 
 
@@ -152,10 +185,54 @@ void StaticGridCollider::clearGrid()
 {
 	// Only called from swap() that already lock the mutex
 
-	for (auto& cell : m_gridRead)
+	// Clear each cell of the read grid
+	// TODO: Optimize this by multithreading or using m_listOfPointerToNonEmptyCells
+	/*for (auto& cell : m_gridRead)
 	{
 		cell.m_particlesId.clear();
+	}*/
+
+	// Clear only the non-empty cells of the read grid to avoid iterating over all the cells
+	for (auto& cell : m_listOfPointerToNonEmptyCellsRead)
+	{
+		cell->m_particlesId.clear();
 	}
+
+	// Clear the list of pointers to non-empty cells of the read grid
+	m_listOfPointerToNonEmptyCellsRead.clear();
+}
+
+
+/*
+* Get the memory size of the grid collider
+*
+* @return size_t Memory size
+*/
+size_t StaticGridCollider::getMemorySize()
+{
+	size_t memorySize = 0;
+
+	for (auto& cell : m_gridRead)
+	{
+		memorySize += sizeof(cell);
+	}
+
+	for (auto& cell : m_gridWrite)
+	{
+		memorySize += sizeof(cell);
+	}
+
+	for (auto& cell : m_listOfPointerToNonEmptyCellsRead)
+	{
+		memorySize += sizeof(cell);
+	}
+
+	for (auto& cell : m_listOfPointerToNonEmptyCellsWrite)
+	{
+		memorySize += sizeof(cell);
+	}
+
+	return memorySize;
 }
 
 
@@ -247,7 +324,7 @@ GridCell* HashGridCollider::getCell(const int x, const int y, const int z)
 * @param particleId Particle Id to add (cloth uid + index I + index J)
 * @return void
 */
-void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<std::string, int, int>& particleId)
+void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId)
 {
 	int x;
 	int y;
@@ -255,16 +332,16 @@ void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<
 
 	// Get the cell coordinates
 	getCellCoords(position, x, y, z);
-
+	
 	// Get the hash corresponding to the cell coordinates
 	size_t key = hashKey(x, y, z);
 
 	// Lock the mutex to prevent concurrent access to the grid
 	std::lock_guard<std::mutex> lock(m_mutex);
-
+	
 	// Find the cell in the grid (or create it) and add the particle to it
 	m_gridWrite[key].m_particlesId.push_back(particleId);
-
+	
 	// If the cell is just created, store it's coordinates
 	if (m_gridWrite[key].m_particlesId.size() == 1)
 	{
@@ -272,4 +349,27 @@ void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<
 		m_gridWrite[key].y = y;
 		m_gridWrite[key].z = z;
 	}
+}
+
+
+/*
+* Get the memory size of the grid collider
+* 
+* @return size_t Memory size
+*/
+size_t HashGridCollider::getMemorySize()
+{
+	size_t memorySize = 0;
+
+	for (auto& cell : m_gridRead)
+	{
+		memorySize += sizeof(cell);
+	}
+
+	for (auto& cell : m_gridWrite)
+	{
+		memorySize += sizeof(cell);
+	}
+
+	return memorySize;
 }

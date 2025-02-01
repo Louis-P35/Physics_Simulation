@@ -52,7 +52,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		m_pCube3DRenderer,
 		pCollider,
 		pGl3dWidget,
-		Vec3(3.0, 1.0, 3.0),
+		Vec3(5.0, 1.0, 5.0),
 		1.0
 	);
 	m_colliders.push_back(pCollider);
@@ -128,10 +128,12 @@ bool ApplicationData::initSimulation()
 	float scale = static_cast<float>(particleColliderRadius); // Sphere obj is 2.0 in diameter
 
 	// Create the grid collider (10x10x10)
-	size_t gridWith = static_cast<size_t>(6.0 / cellSize);
-	size_t gridHeight = static_cast<size_t>(5.0 / cellSize);
-	//m_pGridCollider = std::make_shared<HashGridCollider>(cellSize, gridWith, gridHeight, Vec3(0.0, 0.0, 0.0));
-	m_pGridCollider = std::make_shared<HashGridCollider>(cellSize);
+	size_t gridWith = static_cast<size_t>(10.0 / cellSize);
+	size_t gridHeight = static_cast<size_t>(10.0 / cellSize);
+	m_pGridCollider = std::make_shared<StaticGridCollider>(cellSize, gridWith, gridHeight, Vec3(0.0, 0.0, 0.0));
+	//m_pGridCollider = std::make_shared<HashGridCollider>(cellSize);
+
+
 	/*std::vector<Vec3> debugSpheres;
 	Vec3 pos1 = Vec3(0.0, 0.0, 0.0);
 	debugSpheres.push_back(pos1);
@@ -158,7 +160,7 @@ bool ApplicationData::initSimulation()
 
 	
 	// Create a cloth
-	Vec3 position = Vec3(2.75, 3.0, 2.75);
+	Vec3 position = Vec3(4.75, 3.0, 4.75);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -186,7 +188,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	Vec3 position2 = Vec3(3.0, 3.6, 3.0);
+	Vec3 position2 = Vec3(5.0, 3.6, 5.0);
 	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -250,7 +252,7 @@ bool ApplicationData::resetSimulation()
 	// No need of mutex from here because threads are stopped
 	
 	// Remove all the cloths from the rendering widget
-	for (auto& [uid, pCloth] : m_pCloths.m_pClothsMap)
+	for (auto& pCloth : m_pCloths.m_pCloths)
 	{
 		if (pCloth)
 		{
@@ -311,25 +313,25 @@ void ApplicationData::updateCollisions(const std::vector<GridCell*>& CellsFromRe
 		for (int i = 0; i < pCell->m_particlesId.size(); ++i)
 		{
 			// Get the particles Id
-			auto& [clothUID1, partI1, partJ1] = pCell->m_particlesId[i];
+			auto& [clothUidIndex1, partI1, partJ1] = pCell->m_particlesId[i];
 			// Get the cloths
-			auto pCloth1 = m_pCloths.getCloth(clothUID1);
+			auto pCloth1 = m_pCloths.getCloth(clothUidIndex1);
 
 			for (int j = i + 1; j < pCell->m_particlesId.size(); ++j)
 			{
 				// Get the particles Id
-				auto& [clothUID2, partI2, partJ2] = pCell->m_particlesId[j];
+				auto& [clothUidIndex2, partI2, partJ2] = pCell->m_particlesId[j];
 
 				// Skip the current particle and the neightbors if we collide to ourself
-				if (Cloth::areParticlesNeighbors(clothUID1, clothUID2, partI1, partJ1, partI2, partJ2))
+				if (Cloth::areParticlesNeighbors(clothUidIndex1, clothUidIndex2, partI1, partJ1, partI2, partJ2))
 				{
 					continue;
 				}
 
 				// Get the cloths
-				auto pCloth2 = m_pCloths.getCloth(clothUID2);
+				auto pCloth2 = m_pCloths.getCloth(clothUidIndex2);
 
-				// // Resolve the collisions
+				// Resolve the collisions
 				if (pCloth1 && pCloth2)
 				{
 					Particle::detectCollision(pCloth1->m_particles[partI1][partJ1], pCloth2->m_particles[partI2][partJ2]);
@@ -383,7 +385,7 @@ void ApplicationData::updateCollisions(const std::vector<GridCell*>& CellsFromRe
 							for (auto& [clothUID2, partI2, partJ2] : pAdjCell->m_particlesId)
 							{
 								// Skip the current particle and the neightbors if we collide to ourself
-								if (Cloth::areParticlesNeighbors(clothUID1, clothUID2, partI1, partJ1, partI2, partJ2))
+								if (Cloth::areParticlesNeighbors(clothUidIndex1, clothUID2, partI1, partJ1, partI2, partJ2))
 								{
 									continue;
 								}

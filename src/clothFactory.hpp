@@ -42,7 +42,4 @@ public:
 		std::shared_ptr<GridCollider> pGridCollider,
 		ClothesList& pCloths
 	);
-
-private:
-	static std::string generateUID();
 };

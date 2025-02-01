@@ -1,32 +1,8 @@
 // Includes from project
 #include "clothFactory.hpp"
 
-// Includes from 3rd party
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 // Includes from STL
 #include <iostream>
-
-
-// Définition of the statique variable
-//DynamicBarrier ClothFactory::s_barrier;
-
-
-
-/*
-* Generate a UID to identify a cloth instance
-* 
-* @return std::string UID
-*/
-std::string ClothFactory::generateUID()
-{
-	boost::uuids::random_generator generator;
-	boost::uuids::uuid uid = generator();
-
-	return to_string(uid);
-}
 
 
 /*
@@ -64,12 +40,8 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 		return nullptr;
 	}
 
-	// Generate a UID for the cloth
-	const std::string uid = generateUID();
-	std::cout << "UID: " << uid << std::endl;
-
 	// Create the cloth
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, colliderRadius, thickness, clothMass, position, uid);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, colliderRadius, thickness, clothMass, position);
 
 	// Add the mesh of the cloth to the rendering widget
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);
