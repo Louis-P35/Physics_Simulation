@@ -19,6 +19,11 @@ public:
 	int x;
 	int y;
 	int z;
+	std::mutex m_cellMutex;
+
+public:
+	GridCell() : x(0), y(0), z(0) {};
+	~GridCell() {};
 };
 
 
@@ -43,7 +48,7 @@ public:
 	inline void getCellCoords(const Vec3& position, int& x, int& y, int& z) const;
 	virtual void clearGrid() = 0;
 	virtual void clearGridParallelized(const size_t indexFrom, const size_t indexTo) = 0;
-	virtual GridCell* getCell(const int x, const int y, const int z) = 0;
+	virtual std::shared_ptr<GridCell> getCell(const int x, const int y, const int z) = 0;
 	virtual void addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId) = 0;
 	virtual void swap() = 0;
 	virtual size_t getMemorySize() = 0;
@@ -59,10 +64,10 @@ private:
 	size_t m_gridWidthHeight; // optimization: width * height
 
 public:
-	std::vector<GridCell> m_gridWrite;
-	std::vector<GridCell> m_gridRead;
-	std::vector<GridCell*> m_listOfPointerToNonEmptyCellsWrite;
-	std::vector<GridCell*> m_listOfPointerToNonEmptyCellsRead;
+	std::vector<std::shared_ptr<GridCell>> m_gridWrite;
+	std::vector<std::shared_ptr<GridCell>> m_gridRead;
+	std::vector< std::shared_ptr<GridCell>> m_listOfPointerToNonEmptyCellsWrite;
+	std::vector< std::shared_ptr<GridCell>> m_listOfPointerToNonEmptyCellsRead;
 
 public:
 	StaticGridCollider(const double step, const size_t with, const size_t height, const Vec3& orig);
@@ -70,7 +75,7 @@ public:
 
 	inline bool isCoordValid(const int x, const int y, const int z) const;
 	inline size_t getCellIndex(const int x, const int y, const int z) const;
-	virtual GridCell* getCell(const int x, const int y, const int z) override;
+	virtual std::shared_ptr<GridCell> getCell(const int x, const int y, const int z) override;
 	virtual void addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId) override;
 	virtual void swap() override;
 	virtual size_t getMemorySize() override;
@@ -84,15 +89,15 @@ private:
 class HashGridCollider : public GridCollider
 {
 public:
-	std::unordered_map<size_t, GridCell> m_gridWrite;
-	std::unordered_map<size_t, GridCell> m_gridRead;
+	std::unordered_map<size_t, std::shared_ptr<GridCell>> m_gridWrite;
+	std::unordered_map<size_t, std::shared_ptr<GridCell>> m_gridRead;
 
 public:
 	HashGridCollider(const double step) : GridCollider(step) {};
 	~HashGridCollider() {};
 
 	inline size_t hashKey(const int x, const int y, const int z) const;
-	virtual GridCell* getCell(const int x, const int y, const int z) override;
+	virtual std::shared_ptr<GridCell> getCell(const int x, const int y, const int z) override;
 	virtual void addParticleToCell(const Vec3& position, const std::tuple<size_t, int, int>& particleId) override;
 	virtual void swap() override;
 	virtual size_t getMemorySize() override;

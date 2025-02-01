@@ -173,11 +173,20 @@ void Cloth::updateParticles(
 }
 
 
-void Cloth::updateGridCollider(std::shared_ptr<GridCollider> pGridCollider)
+/*
+* Update the grid collider with the new position of the particles
+* Only update the particles in the range [indexFrom, indexTo], this way we can parallelize the update
+* 
+* @param pGridCollider The grid collider instance
+* @param indexFrom The starting index in the X direction
+* @param indexTo The ending index in the X direction
+* @return void
+*/
+void Cloth::updateGridCollider(std::shared_ptr<GridCollider> pGridCollider, const int indexFrom, const int indexTo)
 {
 	if (pGridCollider)
 	{
-		for (int i = 0; i < m_resX; ++i)
+		for (int i = indexFrom; i < indexTo; ++i)
 		{
 			for (int j = 0; j < m_resY; ++j)
 			{

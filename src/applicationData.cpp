@@ -293,7 +293,15 @@ size_t getUniquePairHash(size_t id1, size_t id2)
 }
 
 
-void ApplicationData::updateCollisions(const std::vector<GridCell*>& CellsFromReadGrid)
+/*
+* Update the collisions between the particles
+* This function detect between all pair of particles within the current cell and some of the adjacent cells
+* Then resolve the collisions for each pair of particles
+* 
+* @param CellsFromReadGrid The list of non-empty grid cells (can be the entire list or just a batch for parallelism)
+* @return void
+*/
+void ApplicationData::updateCollisions(const std::vector<std::shared_ptr<GridCell>>& CellsFromReadGrid)
 {
 	if (!m_pGridCollider) // Should not happend, but anyway...
 	{
@@ -378,7 +386,7 @@ void ApplicationData::updateCollisions(const std::vector<GridCell*>& CellsFromRe
 						}
 
 						// Get the adjacent cell
-						GridCell* pAdjCell = m_pGridCollider->getCell(xx, yy, zz);
+						std::shared_ptr<GridCell> pAdjCell = m_pGridCollider->getCell(xx, yy, zz);
 						if (pAdjCell) // If the adjacent cell exist (has particles)
 						{
 							// Loop over the particles Id in that cell

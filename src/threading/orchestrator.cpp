@@ -55,7 +55,7 @@ Orchestrator::~Orchestrator()
 */
 Orchestrator& Orchestrator::getInstance()
 {
-	static Orchestrator instance(1);
+	static Orchestrator instance(10);
 	return instance;
 }
 
@@ -110,35 +110,20 @@ void Orchestrator::runOrchestrator()
 	const size_t cellsBatchSize = 50;
 	const int resxBatchSize = 5;
 
-	std::cout << "Orchestrator running" << std::endl;
-
-	// Add tasks to the task queue
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 1" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 2" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 3" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 4" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 5" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 6" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 7" << std::endl; });
-	m_taskQueue.addTask([this]() { std::cout << "Executing task 8" << std::endl; });
-
-	std::cout << "Orchestrator waiting for tasks to be completed..." << std::endl;
-	m_taskQueue.waitUntilEmpty();
-	std::cout << "All tasks done! Orchestrator finised waiting" << std::endl;
-
 	double sommeDt = 0.0;
 	double avg = 0.0;
 	int count = 0;
 
+	std::cout << "Orchestrator running" << std::endl;
+
+	// Main simulation loop
 	while (true)
 	{
 		// Calculate the time elapsed since the last update
 		auto currentTime = std::chrono::steady_clock::now();
 		std::chrono::duration<float> deltaTime = currentTime - m_lastUpdateTime;
 		m_lastUpdateTime = currentTime;
-
-		// Convert deltaTime to seconds
-		double elapsedTimeInSeconds = static_cast<double>(deltaTime.count());
+		double elapsedTimeInSeconds = static_cast<double>(deltaTime.count()); // Convert deltaTime to seconds
 
 		// Calculate the average time step for debugging performance
 		sommeDt += elapsedTimeInSeconds;
@@ -147,6 +132,7 @@ void Orchestrator::runOrchestrator()
 
 		// Clamp the time step to avoid huge time steps
 		// This is a simple way to avoid instability in the simulation
+		// But we lose real time in that case
 		if (elapsedTimeInSeconds > 0.005)
 		{
 			elapsedTimeInSeconds = 0.005;
@@ -154,7 +140,7 @@ void Orchestrator::runOrchestrator()
 
 		// First, update all the cloths' particles and the collisions with static colliders
 
-		auto t1 = std::chrono::steady_clock::now();
+		auto t1 = std::chrono::steady_clock::now(); // For performance debugging
 
 		// Update all the cloths' particles and the collisions with static colliders
 		// Add the particles to the hash grid collider
@@ -178,12 +164,6 @@ void Orchestrator::runOrchestrator()
 								m_pAppData->m_pGridCollider
 							);
 						});
-					/*pCloth->updateParticles(
-						elapsedTimeInSeconds,
-						startResX, endResX,
-						m_pAppData->m_colliders,
-						m_pAppData->m_pGridCollider
-					);*/
 				}
 			}
 		}
@@ -208,15 +188,21 @@ void Orchestrator::runOrchestrator()
 					int startResX = i;
 					int endResX = std::min(startResX + resxBatchSize, pCloth->m_resX);
 
-					/*m_taskQueue.addTask(
+					m_taskQueue.addTask(
 						[this, pCloth, startResX, endResX]() {
 							// Update the previous position and velocity
 							pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
-						});*/
-					pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
+						});
+					//pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
+
+					// Add the particle's new position to the grid collider
+					m_taskQueue.addTask(
+						[this, pCloth, startResX, endResX]() {
+							// Update the previous position and velocity
+							pCloth->updateGridCollider(m_pAppData->m_pGridCollider, startResX, endResX);
+						});
+					//pCloth->updateGridCollider(m_pAppData->m_pGridCollider, 0, pCloth->m_resX);
 				}
-				// Add the particle's new position to the grid collider
-				pCloth->updateGridCollider(m_pAppData->m_pGridCollider);
 			}
 		}
 
@@ -236,7 +222,7 @@ void Orchestrator::runOrchestrator()
 		// Then, resolve the collisions between the cloths
 		if (m_pAppData->m_pGridCollider)
 		{
-			std::vector<std::vector<GridCell*>> CellsFromReadGrid;
+			std::vector<std::vector<std::shared_ptr<GridCell>>> CellsFromReadGrid;
 			size_t cellsCount = 0;
 
 			// Loop over all the non-empty (existing) grid cells
@@ -246,12 +232,12 @@ void Orchestrator::runOrchestrator()
 				// Create batches of cells to allow parallelism
 				if (cellsCount > cellsBatchSize || CellsFromReadGrid.size() == 0)
 				{
-					CellsFromReadGrid.push_back(std::vector<GridCell*>());
+					CellsFromReadGrid.push_back(std::vector<std::shared_ptr<GridCell>>());
 					cellsCount = 0;
 				}
 				cellsCount++;
 
-				//CellsFromReadGrid.back().push_back(&cell.second); // HashGrid
+				//CellsFromReadGrid.back().push_back(cell.second); // HashGrid
 				CellsFromReadGrid.back().push_back(pCell);
 			}
 

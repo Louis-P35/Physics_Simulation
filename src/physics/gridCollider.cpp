@@ -28,6 +28,16 @@ m_gridWidth(with), m_gridHeight(height), m_gridWidthHeight(with* height), m_grid
 	size_t size = m_gridWidth * m_gridWidth * m_gridHeight;
 	m_gridWrite.resize(size);
 	m_gridRead.resize(size);
+
+	// Allocate each cell of the grid
+	for (auto& pCell : m_gridWrite)
+	{
+		pCell = std::make_shared<GridCell>();
+	}
+	for (auto& pCell : m_gridRead)
+	{
+		pCell = std::make_shared<GridCell>();
+	}
 }
 
 
@@ -81,23 +91,26 @@ void StaticGridCollider::addParticleToCell(const Vec3& position, const std::tupl
 		// Get the index of the cell in the grid
 		int index = getCellIndex(x, y, z);
 
-		// Lock the mutex to prevent concurrent access when writing to the grid
-		std::lock_guard<std::mutex> lock(m_mutex);
-
 		// Insert it into the grid
 		if (index < m_gridWrite.size())
 		{
-			m_gridWrite[index].m_particlesId.push_back(particleId);
+			// Lock the cell mutex to prevent concurrent access to this same cell when writing to the grid
+			std::lock_guard<std::mutex> lock(m_gridWrite[index]->m_cellMutex);
+
+			m_gridWrite[index]->m_particlesId.push_back(particleId);
 
 			// If the cell is just created, store it's pointer to the list of non-empty cells of the write grid
 			// Also if the cell is just created, store it's coordinates
-			if (m_gridWrite[index].m_particlesId.size() == 1)
+			if (m_gridWrite[index]->m_particlesId.size() == 1)
 			{
-				m_listOfPointerToNonEmptyCellsWrite.push_back(&m_gridWrite[index]);
+				// Lock the global grid mutex to prevent concurrent access to the list of pointers to non-empty cells
+				std::lock_guard<std::mutex> lock(m_mutex);
 
-				m_gridWrite[index].x = x;
-				m_gridWrite[index].y = y;
-				m_gridWrite[index].z = z;
+				m_listOfPointerToNonEmptyCellsWrite.push_back(m_gridWrite[index]);
+
+				m_gridWrite[index]->x = x;
+				m_gridWrite[index]->y = y;
+				m_gridWrite[index]->z = z;
 			}
 		}
 	}
@@ -110,9 +123,9 @@ void StaticGridCollider::addParticleToCell(const Vec3& position, const std::tupl
 * @param x X coordinate of the cell
 * @param y Y coordinate of the cell
 * @param z Z coordinate of the cell
-* @return GridCell* Pointer to the cell
+* @return std::shared_ptr<GridCell> Pointer to the cell
 */
-GridCell* StaticGridCollider::getCell(const int x, const int y, const int z)
+std::shared_ptr<GridCell> StaticGridCollider::getCell(const int x, const int y, const int z)
 {
 	// No mutex for read operations (because reading and writing are done in two differents grids)
 
@@ -125,7 +138,7 @@ GridCell* StaticGridCollider::getCell(const int x, const int y, const int z)
 		// Return the cell
 		if (index < m_gridRead.size())
 		{
-			return &m_gridRead[index];
+			return m_gridRead[index];
 		}
 	}
 
@@ -297,9 +310,9 @@ void HashGridCollider::clearGrid()
 * @param x X coordinate of the cell
 * @param y Y coordinate of the cell
 * @param z Z coordinate of the cell
-* @return GridCell* Pointer to the cell
+* @return std::shared_ptr<GridCell> Pointer to the cell
 */
-GridCell* HashGridCollider::getCell(const int x, const int y, const int z)
+std::shared_ptr<GridCell> HashGridCollider::getCell(const int x, const int y, const int z)
 {
 	// No mutex for read operations (because reading and writing are done in two differents grids)
 	
@@ -310,7 +323,7 @@ GridCell* HashGridCollider::getCell(const int x, const int y, const int z)
 	auto it = m_gridRead.find(key);
 	if (it != m_gridRead.end())
 	{
-		return &it->second;
+		return it->second;
 	}
 
 	return nullptr;
@@ -340,14 +353,14 @@ void HashGridCollider::addParticleToCell(const Vec3& position, const std::tuple<
 	std::lock_guard<std::mutex> lock(m_mutex);
 	
 	// Find the cell in the grid (or create it) and add the particle to it
-	m_gridWrite[key].m_particlesId.push_back(particleId);
+	m_gridWrite[key]->m_particlesId.push_back(particleId);
 	
 	// If the cell is just created, store it's coordinates
-	if (m_gridWrite[key].m_particlesId.size() == 1)
+	if (m_gridWrite[key]->m_particlesId.size() == 1)
 	{
-		m_gridWrite[key].x = x;
-		m_gridWrite[key].y = y;
-		m_gridWrite[key].z = z;
+		m_gridWrite[key]->x = x;
+		m_gridWrite[key]->y = y;
+		m_gridWrite[key]->z = z;
 	}
 }
 

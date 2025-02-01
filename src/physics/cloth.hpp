@@ -78,7 +78,7 @@ public:
 		std::shared_ptr<GridCollider> pGridCollider
 	);
 
-	void updateGridCollider(std::shared_ptr<GridCollider> pGridCollider);
+	void updateGridCollider(std::shared_ptr<GridCollider> pGridCollider, const int indexFrom, const int indexTo);
 
 private:
 	void initMesh();
