@@ -37,6 +37,9 @@ public:
 	Object3D m_debugSphere3D3;
 	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
 
+	Object3D m_suzanne3D;
+	std::shared_ptr<ObjectRenderingInstance> m_pSuzanne3DRenderer;
+
 	// Map of cloths, the key is the cloth's UID
 	ClothesList m_pCloths;
 

@@ -3,6 +3,14 @@
 // Includes from project
 #include "../src/math/vec3.hpp"
 
+class Ray
+{
+public:
+	Vec3 origin;
+	Vec3 direction;
+	Ray(const Vec3& origin, const Vec3& direction) : origin(origin), direction(direction) {};
+	Ray() {};
+};
 
 /*
 * Class Collider

@@ -1,6 +1,7 @@
 // Includes from project
 #include "applicationData.hpp"
 #include "../src/physics/sphereCollider.hpp"
+#include "../src/physics/meshCollider.hpp"
 #include "clothFactory.hpp"
 #include "objectsFactory.hpp"
 #include "../src/threading/orchestrator.hpp"
@@ -37,7 +38,22 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	//Object3D test;
 	//m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
 
-	//m_monkey3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
+	Vec3 suzannePos = Vec3(5.0, 2.0, 5.0);
+	m_suzanne3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
+	m_pSuzanne3DRenderer = pGl3dWidget->addObject(m_suzanne3D);
+	m_pSuzanne3DRenderer->m_pPosRotScale->m_position = suzannePos.toArray();
+	m_pSuzanne3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+	std::shared_ptr<Collider> pSuzanneCollider = std::make_shared<MeshCollider>(suzannePos, m_suzanne3D);
+	if (pSuzanneCollider)
+	{
+		m_colliders.push_back(pSuzanneCollider);
+	}
+	else
+	{
+		std::cerr << "Error: Failed to create the suzanne collider" << std::endl;
+	}
+
+
 	//m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
 
 	//std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
@@ -57,7 +73,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	);
 	m_colliders.push_back(pCollider);*/
 
-	Object3D sphere3D;
+	/*Object3D sphere3D;
 	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
 	std::shared_ptr<Collider> pCollider2 = nullptr;
 	ObjectsFactory::createSphere(
@@ -81,7 +97,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		Vec3(6.5, 3.5, 5.0),
 		1.0
 	);
-	m_colliders.push_back(pCollider3);
+	m_colliders.push_back(pCollider3);*/
 	
 
 	// Ground
@@ -160,7 +176,7 @@ bool ApplicationData::initSimulation()
 
 	
 	// Create a cloth
-	Vec3 position = Vec3(5.75, 4.5, 4.75);
+	/*Vec3 position = Vec3(5.75, 4.5, 4.75);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -175,7 +191,7 @@ bool ApplicationData::initSimulation()
 	if (pCloth)
 	{
 		m_pCloths.addCloth(pCloth);
-	}
+	}*/
 
 	// Debug view of the particles
 	/*for (int i = 0; i < pCloth->m_resX; ++i)
@@ -188,7 +204,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	Vec3 position2 = Vec3(5.0, 5.1, 5.0);
+	/*Vec3 position2 = Vec3(5.0, 5.1, 5.0);
 	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -203,7 +219,7 @@ bool ApplicationData::initSimulation()
 	if (pCloth2)
 	{
 		m_pCloths.addCloth(pCloth2);
-	}
+	}*/
 
 	// Debug view of the particles
 	/*for (int i = 0; i < pCloth2->m_resX; ++i)
@@ -216,7 +232,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	Vec3 position3 = Vec3(6.25, 5.5, 5.0);
+	/*Vec3 position3 = Vec3(6.25, 5.5, 5.0);
 	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
 		res, res,
 		sideSize, sideSize,
@@ -249,10 +265,10 @@ bool ApplicationData::initSimulation()
 	if (pCloth4)
 	{
 		m_pCloths.addCloth(pCloth4);
-	}
+	}*/
 
 
-	Vec3 position5 = Vec3(4.5, 3.0, 5.0);
+	Vec3 position5 = Vec3(4.5, 5.0, 5.0);
 	std::shared_ptr<Cloth> pCloth5 = ClothFactory::createCloth(
 		res*2, res*2,
 		sideSize*2.0, sideSize*2.0,
@@ -268,10 +284,10 @@ bool ApplicationData::initSimulation()
 	{
 		m_pCloths.addCloth(pCloth5);
 	}
-	pCloth5->m_particles[0][0].setFixed(true);
+	/*pCloth5->m_particles[0][0].setFixed(true);
 	pCloth5->m_particles[0].back().setFixed(true);
 	pCloth5->m_particles.back()[0].setFixed(true);
-	pCloth5->m_particles.back().back().setFixed(true);
+	pCloth5->m_particles.back().back().setFixed(true);*/
 
 
 	// Start the physics simulation by starting the orchestrator (main simulation thread)

@@ -5,6 +5,7 @@
 
 #include "../src/math/Vec3.hpp"
 #include "../src/view/OpenGl/Object3D.hpp"
+#include "utils.hpp"
 
 class Object3DTestWrapper : public Object3D
 {
@@ -18,19 +19,6 @@ public:
         return computeTangentAndBitangentVector(p0, p1, p2, uv0, uv1, uv2);
     }
 };
-
-
-bool approximatelyEqual(double a, double b, double epsilon = 1e-5)
-{
-    return std::fabs(a - b) < epsilon;
-}
-
-void assertVec3Near(const Vec3& v1, const Vec3& v2, double epsilon = 1e-5)
-{
-    EXPECT_NEAR(v1.x, v2.x, epsilon);
-    EXPECT_NEAR(v1.y, v2.y, epsilon);
-    EXPECT_NEAR(v1.z, v2.z, epsilon);
-}
 
 
 TEST(TangentBitangentTest, SimpleTriangle)
