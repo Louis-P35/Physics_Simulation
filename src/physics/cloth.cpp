@@ -168,6 +168,13 @@ void Cloth::updateParticles(
 
 			// Update the AABB
 			m_particles[i][j].m_pAabb->constructCubicAABB(m_particles[i][j].m_position);
+
+			// Add the particle's new position to the grid collider
+			// Done here to minimize the "mutex race" between the threads if done all at once at the end
+			pGridCollider->addParticleToCell(
+				m_particles[i][j].m_position,
+				std::make_tuple(m_uidIndex, i, j)
+			);
 		}
 	}
 }

@@ -65,16 +65,15 @@ void TaskQueue::getTask(std::function<void()>& taskCallback)
 {
 	std::unique_lock<std::mutex> lock(m_mutex);
 
-	//std::cout << "Task count: " << m_taskCount << " " << m_tasks.size() << std::endl;
-
-	// If there is tasks in the queue already, do not wait
+	// Wait until a task is available
 	while (m_tasks.empty())
 	{
 		// wait() unlock the mutex and wait until the condition variable is notified
 		// The lambda function is used to check if the task queue is empty
 		// The mutex is locked again before returning
 		m_cv.wait(lock, [this]() { return !m_tasks.empty(); });  // Sleep until a task is available
-		// The notify_all() in addTask() will wake up only one worker thread waiting here
+		// The notify_all() in addTask() will wake up all the worker threads waiting here. 
+		// The first one to get the lock will get the task, the others will go back to waiting.
 	}
 
 	// Can happen, because the orchestrator thread can wake up more worker threads than there are tasks

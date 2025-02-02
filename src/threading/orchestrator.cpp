@@ -220,13 +220,6 @@ void Orchestrator::runOrchestrator()
 							// Update the previous position and velocity
 							pCloth->updatePreviousPositionAndVelocity(startResX, endResX);
 						});
-
-					// Add the particle's new position to the grid collider
-					m_taskQueue.addTask(
-						[this, pCloth, startResX, endResX]() {
-							// Update the previous position and velocity
-							pCloth->updateGridCollider(m_pAppData->m_pGridCollider, startResX, endResX);
-						});
 				}
 			}
 		}
