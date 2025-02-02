@@ -46,7 +46,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	//m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
 	//m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
-	std::shared_ptr<Collider> pCollider = nullptr;
+	/*std::shared_ptr<Collider> pCollider = nullptr;
 	ObjectsFactory::createSphere(
 		m_cube3D,
 		m_pCube3DRenderer,
@@ -55,7 +55,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		Vec3(5.0, 1.0, 5.0),
 		1.0
 	);
-	m_colliders.push_back(pCollider);
+	m_colliders.push_back(pCollider);*/
 
 	Object3D sphere3D;
 	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
@@ -65,7 +65,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		pSphere3DRenderer,
 		pCollider2,
 		pGl3dWidget,
-		Vec3(3.5, 3.0, 5.0),
+		Vec3(3.5, 3.5, 5.0),
 		1.0
 	);
 	m_colliders.push_back(pCollider2);
@@ -78,7 +78,7 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		pSphere3DRenderer2,
 		pCollider3,
 		pGl3dWidget,
-		Vec3(6.5, 3.0, 5.0),
+		Vec3(6.5, 3.5, 5.0),
 		1.0
 	);
 	m_colliders.push_back(pCollider3);
@@ -160,7 +160,7 @@ bool ApplicationData::initSimulation()
 
 	
 	// Create a cloth
-	Vec3 position = Vec3(5.75, 4.0, 4.75);
+	Vec3 position = Vec3(5.75, 4.5, 4.75);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -188,7 +188,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	Vec3 position2 = Vec3(5.0, 4.6, 5.0);
+	Vec3 position2 = Vec3(5.0, 5.1, 5.0);
 	std::shared_ptr<Cloth> pCloth2 = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -216,7 +216,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	Vec3 position3 = Vec3(6.25, 5.0, 5.0);
+	Vec3 position3 = Vec3(6.25, 5.5, 5.0);
 	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
 		res, res,
 		sideSize, sideSize,
@@ -234,7 +234,7 @@ bool ApplicationData::initSimulation()
 	}
 
 
-	Vec3 position4 = Vec3(4.0, 5.3, 5.0);
+	Vec3 position4 = Vec3(4.0, 5.8, 5.0);
 	std::shared_ptr<Cloth> pCloth4 = ClothFactory::createCloth(
 		res, res,
 		sideSize, sideSize,
@@ -252,7 +252,7 @@ bool ApplicationData::initSimulation()
 	}
 
 
-	Vec3 position5 = Vec3(4.5, 5.6, 5.0);
+	Vec3 position5 = Vec3(4.5, 3.0, 5.0);
 	std::shared_ptr<Cloth> pCloth5 = ClothFactory::createCloth(
 		res*2, res*2,
 		sideSize*2.0, sideSize*2.0,
@@ -268,6 +268,10 @@ bool ApplicationData::initSimulation()
 	{
 		m_pCloths.addCloth(pCloth5);
 	}
+	pCloth5->m_particles[0][0].setFixed(true);
+	pCloth5->m_particles[0].back().setFixed(true);
+	pCloth5->m_particles.back()[0].setFixed(true);
+	pCloth5->m_particles.back().back().setFixed(true);
 
 
 	// Start the physics simulation by starting the orchestrator (main simulation thread)
