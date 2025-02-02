@@ -7,7 +7,8 @@
 
 // Includes from STL
 #include <memory>
-
+#include <vector>
+#include <array>
 
 
 /*
@@ -19,6 +20,7 @@ class MeshCollider : public Collider
 {
 private:
 	std::shared_ptr<OctreeNode> m_pRoot;
+	std::vector<std::array<Vec3, 3>> m_triangles;
 
 
 public:
@@ -40,4 +42,7 @@ public:
 		Vec3& collPosition, 
 		Vec3& collNormal
 	);
+
+	static Vec3 ClosestPointOnTriangle(const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& point);
+	static Vec3 ClosestPointOnLineSegment(const Vec3& a, const Vec3& b, const Vec3& point);
 };

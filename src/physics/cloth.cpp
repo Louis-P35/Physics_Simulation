@@ -125,6 +125,8 @@ void Cloth::updateParticles(
 	std::shared_ptr<GridCollider> pGridCollider
 )
 {
+	constexpr double EPSILON = 1e-7;
+
 	// Update the particles
 	for (int i = resxFrom; i < resxTo; ++i)
 	{
@@ -156,7 +158,7 @@ void Cloth::updateParticles(
 				if (pCollider->hasCollided(collPosition, collNormal, bounceVect, m_particles[i][j].m_previousPosition, m_particles[i][j].m_position, m_particles[i][j].m_pAabb->m_halfSize))
 				{
 					// Compute the new position
-					m_particles[i][j].m_position = collPosition + collNormal * m_particles[i][j].m_pAabb->m_halfSize;
+					m_particles[i][j].m_position = collPosition + collNormal * (m_particles[i][j].m_pAabb->m_halfSize + EPSILON);
 					// Compute the new velocity
 					m_particles[i][j].m_velocity = bounceVect * m_particles[i][j].m_velocity.norm();
 					if (m_particles[i][j].m_objectFriction > 0.0)

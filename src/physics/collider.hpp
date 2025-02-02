@@ -6,9 +6,10 @@
 class Ray
 {
 public:
-	Vec3 origin;
-	Vec3 direction;
-	Ray(const Vec3& origin, const Vec3& direction) : origin(origin), direction(direction) {};
+	Vec3 m_origin;
+	Vec3 m_direction;
+	double m_lenght;
+	Ray(const Vec3& origin, const Vec3& direction, const double lenght) : m_origin(origin), m_direction(direction), m_lenght(lenght){};
 	Ray() {};
 };
 
@@ -34,4 +35,18 @@ public:
 		const Vec3& p1,
 		const double partRadius
 	) const = 0;
+
+
+	/*
+	* Compute the bounce vector
+	* inline, so defined here
+	*
+	* @param particleDir The vector to bounce
+	* @param collNormal The normal of the collision
+	* @return Vec3 The bounce vector
+	*/
+	inline static Vec3 getBounceVector(const Vec3& particleDir, const Vec3& collNormal)
+	{
+		return particleDir - collNormal * (2.0 * particleDir.dot(collNormal));
+	};
 };

@@ -11,8 +11,8 @@ TEST(RayTriangleIntersectionTest, RayHitsTriangle)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(0.25, 0.25, -1.0);
-    ray.direction = Vec3(0.0, 0.0, 1.0).getNormalized();
+    ray.m_origin = Vec3(0.25, 0.25, -1.0);
+    ray.m_direction = Vec3(0.0, 0.0, 1.0).getNormalized();
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);
@@ -29,8 +29,8 @@ TEST(RayTriangleIntersectionTest, RayMissesTriangleDueToDirection)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(0.25, 0.25, -1.0);
-    ray.direction = Vec3(1.0, 1.0, 0.0).getNormalized(); // Wrong direction
+    ray.m_origin = Vec3(0.25, 0.25, -1.0);
+    ray.m_direction = Vec3(1.0, 1.0, 0.0).getNormalized(); // Wrong direction
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);
@@ -45,8 +45,8 @@ TEST(RayTriangleIntersectionTest, RayMissesOutsideTriangle)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(1.5, 1.5, -1.0); // Outside triangle
-    ray.direction = Vec3(0.0, 0.0, 1.0).getNormalized();
+    ray.m_origin = Vec3(1.5, 1.5, -1.0); // Outside triangle
+    ray.m_direction = Vec3(0.0, 0.0, 1.0).getNormalized();
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);
@@ -61,8 +61,8 @@ TEST(RayTriangleIntersectionTest, RayHitsTriangleEdge)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(0.5, 0.0, -1.0); // Directly above edge v0-v1
-    ray.direction = Vec3(0.0, 0.0, 1.0).getNormalized();
+    ray.m_origin = Vec3(0.5, 0.0, -1.0); // Directly above edge v0-v1
+    ray.m_direction = Vec3(0.0, 0.0, 1.0).getNormalized();
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);
@@ -79,8 +79,8 @@ TEST(RayTriangleIntersectionTest, RayHitsTriangleVertex)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(0.0, 0.0, -1.0); // Directly above v0
-    ray.direction = Vec3(0.0, 0.0, 1.0).getNormalized();
+    ray.m_origin = Vec3(0.0, 0.0, -1.0); // Directly above v0
+    ray.m_direction = Vec3(0.0, 0.0, 1.0).getNormalized();
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);
@@ -97,8 +97,8 @@ TEST(RayTriangleIntersectionTest, RayHitsBackface)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(0.25, 0.25, 1.0); // Starts behind the triangle
-    ray.direction = Vec3(0.0, 0.0, -1.0).getNormalized();
+    ray.m_origin = Vec3(0.25, 0.25, 1.0); // Starts behind the triangle
+    ray.m_direction = Vec3(0.0, 0.0, -1.0).getNormalized();
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);
@@ -115,8 +115,8 @@ TEST(RayTriangleIntersectionTest, RayOriginInsideTriangle)
     Vec3 v2(0.0, 1.0, 0.0);
 
     Ray ray;
-    ray.origin = Vec3(0.25, 0.25, 0.0); // Inside the triangle
-    ray.direction = Vec3(0.0, 0.0, 1.0).getNormalized(); // Going upwards
+    ray.m_origin = Vec3(0.25, 0.25, 0.0); // Inside the triangle
+    ray.m_direction = Vec3(0.0, 0.0, 1.0).getNormalized(); // Going upwards
 
     Vec3 collisionPoint, collisionNormal;
     bool result = MeshCollider::rayTriangleIntersection(ray, v0, v1, v2, collisionPoint, collisionNormal);

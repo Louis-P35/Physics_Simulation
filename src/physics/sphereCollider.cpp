@@ -39,7 +39,7 @@ bool SphereCollider::hasCollided(Vec3& collPosition, Vec3& collNormal, Vec3& bou
 
 		// Compute the bounce vector
 		const Vec3 v = (p1 - p0).getNormalized();
-		bounceVect = v - collNormal * (2.0 * v.dot(collNormal));
+		bounceVect = Collider::getBounceVector(v, collNormal);
 
 		return true;
 	}

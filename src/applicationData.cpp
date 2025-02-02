@@ -105,6 +105,16 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	m_pGround3DRenderer = pGl3dWidget->addObject(m_ground3D);
 	m_pGround3DRenderer->m_pPosRotScale->m_position = { 0.0f, 0.0f, 0.0f };
 	m_pGround3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+	/*Vec3 groundPos = Vec3(0.0, 0.0, 0.0);
+	std::shared_ptr<Collider> pSuzanneCollider = std::make_shared<MeshCollider>(groundPos, m_ground3D);
+	if (pSuzanneCollider)
+	{
+		m_colliders.push_back(pSuzanneCollider);
+	}
+	else
+	{
+		std::cerr << "Error: Failed to create the suzanne collider" << std::endl;
+	}*/
 
 	// Debug sphere
 	m_debugSphere3D.loadFromObjFile("../models/sphere_highRes/", "sphere.obj");
@@ -268,10 +278,12 @@ bool ApplicationData::initSimulation()
 	}*/
 
 
-	Vec3 position5 = Vec3(4.5, 5.0, 5.0);
+	Vec3 position5 = Vec3(5.0, 3.2, 5.0);
 	std::shared_ptr<Cloth> pCloth5 = ClothFactory::createCloth(
 		res*2, res*2,
 		sideSize*2.0, sideSize*2.0,
+		//res, res,
+		//sideSize, sideSize,
 		particleColliderRadius,
 		0.025, 300.0,
 		position5,
@@ -288,6 +300,15 @@ bool ApplicationData::initSimulation()
 	pCloth5->m_particles[0].back().setFixed(true);
 	pCloth5->m_particles.back()[0].setFixed(true);
 	pCloth5->m_particles.back().back().setFixed(true);*/
+	/*for (int i = 0; i < pCloth5->m_resX; ++i)
+	{
+		for (int j = 0; j < pCloth5->m_resY; ++j)
+		{
+			pCloth5->m_particles[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
+			pCloth5->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth5->m_particles[i][j].m_position.toArray();
+			pCloth5->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
+		}
+	}*/
 
 
 	// Start the physics simulation by starting the orchestrator (main simulation thread)
