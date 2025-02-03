@@ -2,7 +2,7 @@
 #include "collider.hpp"
 
 
-Collider::Collider(const Vec3& position) : m_position(position)
+Collider::Collider(const Vec3& position) : m_colliderPosition(position)
 {
 
 }

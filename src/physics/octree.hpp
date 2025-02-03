@@ -9,24 +9,23 @@
 #include <vector>
 
 
-class OctreeNode : public AABB
+class OctreeNode
 {
 public:
 	std::vector<std::shared_ptr<OctreeNode>> m_pChildren;
 
-	// Dirty
-	int m_indexI = -1;
-	int m_indexJ = -1;
+	AABB m_aabb;
 
+	std::vector<std::array<Vec3, 3>> m_triangles;
 
 private:
 	OctreeNode* m_pParent = nullptr;
 	
 
 public:
-	OctreeNode(const Vec3& min, const Vec3& max) : AABB(min, max) {};
-	OctreeNode(const AABB& other) : AABB(other) {};
-	OctreeNode(const std::vector<AABB>& others) : AABB(others) {};
+	OctreeNode(const Vec3& min, const Vec3& max) : m_aabb(min, max) {};
+	OctreeNode(const AABB& other) : m_aabb(other) {};
+	OctreeNode(const std::vector<AABB>& others) : m_aabb(others) {};
 	~OctreeNode() {};
 
 	bool isLeaf() const;

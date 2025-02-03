@@ -1,9 +1,11 @@
 // Includes from project
 #include "meshCollider.hpp"
+#include "aabb.hpp"
 
 // Includes from STL
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 
 
@@ -17,6 +19,9 @@ MeshCollider::MeshCollider(const Vec3& position, const Object3D& obj) : Collider
 
 		m_triangles.push_back({v0, v1, v2});
 	}
+
+	m_pRoot = std::make_shared<OctreeNode>(createAABB(m_triangles));
+    createCollisionTree(m_pRoot, m_triangles, 0.035);
 }
 
 
@@ -36,36 +41,50 @@ bool MeshCollider::hasCollided(
 	Vec3& bounceVect,
 	const Vec3& p0,
 	const Vec3& p1,
-	const double partRadius
+	const double partRadius,
+    const AABB& aabb
 ) const
 {
+	if (!m_pRoot)
+	{
+		return false;
+	}
+
 	double length = (p1 - p0).norm();
 	Vec3 particleDir = (p1 - p0).getNormalized();
-	Vec3 particlePos = p0 - m_position;
-	Ray ray(particlePos, particleDir, length);
+	Vec3 particlePos = p0 - m_colliderPosition;
 
 	double closestTriangleDist = std::numeric_limits<double>::max();
     bool hasCollided = false;
     Vec3 closestClosestPointOnT;
     Vec3 closestNormalOnT;
-	for (const auto& triangle : m_triangles)
-	{
-		Vec3 closestPointOnT = ClosestPointOnTriangle(triangle[0], triangle[1], triangle[2], particlePos);
-		double distToT = (closestPointOnT - particlePos).norm();
-        if (distToT < partRadius)
-        {
-			hasCollided = true;
-			if (distToT < closestTriangleDist)
+
+    AABB _aabb = AABB(aabb);
+	_aabb.m_min -= m_colliderPosition;
+	_aabb.m_max -= m_colliderPosition;
+    std::vector<OctreeNode*> listCollidedAabb = m_pRoot->detectCollision(_aabb);
+    for (OctreeNode* pNode : listCollidedAabb)
+    {
+		for (const auto& triangle : pNode->m_triangles)
+		{
+			Vec3 closestPointOnT = ClosestPointOnTriangle(triangle[0], triangle[1], triangle[2], particlePos);
+			double distToT = (closestPointOnT - particlePos).norm();
+			if (distToT < partRadius)
 			{
-				closestTriangleDist = distToT;
-                closestClosestPointOnT = closestPointOnT;
+				hasCollided = true;
+				if (distToT < closestTriangleDist)
+				{
+					closestTriangleDist = distToT;
+					closestClosestPointOnT = closestPointOnT;
+					closestNormalOnT = (closestPointOnT - particlePos).getNormalized();
+				}
 			}
-        }
+		}
 	}
 
     if (hasCollided)
     {
-        collPosition = closestClosestPointOnT + m_position;
+        collPosition = closestClosestPointOnT + m_colliderPosition;
         collNormal = (particlePos - closestClosestPointOnT).getNormalized();
 
         // Compute the bounce vector
@@ -212,3 +231,185 @@ Vec3 MeshCollider::ClosestPointOnTriangle(const Vec3& v0, const Vec3& v1, const 
     return c2;
 }
 
+
+/*
+* Create the AABB of the given triangles list
+* 
+* @param triangles The list of triangles
+* @return AABB The AABB of the triangles
+*/
+AABB MeshCollider::createAABB(std::vector<std::array<Vec3, 3>>& triangles)
+{
+	Vec3 min(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+	Vec3 max(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
+
+	for (const auto& triangle : triangles)
+	{
+		double minX = std::min({ triangle[0].x, triangle[1].x, triangle[2].x });
+		double minY = std::min({ triangle[0].y, triangle[1].y, triangle[2].y });
+		double minZ = std::min({ triangle[0].z, triangle[1].z, triangle[2].z });
+
+		double maxX = std::max({ triangle[0].x, triangle[1].x, triangle[2].x });
+		double maxY = std::max({ triangle[0].y, triangle[1].y, triangle[2].y });
+		double maxZ = std::max({ triangle[0].z, triangle[1].z, triangle[2].z });
+
+		min.x = std::min(min.x, minX);
+		min.y = std::min(min.y, minY);
+		min.z = std::min(min.z, minZ);
+
+		max.x = std::max(max.x, maxX);
+		max.y = std::max(max.y, maxY);
+		max.z = std::max(max.z, maxZ);
+	}
+
+	return AABB(min, max);
+}
+
+
+/*
+* Get the 8 sub AABBs from the parent AABB
+* Divide the parent AABB into 8 sub AABBs
+* 
+* @param parentAabb The parent AABB
+* @return std::vector<AABB> The list of 8 sub AABBs
+*/
+std::vector<AABB> MeshCollider::getSubAabbs(const AABB& parentAabb)
+{
+    // TOP
+    // 0    1
+    // 2	3
+
+    // BOTTOM
+    // 4    5
+    // 6    7
+
+	std::vector<AABB> subAabbs;
+
+    double middleX = (parentAabb.m_min.x + parentAabb.m_max.x) / 2.0;
+    double middleY = (parentAabb.m_min.y + parentAabb.m_max.y) / 2.0;
+    double middleZ = (parentAabb.m_min.z + parentAabb.m_max.z) / 2.0;
+
+    subAabbs.push_back(AABB(Vec3(parentAabb.m_min.x, middleY, middleZ), Vec3(middleX, parentAabb.m_max.y, parentAabb.m_max.z)));
+    subAabbs.push_back(AABB(Vec3(middleX, middleY, middleZ), Vec3(parentAabb.m_max.x, parentAabb.m_max.y, parentAabb.m_max.z)));
+    subAabbs.push_back(AABB(Vec3(parentAabb.m_min.x, parentAabb.m_min.y, middleZ), Vec3(middleX, middleY, parentAabb.m_max.z)));
+    subAabbs.push_back(AABB(Vec3(middleX, parentAabb.m_min.y, middleZ), Vec3(parentAabb.m_max.x, middleY, parentAabb.m_max.z)));
+    subAabbs.push_back(AABB(Vec3(parentAabb.m_min.x, middleY, parentAabb.m_min.z), Vec3(middleX, parentAabb.m_max.y, middleZ)));
+    subAabbs.push_back(AABB(Vec3(middleX, middleY, parentAabb.m_min.z), Vec3(parentAabb.m_max.x, parentAabb.m_max.y, middleZ)));
+    subAabbs.push_back(AABB(Vec3(parentAabb.m_min.x, parentAabb.m_min.y, parentAabb.m_min.z), Vec3(middleX, middleY, middleZ)));
+    subAabbs.push_back(AABB(Vec3(middleX, parentAabb.m_min.y, parentAabb.m_min.z), Vec3(parentAabb.m_max.x, middleY, middleZ)));
+
+    return subAabbs;
+}
+
+
+/*
+* Create the collision tree
+* Recursively climb down the tree to create the children
+* When it reach a leaf, create it's bounding box
+* Then climb back up to set the AABB of the currents nodes (fuse the AABB of the children)
+*
+* @param pRoot The current node of the tree
+* @param iMin The minimum index in the X direction
+* @param iMax The maximum index in the X direction
+* @param jMin The minimum index in the Y direction
+* @param jMax The maximum index in the Y direction
+* @return std::shared_ptr<OctreeNode> The newly created node
+*/
+std::shared_ptr<OctreeNode> MeshCollider::createCollisionTree(
+    std::shared_ptr<OctreeNode> pRoot,
+    std::vector<std::array<Vec3, 3>>& triangles,
+    const double particleRadius
+)
+{
+    if (!pRoot || triangles.size() == 0)
+    {
+        return nullptr;
+    }
+
+    // At this point, pRoot is not yet added to the tree
+
+    // If is leaf
+    if (triangles.size() == 1)
+    {
+        // Set the AABB of the leaf to be the AABB of the triangle + the particle radius
+        pRoot->m_aabb.setAabb(createAABB(triangles));
+		pRoot->m_aabb.m_min -= Vec3(particleRadius, particleRadius, particleRadius);
+		pRoot->m_aabb.m_max += Vec3(particleRadius, particleRadius, particleRadius);
+
+		pRoot->m_triangles.push_back(triangles[0]);
+
+        // Return the leaf
+        return pRoot;
+    }
+
+    // Going down the tree, we create the children of the current node
+    // At this point pRoot can not be a leaf
+
+	// Split the AABB of the current node into 8 sub AABBs
+    std::vector<AABB> subAabbs = getSubAabbs(pRoot->m_aabb);
+
+	// Split the triangles into the children
+    std::vector<std::array<Vec3, 3>> childrenTriangles[8];
+	
+	for (const auto& triangle : triangles)
+	{
+		// Find the closest sub AABB
+		double minDist = std::numeric_limits<double>::max();
+		int index = -1;
+		for (int i = 0; i < 8; ++i)
+		{
+			Vec3 center = (subAabbs[i].m_min + subAabbs[i].m_max) / 2.0;
+			double dist = (center - (triangle[0] + triangle[1] + triangle[2]) / 3.0).norm();
+			if (dist < minDist)
+			{
+				minDist = dist;
+                index = i;
+			}
+		}
+		
+        if (index >= 0 && index < 8)
+		{
+            childrenTriangles[index].push_back(triangle);
+		}
+	}
+
+	// Create the children
+	for (int i = 0; i < 8; ++i)
+	{
+		if (childrenTriangles[i].empty())
+		{
+			continue;
+		}
+
+        if (childrenTriangles[i].size() == triangles.size())
+        {
+			// All the triangles are in the same child
+			// We can't split the triangles anymore in some cases...
+			// So we create a leaf
+			std::shared_ptr<OctreeNode> pChild = std::make_shared<OctreeNode>(createAABB(childrenTriangles[i]));
+            pChild->m_aabb.m_min -= Vec3(particleRadius, particleRadius, particleRadius);
+            pChild->m_aabb.m_max += Vec3(particleRadius, particleRadius, particleRadius);
+			pRoot->addChildren(pChild);
+			pChild->m_triangles.insert(pChild->m_triangles.end(), childrenTriangles[i].begin(), childrenTriangles[i].end());
+
+			continue;
+        }
+
+		std::shared_ptr<OctreeNode> pChild = std::make_shared<OctreeNode>(subAabbs[i]);
+		pRoot->addChildren(createCollisionTree(pChild, childrenTriangles[i], particleRadius));
+	}
+
+    // Climbing back up the tree, we set the AABB of the current node
+    // Fuse the AABB of the children
+    std::vector<AABB> aabbs;
+    for (const auto& pChild : pRoot->m_pChildren)
+    {
+		if (pChild)
+		{
+            aabbs.push_back(pChild->m_aabb);
+		}
+    }
+    pRoot->m_aabb.setAabb(aabbs);
+
+    return pRoot;
+}

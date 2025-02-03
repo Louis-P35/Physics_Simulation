@@ -2,6 +2,7 @@
 
 // Includes from project
 #include "../src/math/vec3.hpp"
+#include "../src/physics/aabb.hpp"
 
 class Ray
 {
@@ -21,7 +22,7 @@ public:
 class Collider
 {
 protected:
-	Vec3 m_position;
+	Vec3 m_colliderPosition;
 
 public:
 	Collider(const Vec3& position);
@@ -33,7 +34,8 @@ public:
 		Vec3& bounceVect,
 		const Vec3& p0, 
 		const Vec3& p1,
-		const double partRadius
+		const double partRadius,
+		const AABB& aabb
 	) const = 0;
 
 

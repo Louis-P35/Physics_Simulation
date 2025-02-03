@@ -32,14 +32,18 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/src/math/vec3.cpp
     ${CMAKE_SOURCE_DIR}/src/physics/meshCollider.cpp
     ${CMAKE_SOURCE_DIR}/src/physics/collider.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/aabb.cpp
+    ${CMAKE_SOURCE_DIR}/src/physics/octree.cpp
 )
 
 set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/tests/utils.hpp
     ${CMAKE_SOURCE_DIR}/src/math/vec3.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/aabb.hpp
     ${CMAKE_SOURCE_DIR}/src/view/OpenGl/object3D.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/meshCollider.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/collider.hpp
+    ${CMAKE_SOURCE_DIR}/src/physics/octree.hpp
 )
 
 # Create a test executable

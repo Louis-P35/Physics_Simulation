@@ -278,7 +278,7 @@ bool ApplicationData::initSimulation()
 	}*/
 
 
-	Vec3 position5 = Vec3(5.0, 3.2, 5.0);
+	Vec3 position5 = Vec3(4.5, 5.0, 5.0);
 	std::shared_ptr<Cloth> pCloth5 = ClothFactory::createCloth(
 		res*2, res*2,
 		sideSize*2.0, sideSize*2.0,

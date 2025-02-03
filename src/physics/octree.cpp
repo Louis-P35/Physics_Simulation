@@ -60,7 +60,7 @@ void OctreeNode::addChildren(std::shared_ptr<OctreeNode> pChild)
 std::vector<OctreeNode*> OctreeNode::detectCollision(const AABB& other) const
 {
 	auto collisionLambda = [&](const OctreeNode* pNode) -> bool {
-		return pNode->hasCollided(other);
+		return pNode->m_aabb.hasCollided(other);
 	};
 
 	return detectCollisionInternal(collisionLambda);
@@ -77,7 +77,7 @@ std::vector<OctreeNode*> OctreeNode::detectCollision(const AABB& other) const
 std::vector<OctreeNode*> OctreeNode::detectCollision(const Vec3& p0, const Vec3& p1) const
 {
 	auto collisionLambda = [&](const OctreeNode* pNode) -> bool {
-		return pNode->hasCollided(p0, p1);
+		return pNode->m_aabb.hasCollided(p0, p1);
 	};
 
 	return detectCollisionInternal(collisionLambda);

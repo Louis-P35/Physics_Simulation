@@ -24,6 +24,7 @@ public:
 		Vec3& bounceVect,
 		const Vec3& p0, 
 		const Vec3& p1,
-		const double partRadius
+		const double partRadius,
+		const AABB& aabb
 	) const override;
 };

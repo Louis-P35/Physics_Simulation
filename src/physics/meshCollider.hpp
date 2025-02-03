@@ -33,15 +33,25 @@ public:
 		Vec3& bounceVect,
 		const Vec3& p0,
 		const Vec3& p1,
-		const double partRadius
+		const double partRadius,
+		const AABB& aabb
 	) const override;
 
 	static bool rayTriangleIntersection(
-		const Ray& ray, 
-		const Vec3& v0, const Vec3& v1, const Vec3& v2, 
-		Vec3& collPosition, 
+		const Ray& ray,
+		const Vec3& v0, const Vec3& v1, const Vec3& v2,
+		Vec3& collPosition,
 		Vec3& collNormal
 	);
+
+private:
+	std::shared_ptr<OctreeNode> createCollisionTree(
+		std::shared_ptr<OctreeNode> pRoot,
+		std::vector<std::array<Vec3, 3>>& triangles,
+		const double particleRadius
+	);
+	static AABB createAABB(std::vector<std::array<Vec3, 3>>& triangles);
+	std::vector<AABB> getSubAabbs(const AABB& parentAabb);
 
 	static Vec3 ClosestPointOnTriangle(const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& point);
 	static Vec3 ClosestPointOnLineSegment(const Vec3& a, const Vec3& b, const Vec3& point);
