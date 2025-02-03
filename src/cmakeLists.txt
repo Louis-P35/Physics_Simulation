@@ -35,8 +35,8 @@ set(SRC_FILES
 set(HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/view/Qt/mainWindow.hpp
     ${CMAKE_SOURCE_DIR}/src/math/vec3.hpp
-    ${CMAKE_SOURCE_DIR}/include/main.hpp
-    ${CMAKE_SOURCE_DIR}/include/applicationData.hpp
+    ${CMAKE_SOURCE_DIR}/src/main.hpp
+    ${CMAKE_SOURCE_DIR}/src/applicationData.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/particle.hpp
     ${CMAKE_SOURCE_DIR}/src/physics/cloth.hpp
     ${CMAKE_SOURCE_DIR}/src/clothFactory.hpp

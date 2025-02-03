@@ -40,7 +40,7 @@ public:
 
 	std::shared_ptr<OctreeNode> m_pCollisionTree;
 
-	size_t m_uidIndex = -1;
+	size_t m_uidIndex;
 
 private:
 	int m_meshFaceIndexTop = 0;

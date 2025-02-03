@@ -30,8 +30,7 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	Vec3 position,
 	OpenGl3DWidget* pOpenGl3DWidget,
 	std::vector<std::shared_ptr<Collider>>& colliders,
-	std::shared_ptr<GridCollider> pGridCollider,
-	ClothesList& pCloths
+	std::shared_ptr<GridCollider> pGridCollider
 )
 {
 	if (!pOpenGl3DWidget)
@@ -46,20 +45,6 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 	// Add the mesh of the cloth to the rendering widget
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);
 	pCloth->m_pRenderingInstance->m_isStatic = false;
-
-	// Increase the barrier threshold to synchronize the threads
-	//s_barrier.increaseThreshold();
-
-	// Start the simulation in a separate thread
-	// Capture a copy of the pointer instead of a reference to avoid a dangling pointer
-	/*pCloth->startWorker([pCloth, pColliders = &colliders, pGridCollider = pGridCollider, syncBarrier = &s_barrier, &pCloths]() {
-		// Wait for all the threads to be ready
-		// The last one will clear the collision grid
-		syncBarrier->arriveAndWait([&pGridCollider](){pGridCollider->swap();});
-
-		// Perform physics updates
-		pCloth->updateSimulation(*pColliders, pGridCollider, pCloths);
-		});*/
 
 	return pCloth;
 }

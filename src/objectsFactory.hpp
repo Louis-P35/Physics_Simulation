@@ -49,7 +49,7 @@ public:
 	);
 
 private:
-	static void load3dObject(
+	static bool load3dObject(
 		Object3D& object3d,
 		std::shared_ptr<ObjectRenderingInstance>& pRenderingInstance,
 		OpenGl3DWidget* pGl3dWidget,

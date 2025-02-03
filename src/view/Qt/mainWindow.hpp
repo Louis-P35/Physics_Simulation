@@ -3,7 +3,7 @@
 // Include from project
 #include "../src/view/OpenGl/OpenGl3DWidget.hpp"
 #include "../src/view/Qt/clothWidget.hpp"
-#include "applicationData.hpp"
+#include "../src/applicationData.hpp"
 
 // Includes from 3rd party
 #include <QMainWindow>

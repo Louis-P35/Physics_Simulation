@@ -9,6 +9,12 @@
 #include <vector>
 
 
+/*
+* Class OctreeNode
+* Represent a node of the octree used to detect collisions between a particle and a mesh
+* Each node has an AABB and can have children, it's AABB must contain the AABB of it's children
+* Leafs contains the triangles of the mesh
+*/
 class OctreeNode
 {
 public:

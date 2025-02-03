@@ -1,7 +1,7 @@
 #pragma once
 
 // Includes from project
-#include "applicationData.hpp"
+#include "../src/applicationData.hpp"
 #include "../src/threading/taskQueue.hpp"
 
 // Includes from STL

@@ -22,8 +22,7 @@ ApplicationData::ApplicationData() : m_pOpenGl3DWidget(nullptr)
 
 ApplicationData::~ApplicationData()
 {
-	// Stop the physics simulation for all the cloths
-	// TODO
+
 }
 
 
@@ -35,23 +34,21 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 		return false;
 	}
 
-	//Object3D test;
-	//m_monkey3D.loadFromObjFile("../models/test2/", "testCube.obj");
-
-	Vec3 suzannePos = Vec3(5.0, 2.0, 5.0);
-	m_suzanne3D.loadFromObjFile("../models/Susanne/", "suzanne.obj");
-	m_pSuzanne3DRenderer = pGl3dWidget->addObject(m_suzanne3D);
-	m_pSuzanne3DRenderer->m_pPosRotScale->m_position = suzannePos.toArray();
-	m_pSuzanne3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
-	std::shared_ptr<Collider> pSuzanneCollider = std::make_shared<MeshCollider>(suzannePos, m_suzanne3D);
-	if (pSuzanneCollider)
-	{
-		m_colliders.push_back(pSuzanneCollider);
-	}
-	else
-	{
-		std::cerr << "Error: Failed to create the suzanne collider" << std::endl;
-	}
+	Object3D suzanne3D;
+	std::shared_ptr<Collider> pSuzanneCollider = nullptr;
+	ObjectsFactory::create3dObject(
+		suzanne3D,
+		m_pSuzanne3DRenderer,
+		pSuzanneCollider,
+		pGl3dWidget,
+		"../models/Susanne/",
+		"suzanne.obj",
+		Vec3(6.5, 4.5, 5.0),
+		Vec3(1.0, 1.0, 1.0)
+	);
+	m_3dObjects.push_back(suzanne3D);
+	m_colliders.push_back(pSuzanneCollider);
+	
 
 
 	//m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
@@ -62,42 +59,45 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	//m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
 	//m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
-	/*std::shared_ptr<Collider> pCollider = nullptr;
+	Object3D sphere3D1;
+	std::shared_ptr<Collider> pCollider = nullptr;
 	ObjectsFactory::createSphere(
-		m_cube3D,
+		sphere3D1,
 		m_pCube3DRenderer,
 		pCollider,
 		pGl3dWidget,
-		Vec3(5.0, 1.0, 5.0),
+		Vec3(3.0, 4.0, 5.0),
 		1.0
 	);
-	m_colliders.push_back(pCollider);*/
+	m_3dObjects.push_back(sphere3D1);
+	m_colliders.push_back(pCollider);
 
-	/*Object3D sphere3D;
-	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
-	std::shared_ptr<Collider> pCollider2 = nullptr;
-	ObjectsFactory::createSphere(
-		sphere3D,
-		pSphere3DRenderer,
-		pCollider2,
-		pGl3dWidget,
-		Vec3(3.5, 3.5, 5.0),
-		1.0
-	);
-	m_colliders.push_back(pCollider2);
+	///*Object3D sphere3D;
+	//std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
+	//std::shared_ptr<Collider> pCollider2 = nullptr;
+	//ObjectsFactory::createSphere(
+	//	sphere3D,
+	//	pSphere3DRenderer,
+	//	pCollider2,
+	//	pGl3dWidget,
+	//	Vec3(5.5, 3.0, 5.0),
+	//	1.0
+	//);
+	//m_3dObjects.push_back(sphere3D);
+	//m_colliders.push_back(pCollider2);*/
 
-	Object3D sphere3D2;
-	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer2;
-	std::shared_ptr<Collider> pCollider3 = nullptr;
-	ObjectsFactory::createSphere(
-		sphere3D2,
-		pSphere3DRenderer2,
-		pCollider3,
-		pGl3dWidget,
-		Vec3(6.5, 3.5, 5.0),
-		1.0
-	);
-	m_colliders.push_back(pCollider3);*/
+	///*Object3D sphere3D2;
+	//std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer2;
+	//std::shared_ptr<Collider> pCollider3 = nullptr;
+	//ObjectsFactory::createSphere(
+	//	sphere3D2,
+	//	pSphere3DRenderer2,
+	//	pCollider3,
+	//	pGl3dWidget,
+	//	Vec3(3.5, 3.5, 5.0),
+	//	1.0
+	//);
+	//m_colliders.push_back(pCollider3);*/
 	
 
 	// Ground
@@ -105,24 +105,6 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	m_pGround3DRenderer = pGl3dWidget->addObject(m_ground3D);
 	m_pGround3DRenderer->m_pPosRotScale->m_position = { 0.0f, 0.0f, 0.0f };
 	m_pGround3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
-	/*Vec3 groundPos = Vec3(0.0, 0.0, 0.0);
-	std::shared_ptr<Collider> pSuzanneCollider = std::make_shared<MeshCollider>(groundPos, m_ground3D);
-	if (pSuzanneCollider)
-	{
-		m_colliders.push_back(pSuzanneCollider);
-	}
-	else
-	{
-		std::cerr << "Error: Failed to create the suzanne collider" << std::endl;
-	}*/
-
-	// Debug sphere
-	m_debugSphere3D.loadFromObjFile("../models/sphere_highRes/", "sphere.obj");
-	m_debugSphere3D2.loadFromObjFile("../models/sphere_highRes2/", "sphere.obj");
-	m_debugSphere3D3.loadFromObjFile("../models/sphere_highRes3/", "sphere.obj");
-	//m_pDebugSphere3DRenderer = pGl3dWidget->addObject(m_debugSphere3D);
-	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
-	//m_pDebugSphere3DRenderer->m_pPosRotScale->m_scale = { 0.1f, 0.1f, 0.1f };
 
 	return initSimulation();
 }
@@ -186,7 +168,7 @@ bool ApplicationData::initSimulation()
 
 	
 	// Create a cloth
-	/*Vec3 position = Vec3(5.75, 4.5, 4.75);
+	/*Vec3 position = Vec3(5.75, 6.25, 4.75);
 	std::shared_ptr<Cloth> pCloth = ClothFactory::createCloth(
 		res, res, 
 		sideSize, sideSize,
@@ -195,8 +177,7 @@ bool ApplicationData::initSimulation()
 		position, 
 		m_pOpenGl3DWidget, 
 		m_colliders,
-		m_pGridCollider,
-		m_pCloths
+		m_pGridCollider
 	);
 	if (pCloth)
 	{
@@ -242,7 +223,7 @@ bool ApplicationData::initSimulation()
 		}
 	}*/
 
-	/*Vec3 position3 = Vec3(6.25, 5.5, 5.0);
+	/*Vec3 position3 = Vec3(5.0, 6.5, 5.0);
 	std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
 		res, res,
 		sideSize, sideSize,
@@ -251,8 +232,7 @@ bool ApplicationData::initSimulation()
 		position3,
 		m_pOpenGl3DWidget,
 		m_colliders,
-		m_pGridCollider,
-		m_pCloths
+		m_pGridCollider
 	);
 	if (pCloth3)
 	{
@@ -260,7 +240,7 @@ bool ApplicationData::initSimulation()
 	}
 
 
-	Vec3 position4 = Vec3(4.0, 5.8, 5.0);
+	Vec3 position4 = Vec3(5.0, 6.8, 5.0);
 	std::shared_ptr<Cloth> pCloth4 = ClothFactory::createCloth(
 		res, res,
 		sideSize, sideSize,
@@ -269,37 +249,72 @@ bool ApplicationData::initSimulation()
 		position4,
 		m_pOpenGl3DWidget,
 		m_colliders,
-		m_pGridCollider,
-		m_pCloths
+		m_pGridCollider
 	);
 	if (pCloth4)
 	{
 		m_pCloths.addCloth(pCloth4);
 	}*/
 
+	double _x = 2.5;
+	for (int i = 0; i < 8; ++i)
+	{
+		double h = 8.0 + static_cast<double>(i) * 0.5;
+		_x += 0.25;
+		Vec3 position3 = Vec3(_x, h, 5.0);
+		std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
+			res, res,
+			sideSize, sideSize,
+			particleColliderRadius,
+			0.025, 300.0,
+			position3,
+			m_pOpenGl3DWidget,
+			m_colliders,
+			m_pGridCollider
+		);
+		if (pCloth3)
+		{
+			m_pCloths.addCloth(pCloth3);
+		}
+	}
 
-	Vec3 position5 = Vec3(4.5, 5.0, 5.0);
+
+	Vec3 position6 = Vec3(5.4, 6.0, 5.0);
+	std::shared_ptr<Cloth> pCloth6 = ClothFactory::createCloth(
+		res * 2, res * 2,
+		sideSize * 2.0, sideSize * 2.0,
+		particleColliderRadius,
+		0.025, 600.0,
+		position6,
+		m_pOpenGl3DWidget,
+		m_colliders,
+		m_pGridCollider
+	);
+	if (pCloth6)
+	{
+		m_pCloths.addCloth(pCloth6);
+	}
+
+
+	Vec3 position5 = Vec3(5.0, 3.0, 5.0);
 	std::shared_ptr<Cloth> pCloth5 = ClothFactory::createCloth(
 		res*2, res*2,
 		sideSize*2.0, sideSize*2.0,
-		//res, res,
-		//sideSize, sideSize,
 		particleColliderRadius,
 		0.025, 300.0,
 		position5,
 		m_pOpenGl3DWidget,
 		m_colliders,
-		m_pGridCollider,
-		m_pCloths
+		m_pGridCollider
 	);
 	if (pCloth5)
 	{
 		m_pCloths.addCloth(pCloth5);
 	}
-	/*pCloth5->m_particles[0][0].setFixed(true);
+	pCloth5->m_particles[0][0].setFixed(true);
 	pCloth5->m_particles[0].back().setFixed(true);
 	pCloth5->m_particles.back()[0].setFixed(true);
-	pCloth5->m_particles.back().back().setFixed(true);*/
+	pCloth5->m_particles.back().back().setFixed(true);
 	/*for (int i = 0; i < pCloth5->m_resX; ++i)
 	{
 		for (int j = 0; j < pCloth5->m_resY; ++j)
@@ -340,12 +355,6 @@ bool ApplicationData::resetSimulation()
 
 	// Clear the list of cloths
 	m_pCloths.clearClothes();
-
-	// Dirty, TODO fix this: Wait for the threads to finish
-	_sleep(100);
-
-	// Ensure the barrier threshold for threads synchronization is zero
-	//ClothFactory::s_barrier.setThreshold(0);
 
 	// Reset the and restart the simulation
 	int res = initSimulation();

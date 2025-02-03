@@ -39,7 +39,6 @@ public:
 		Vec3 position,
 		OpenGl3DWidget* pOpenGl3DWidget,
 		std::vector<std::shared_ptr<Collider>>& colliders,
-		std::shared_ptr<GridCollider> pGridCollider,
-		ClothesList& pCloths
+		std::shared_ptr<GridCollider> pGridCollider
 	);
 };

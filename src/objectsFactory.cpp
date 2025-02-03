@@ -1,8 +1,7 @@
 // Includes from project
 #include "objectsFactory.hpp"
 #include "../src/physics/sphereCollider.hpp"
-
-// Includes from 3rd party
+#include "../src/physics/meshCollider.hpp"
 
 // Includes from STL
 #include <iostream>
@@ -23,7 +22,7 @@ namespace fs = std::filesystem;
 * @param scale Scale of the object
 * @return void
 */
-void ObjectsFactory::load3dObject(
+bool ObjectsFactory::load3dObject(
 	Object3D& object3d,
 	std::shared_ptr<ObjectRenderingInstance>& pRenderingInstance,
 	OpenGl3DWidget* pGl3dWidget,
@@ -36,12 +35,17 @@ void ObjectsFactory::load3dObject(
 	const fs::path texturePath = g_pReourcesPath / fs::path(folderName) / fileName;
 
 	// Load the object
-	object3d.loadFromObjFile("../models/sphere_highRes/", "untitled.obj");
+	bool ret = object3d.loadFromObjFile(folderName, fileName);
 	
 	// Add the object to the rendering list
-	pRenderingInstance = pGl3dWidget->addObject(object3d);
-	pRenderingInstance->m_pPosRotScale->m_position = pos.toArray();
-	pRenderingInstance->m_pPosRotScale->m_scale = scale.toArray();
+	if (ret)
+	{
+		pRenderingInstance = pGl3dWidget->addObject(object3d);
+		pRenderingInstance->m_pPosRotScale->m_position = pos.toArray();
+		pRenderingInstance->m_pPosRotScale->m_scale = scale.toArray();
+	}
+
+	return ret;
 }
 
 
@@ -69,10 +73,18 @@ void ObjectsFactory::create3dObject(
 	Vec3 scale
 )
 {
-	load3dObject(object3d, pRenderingInstance, pGl3dWidget, folderName, fileName, pos, scale);
+	bool ret = load3dObject(object3d, pRenderingInstance, pGl3dWidget, folderName, fileName, pos, scale);
+	if (!ret)
+	{
+		return;
+	}
 
-	// Create the collider (Sphere TODO change that)
-	pCollider = std::make_shared<SphereCollider>(pos, 1.0);
+	// Create the collider
+	pCollider = std::make_shared<MeshCollider>(pos, object3d);
+	if (!pCollider)
+	{
+		std::cerr << "Error: Failed to create the collider" << std::endl;
+	}
 }
 
 
