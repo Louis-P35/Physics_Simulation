@@ -3,6 +3,9 @@
 
 // Includes from STL
 #include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 
 /*
@@ -39,8 +42,44 @@ std::shared_ptr<Cloth> ClothFactory::createCloth(
 		return nullptr;
 	}
 
+	// Texture folders
+	static std::vector<fs::path> s_textureFolders;
+	static size_t s_currentTextureFolderIndex = 0;
+	if (s_textureFolders.size() == 0)
+	{
+		const fs::path texturePath = fs::path("../models/fabrics_textures/");// / m_textureFolderName;
+		try
+		{
+			for (const auto& entry : fs::directory_iterator(texturePath))
+			{
+				if (entry.is_directory())
+				{
+					s_textureFolders.push_back(entry.path());
+				}
+			}
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << "Error: " << e.what() << '\n';
+		}
+	}
+
 	// Create the cloth
-	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(resX, resY, width, height, colliderRadius, thickness, clothMass, position);
+	std::shared_ptr<Cloth> pCloth = std::make_shared<Cloth>(
+		resX, resY, 
+		width, height, 
+		colliderRadius, 
+		thickness, 
+		clothMass, 
+		position,
+		s_textureFolders.size() > 0 ? s_textureFolders[s_currentTextureFolderIndex].string() : ""
+	);
+
+	s_currentTextureFolderIndex++;
+	if (s_currentTextureFolderIndex >= s_textureFolders.size())
+	{
+		s_currentTextureFolderIndex = 0;
+	}
 
 	// Add the mesh of the cloth to the rendering widget
 	pCloth->m_pRenderingInstance = pOpenGl3DWidget->addObject(pCloth->m_object3D);

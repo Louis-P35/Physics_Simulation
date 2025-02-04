@@ -20,9 +20,8 @@ class ClothesList;
 /*
 * Class Cloth
 * The cloth is made of particles, each particle is connected to its neighbors by springs
-* The cloth is one or two grid of particles (depending on its thickness)
 */
-class Cloth //: public PhysicsWorker
+class Cloth
 {
 public:
 	int m_resX;
@@ -46,7 +45,7 @@ private:
 	int m_meshFaceIndexTop = 0;
 
 	// Cloth texture params
-	std::string m_textureFolderName = "3";
+	std::string m_textureFolderPath;
 	float m_uvScale = 1.0f;
 
 public:
@@ -56,7 +55,8 @@ public:
 		double colliderRadius, 
 		double thickness, 
 		double clothMass, 
-		Vec3 position
+		Vec3 position,
+		const std::string& textureFolderPath
 	);
 	virtual ~Cloth();
 

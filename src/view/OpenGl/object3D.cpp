@@ -124,19 +124,26 @@ bool Object3D::postProcess(const std::string& path, bool hasNormals, bool hasUVs
 {
     // Load the textures
     // Color
-    const fs::path colorTexturePath = fs::path(path) / "color.png";
-    auto loadText = [this](std::shared_ptr<QOpenGLTexture>& pTexture, const std::string _path){
+    const fs::path colorTexturePath = fs::path(path) / "color.jpg";
+    const fs::path colorTexturePath2 = fs::path(path) / "color.png";
+    auto loadText = [this](std::shared_ptr<QOpenGLTexture>& pTexture, const std::string _path) -> bool
+        {
             pTexture = loadTexture(_path);
             if (pTexture != nullptr)
             {
                 std::cout << "Texture " << _path << " loaded successfully." << std::endl;
+                return true;
             }
             else
             {
                 std::cerr << "Error: Failed to load texture : " << _path << std::endl;
+                return false;
             }
         };
-	loadText(m_pColorTexture, colorTexturePath.string());
+    if (!loadText(m_pColorTexture, colorTexturePath.string()))
+    {
+        loadText(m_pColorTexture, colorTexturePath2.string());
+    }
 
     // Normal
     const fs::path normalTexturePath = fs::path(path) / "normal.png";

@@ -22,11 +22,13 @@ Cloth::Cloth(
 	double colliderRadius, 
 	double thickness, 
 	double clothMass, 
-	Vec3 position
+	Vec3 position,
+	const std::string& textureFolderPath
 ) : m_resX(resX), m_resY(resY), 
 m_width(width), m_height(height), 
 m_thickness(thickness), 
-m_clothMass(clothMass)
+m_clothMass(clothMass),
+m_textureFolderPath(textureFolderPath)
 {
 	const int nbParticles = m_resX * m_resY;
 	const double particleMass = clothMass / static_cast<double>(nbParticles);
@@ -294,8 +296,7 @@ void Cloth::initMesh()
 	initMeshOneFace(m_object3D.m_vertices.size(), m_particles, true);
 
 	// Load textures, Compute the tangent and bitangent vectors
-	const fs::path texturePath = fs::path("../models/fabrics_textures/") / m_textureFolderName;
-	m_object3D.postProcess(texturePath.string(), true, true);
+	m_object3D.postProcess(m_textureFolderPath, true, true);
 }
 
 
