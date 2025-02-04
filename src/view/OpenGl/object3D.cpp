@@ -25,7 +25,7 @@ namespace fs = std::filesystem;
 * @param filename Name of the file
 * @return bool True if the object is loaded successfully, false otherwise
 */
-bool Object3D::loadFromObjFile(const std::string& path, const std::string& filename)
+bool Object3D::loadFromObjFile(const std::string& path, const std::string& filename, const float uvsScale)
 {
     const fs::path _fullPath = fs::path(path) / fs::path(filename);
     const std::string fullPath = _fullPath.string();
@@ -81,6 +81,8 @@ bool Object3D::loadFromObjFile(const std::string& path, const std::string& filen
 			hasUV = true;
             std::array<float, 2> uv{0, 0};
             iss >> uv[0] >> uv[1];
+			uv[0] = uv[0] * uvsScale;
+			uv[1] = uv[1] * uvsScale;
             m_uvs.push_back(uv);
         }
 

@@ -171,7 +171,7 @@ void OpenGl3DWidget::drawObject(std::shared_ptr<ObjectRenderingInstance> pObjRen
     m_pShader.m_shaderProgram.setUniformValue("viewPos", m_cameraPosition);
     // Bump
     m_pShader.m_shaderProgram.setUniformValue("displacementScale", 0.05f);
-    m_pShader.m_shaderProgram.setUniformValue("tessellationFactor", 40.0f);
+    m_pShader.m_shaderProgram.setUniformValue("tessellationFactor", 20.0f);
 
     // Set textures
     // Color (diffuse)

@@ -66,7 +66,7 @@ public:
 	Object3D() {};
 	virtual ~Object3D() = default;
 
-	bool loadFromObjFile(const std::string& path, const std::string& filename);
+	bool loadFromObjFile(const std::string& path, const std::string& filename, const float uvsScale = 1.0f);
 	std::vector<VBOVertex> computeVBOVerticesData();
 	bool postProcess(const std::string& path, bool hasNormals, bool hasUVs);
 

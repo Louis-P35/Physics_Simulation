@@ -35,7 +35,7 @@ bool ObjectsFactory::load3dObject(
 	const fs::path texturePath = g_pReourcesPath / fs::path(folderName) / fileName;
 
 	// Load the object
-	bool ret = object3d.loadFromObjFile(folderName, fileName);
+	bool ret = object3d.loadFromObjFile(folderName, fileName, 2.0f);
 	
 	// Add the object to the rendering list
 	if (ret)
@@ -109,7 +109,7 @@ void ObjectsFactory::createSphere(
 )
 {
 	// Load the object
-	object3d.loadFromObjFile("../models/sphere_highRes/", "sphere.obj");
+	object3d.loadFromObjFile("../models/sphere_highRes/", "sphere.obj", 1.0f);
 
 	// Add the object to the rendering list
 	pRenderingInstance = pGl3dWidget->addObject(object3d);
