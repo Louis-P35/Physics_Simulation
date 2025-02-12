@@ -32,8 +32,15 @@ private:
 
 public:
 	Orchestrator(const size_t numberOfThreads);
-	~Orchestrator();
 
+	// Delete copy constructor and assignment operator
+	Orchestrator(const Orchestrator&) = delete;
+	Orchestrator& operator=(const Orchestrator&) = delete;
+
+private:
+	~Orchestrator(); // Private destructor
+
+public:
 	static Orchestrator& getInstance();
 
 	void runOrchestrator();
