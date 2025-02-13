@@ -16,30 +16,36 @@ algorithms.
 ## Key Features
 
 ### Real-Time 3D Simulation:
-A Qt window hosts an OpenGL view where the simulation unfolds in real time.
+A Qt window hosts an OpenGL view where the simulation unfolds in real time, using CPU
+only for physics calculation. 
 
 ### Advanced Rendering:
 3D objects are loaded from .obj files and rendered with realistic materials. Shaders 
 implement normal mapping, tessellation, and bump mapping to achieve high-fidelity visuals.
 To render a cloth, a mesh is computed from the cloth particles and a given thickness at 
-each frame. Then, a tesselation and bump mapping shader is used to render the cloth with 
-realistic textures.
+each frame. Then, a tesselation and bump mapping shader is used increase the resolution
+of the mesh of the cloth directly on the GPU.
 
 ### Cloth Simulation:
 Cloths are modeled as grids of particles interconnected by springs. The simulation uses 
-Euler integration to update particle positions over time.
+Euler integration to update particles positions over time.
 
 
 ### Robust And Fast Collision Detection:
 
 #### Cloth-to-Object Collisions:
-To avoid an expensive O(n²) complexity, an octree is built from the 3D object’s mesh, subdividing 
-its bounding box until each node holds only a few triangles. This structure efficiently detects 
-collisions between the cloth particles (modeled as moving spheres) and the mesh.
+A 3D object is a list of triangles. The collision must be check between all the 
+particles/triangles combinaisons.
+To avoid an expensive O(n²) complexity, an octree structure is use and built from the 
+3D object’s mesh. Each node of the octree contain a Axis Aligned Bounding Box (AABB) that
+encloses the AABB of its children. The leaf nodes contain the triangles of the mesh.
+This structure efficiently detects collisions between the cloth particles (modeled as moving 
+spheres) and the mesh.
 
 #### Cloth-to-Cloth Collisions: 
-Each cloth particle is treated as a small sphere. To avoid an expensive O(n²) complexity, 
-two versions of a hashgrid algorithm are implemented:
+Each cloth particle is treated as a small sphere. The collision must be check between all pairs
+of particles in the scene.
+To avoid an expensive O(n²) complexity, two versions of a hashgrid algorithm are implemented:
 A fast version using a 3D grid stored in a single vector. It use a lot of memory as there is a lot of 
 empty cells.
 ```cpp
@@ -97,7 +103,7 @@ Each particle are stored in the grid cell corresponding to its position. The gri
 for each cell of the grid, the particles are checked for collisions with the particles in the same cell and 
 the particles in the adjacent cells.
 Double buffering: The grid is stored in two buffers. At each frame, the grid is updated in the write grid and 
-the read grid is used for collision detection. At the end of the frame, the two grig buffers are swapped. This
+the read grid is used for collision detection. At the end of the frame, the two grid buffers are swapped. This
 double the memory usage but allows to avoid thread race.
 
 
@@ -156,9 +162,6 @@ public:
 
 
 # Project setup
-
-## On linux, make the scripts executable:
-chmod +x scripts/build_release.sh scripts/run.sh scripts/test.sh
 
 ## If not already, install vcpkg
 ### Clone repository
