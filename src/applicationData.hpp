@@ -28,13 +28,8 @@ class ApplicationData : public QObject
 public:
 	OpenGl3DWidget* m_pOpenGl3DWidget;
 
-	std::shared_ptr<ObjectRenderingInstance> m_pCube3DRenderer;
 	Object3D m_ground3D;
-	std::shared_ptr<ObjectRenderingInstance> m_pGround3DRenderer;
-	std::shared_ptr<ObjectRenderingInstance> m_pDebugSphere3DRenderer;
-
 	std::vector<Object3D> m_3dObjects;
-	std::shared_ptr<ObjectRenderingInstance> m_pSuzanne3DRenderer;
 
 	// Map of cloths, the key is the cloth's UID
 	ClothesList m_pCloths;

@@ -35,76 +35,56 @@ bool ApplicationData::initAfterOpenGl(OpenGl3DWidget* pGl3dWidget)
 	}
 
 	Object3D suzanne3D;
+	std::shared_ptr<ObjectRenderingInstance> suzanne3DRenderer;
 	std::shared_ptr<Collider> pSuzanneCollider = nullptr;
 	ObjectsFactory::create3dObject(
 		suzanne3D,
-		m_pSuzanne3DRenderer,
+		suzanne3DRenderer,
 		pSuzanneCollider,
 		pGl3dWidget,
 		"../models/Susanne/",
 		"suzanne.obj",
-		Vec3(6.5, 4.5, 5.0),
+		Vec3(5.0, 3.5, 5.0),
 		Vec3(1.0, 1.0, 1.0)
 	);
 	m_3dObjects.push_back(suzanne3D);
 	m_colliders.push_back(pSuzanneCollider);
-	
-
-
-	//m_monkey3D.loadFromObjFile("../models/sphere/", "sphere.obj");
-
-	//std::shared_ptr<Object3D> pCube = std::make_shared<Object3D>();
-	//m_cube3D.loadFromObjFile("../models/cube/", "cube.obj");
-	//m_pCube3DRenderer = pGl3dWidget->addObject(m_cube3D);
-	//m_pCube3DRenderer->m_pPosRotScale->m_position = { 0.0f, 2.0f, 0.0f };
-	//m_pCube3DRenderer->m_pPosRotScale->m_scale = { 0.3f, 0.3f, 0.3f };
 
 	Object3D sphere3D1;
+	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer1;
 	std::shared_ptr<Collider> pCollider = nullptr;
 	ObjectsFactory::createSphere(
 		sphere3D1,
-		m_pCube3DRenderer,
+		pSphere3DRenderer1,
 		pCollider,
 		pGl3dWidget,
-		Vec3(3.0, 4.0, 5.0),
+		Vec3(3.0, 2.0, 5.0),
 		1.0
 	);
 	m_3dObjects.push_back(sphere3D1);
 	m_colliders.push_back(pCollider);
 
-	///*Object3D sphere3D;
-	//std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
-	//std::shared_ptr<Collider> pCollider2 = nullptr;
-	//ObjectsFactory::createSphere(
-	//	sphere3D,
-	//	pSphere3DRenderer,
-	//	pCollider2,
-	//	pGl3dWidget,
-	//	Vec3(5.5, 3.0, 5.0),
-	//	1.0
-	//);
-	//m_3dObjects.push_back(sphere3D);
-	//m_colliders.push_back(pCollider2);*/
-
-	///*Object3D sphere3D2;
-	//std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer2;
-	//std::shared_ptr<Collider> pCollider3 = nullptr;
-	//ObjectsFactory::createSphere(
-	//	sphere3D2,
-	//	pSphere3DRenderer2,
-	//	pCollider3,
-	//	pGl3dWidget,
-	//	Vec3(3.5, 3.5, 5.0),
-	//	1.0
-	//);
-	//m_colliders.push_back(pCollider3);*/
+	Object3D sphere3D;
+	std::shared_ptr<ObjectRenderingInstance> pSphere3DRenderer;
+	std::shared_ptr<Collider> pCollider2 = nullptr;
+	ObjectsFactory::createSphere(
+		sphere3D,
+		pSphere3DRenderer,
+		pCollider2,
+		pGl3dWidget,
+		Vec3(7.0, 2.0, 5.0),
+		1.0
+	);
+	m_3dObjects.push_back(sphere3D);
+	m_colliders.push_back(pCollider2);
 	
 
 	// Ground
+	std::shared_ptr<ObjectRenderingInstance> ground3DRenderer;
 	m_ground3D.loadFromObjFile("../models/ground_2/", "ground.obj");
-	m_pGround3DRenderer = pGl3dWidget->addObject(m_ground3D);
-	m_pGround3DRenderer->m_pPosRotScale->m_position = { 0.0f, 0.0f, 0.0f };
-	m_pGround3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
+	ground3DRenderer = pGl3dWidget->addObject(m_ground3D);
+	ground3DRenderer->m_pPosRotScale->m_position = { 0.0f, 0.0f, 0.0f };
+	ground3DRenderer->m_pPosRotScale->m_scale = { 1.0f, 1.0f, 1.0f };
 
 	return initSimulation();
 }
@@ -124,8 +104,6 @@ bool ApplicationData::initSimulation()
 		return false;
 	}
 
-	//return true;
-
 	const double particleRadius = 0.035;
 	const int res = 30;
 
@@ -140,18 +118,26 @@ bool ApplicationData::initSimulation()
 	size_t gridHeight = static_cast<size_t>(10.0 / cellSize);
 	m_pGridCollider = std::make_shared<StaticGridCollider>(cellSize, gridWith, gridHeight, Vec3(0.0, 0.0, 0.0));
 
-
-	double _x = 2.5;
-	for (int i = 0; i < 8; ++i)
+	// Create a bunch of cloths in a raw
+	double _x = 5.0;
+	for (int i = 0; i < 13; ++i)
 	{
-		double h = 8.0 + static_cast<double>(i) * 0.5;
-		_x += 0.25;
+		double h = 6.5 + static_cast<double>(i) * 0.25;
+		if (i % 2 == 0)
+		{
+			_x = 3.0;
+		}
+		else
+		{
+			_x = 7.0;
+		}
+		//_x += 0.25;
 		Vec3 position3 = Vec3(_x, h, 5.0);
 		std::shared_ptr<Cloth> pCloth3 = ClothFactory::createCloth(
 			res, res,
 			sideSize, sideSize,
 			particleColliderRadius,
-			0.025, 300.0,
+			0.025, 200.0,
 			position3,
 			m_pOpenGl3DWidget,
 			m_colliders,
@@ -164,12 +150,12 @@ bool ApplicationData::initSimulation()
 	}
 
 
-	Vec3 position6 = Vec3(5.4, 6.0, 5.0);
+	Vec3 position6 = Vec3(5.0, 4.5, 5.0);
 	std::shared_ptr<Cloth> pCloth6 = ClothFactory::createCloth(
-		res * 2, res * 2,
-		sideSize * 2.0, sideSize * 2.0,
+		res * 3, res * 3,
+		sideSize * 3.0, sideSize * 3.0,
 		particleColliderRadius,
-		0.025, 600.0,
+		0.025, 900.0,
 		position6,
 		m_pOpenGl3DWidget,
 		m_colliders,
@@ -179,37 +165,6 @@ bool ApplicationData::initSimulation()
 	{
 		m_pCloths.addCloth(pCloth6);
 	}
-
-
-	Vec3 position5 = Vec3(5.0, 3.0, 5.0);
-	std::shared_ptr<Cloth> pCloth5 = ClothFactory::createCloth(
-		res*2, res*2,
-		sideSize*2.0, sideSize*2.0,
-		particleColliderRadius,
-		0.025, 300.0,
-		position5,
-		m_pOpenGl3DWidget,
-		m_colliders,
-		m_pGridCollider
-	);
-	if (pCloth5)
-	{
-		m_pCloths.addCloth(pCloth5);
-	}
-	pCloth5->m_particles[0][0].setFixed(true);
-	pCloth5->m_particles[0].back().setFixed(true);
-	pCloth5->m_particles.back()[0].setFixed(true);
-	pCloth5->m_particles.back().back().setFixed(true);
-	/*for (int i = 0; i < pCloth5->m_resX; ++i)
-	{
-		for (int j = 0; j < pCloth5->m_resY; ++j)
-		{
-			pCloth5->m_particles[i][j].m_debugSphere3DRenderer = m_pOpenGl3DWidget->addObject(m_debugSphere3D2);
-			pCloth5->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_position = pCloth5->m_particles[i][j].m_position.toArray();
-			pCloth5->m_particles[i][j].m_debugSphere3DRenderer->m_pPosRotScale->m_scale = { scale, scale, scale };
-		}
-	}*/
-
 
 	// Start the physics simulation by starting the orchestrator (main simulation thread)
 	Orchestrator::getInstance().start(*this);
