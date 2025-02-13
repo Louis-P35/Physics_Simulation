@@ -1,16 +1,158 @@
-# Physics_Simulation
-This is a physics simulator project (C++, Qt, OpenGl)
+# Cloth Simulation Project
+This repository contains a high-performance, real-time cloth simulation engine 
+developed in C++ using Qt and OpenGL. The project showcases advanced techniques 
+in physics simulation, collision detection, and multithreading—all implemented 
+with modern C++.
 
-## Cloth simulation
+## Overview
 ![Simulation Animation](imgs/Physicssimulation1.gif)
 
-## Soft body simulation
+The simulation features multiple cloth objects falling and interacting in a 3D scene. 
+The cloths, represented as grids of particles connected by spring forces, are updated 
+using Euler integration. They collide with both static 3D objects, other cloths and 
+themselves, achieving realistic behavior through sophisticated collision detection 
+algorithms.
 
-## Complex object collision
+## Key Features
 
-## Self collision
+### Real-Time 3D Simulation:
+A Qt window hosts an OpenGL view where the simulation unfolds in real time.
 
-## Multithreading
+### Advanced Rendering:
+3D objects are loaded from .obj files and rendered with realistic materials. Shaders 
+implement normal mapping, tessellation, and bump mapping to achieve high-fidelity visuals.
+To render a cloth, a mesh is computed from the cloth particles and a given thickness at 
+each frame. Then, a tesselation and bump mapping shader is used to render the cloth with 
+realistic textures.
+
+### Cloth Simulation:
+Cloths are modeled as grids of particles interconnected by springs. The simulation uses 
+Euler integration to update particle positions over time.
+
+
+### Robust And Fast Collision Detection:
+
+#### Cloth-to-Object Collisions:
+To avoid an expensive O(n²) complexity, an octree is built from the 3D object’s mesh, subdividing 
+its bounding box until each node holds only a few triangles. This structure efficiently detects 
+collisions between the cloth particles (modeled as moving spheres) and the mesh.
+
+#### Cloth-to-Cloth Collisions: 
+Each cloth particle is treated as a small sphere. To avoid an expensive O(n²) complexity, 
+two versions of a hashgrid algorithm are implemented:
+A fast version using a 3D grid stored in a single vector. It use a lot of memory as there is a lot of 
+empty cells.
+```cpp
+std::vector<std::shared_ptr<GridCell>> m_gridWrite;
+std::vector<std::shared_ptr<GridCell>> m_gridRead;
+```
+
+```cpp
+/*
+* Get the index of the cell at the specified coordinates
+* Because the grid is a 3D array stored in a 1D vector, we need to compute the index
+* 
+* @param x X coordinate of the cell
+* @param y Y coordinate of the cell
+* @param z Z coordinate of the cell
+* @return size_t Index of the cell in the grid
+*/
+inline size_t StaticGridCollider::getCellIndex(const int x, const int y, const int z) const
+{
+	return x + y * m_gridWidth + z * m_gridWidthHeight;
+}
+```
+To avoid looping over a lot of empty cells, a vector of pointer to the non-empty cells is stored and 
+updated at each frame.
+
+
+An alternative version using a hashmap for grid storage. It is slower but uses less memory. A hash is 
+calculated from the grid cell coordinates and the particles are stored in a hashmap with the hash as key.
+```cpp
+std::unordered_map<size_t, std::shared_ptr<GridCell>> m_gridWrite;
+std::unordered_map<size_t, std::shared_ptr<GridCell>> m_gridRead;
+```
+
+```cpp
+/* 
+* Helper function to compute a unique hash key from (x, y, z)
+* 
+* @param x X coordinate
+* @param y Y coordinate
+* @param z Z coordinate
+* @return size_t Unique hash key
+*/
+inline size_t HashGridCollider::hashKey(const int x, const int y, const int z) const
+{
+    size_t h1 = std::hash<int>()(x);
+    size_t h2 = std::hash<int>()(y);
+    size_t h3 = std::hash<int>()(z);
+
+	// Using the XOR bitwise operator to combine the hashes and minimize keys collisions
+    return h1 ^ (h2 << 1) ^ (h3 << 2);
+}
+```
+
+Each particle are stored in the grid cell corresponding to its position. The grid is updated at each frame. Then,
+for each cell of the grid, the particles are checked for collisions with the particles in the same cell and 
+the particles in the adjacent cells.
+Double buffering: The grid is stored in two buffers. At each frame, the grid is updated in the write grid and 
+the read grid is used for collision detection. At the end of the frame, the two grig buffers are swapped. This
+double the memory usage but allows to avoid thread race.
+
+
+### Multithreading for Performance:
+A dedicated orchestrator (implemented as a singleton) manages a pool of worker threads. The orchestrator 
+thread continuously subdivise the simulations in small tasks and fills a task queue with thoses simulation 
+tasks (packaged as lambdas). The workers threads continuoulsy pull thoses tasks from the queue and execute
+them in parallel.
+```cpp
+// Worker thread lambda function
+// This just endlessley loops to gets and execute tasks from the task queue
+auto workerThreadLambda = [this]()
+{
+	while (m_workerRunning)
+	{
+		std::function<void()> task;
+		m_taskQueue.getTask(task);
+		if (task)
+		{
+			task();
+			m_taskQueue.markTaskAsDone();
+		}
+	}
+};
+```
+
+```cpp
+/*
+* TaskQueue
+* A simple task queue that can be used to queue up tasks to be executed by a thread pool.
+* The tasks are stored in a deque and can be added, retrieved and marked as done.
+* The orchestrator thread can also wait until all tasks have been completed.
+* The tasks are stored as std::function<void()> so they can be any callable object.
+*/
+class TaskQueue
+{
+private:
+	std::deque<std::function<void()>> m_tasks;
+	std::mutex m_mutex;
+	std::atomic<int> m_taskCount = 0;
+	std::condition_variable m_cv;
+
+public:
+	TaskQueue() = default;
+	~TaskQueue() = default;
+
+	void addTask(std::function<void()>&& taskCallback);
+	void getTask(std::function<void()>& taskCallback);
+	void markTaskAsDone();
+	void waitUntilEmpty();
+	void releaseAll(const size_t numberOfThreads);
+	void clearTaskQueue();
+};
+```
+
 
 
 # Project setup
